@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if categoria else 'Nueva' }} categoría{% endblock %}
+{% block contenido %}
+<h2 class="mb-3">{{ 'Editar categoría' if categoria else 'Nueva categoría' }}</h2>
+<form method="post" class="card shadow-sm p-4" style="max-width: 500px;">
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control" required value="{{ categoria.nombre if categoria else '' }}">
+    </div>
+    <div class="row">
+        <div class="col-6 mb-3">
+            <label class="form-label">Edad mínima</label>
+            <input type="number" name="edad_min" class="form-control" value="{{ categoria.edad_min if categoria else '' }}">
+        </div>
+        <div class="col-6 mb-3">
+            <label class="form-label">Edad máxima</label>
+            <input type="number" name="edad_max" class="form-control" value="{{ categoria.edad_max if categoria else '' }}">
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="{{ url_for('categorias.listar') }}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

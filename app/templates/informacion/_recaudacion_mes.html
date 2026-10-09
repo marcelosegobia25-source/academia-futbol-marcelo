@@ -1,0 +1,22 @@
+<div id="recaudacion-mes"
+     class="card h-100"
+     hx-get="{{ url_for('informacion.recaudacion_mes') }}"
+     hx-trigger="every 5s"
+     hx-swap="outerHTML">
+    <div class="card-header">
+        <h5 class="mb-0">Recaudación del mes</h5>
+        <small class="text-muted">Pagos activos registrados durante el mes actual · actualización automática.</small>
+    </div>
+    <div class="card-body">
+        <div class="finance-total">Bs {{ '%.2f'|format(recaudacion_mes) }}</div>
+        <div class="d-flex justify-content-between border-top pt-3 mt-3">
+            <span><i class="bi bi-cash me-1 text-success"></i> Efectivo</span>
+            <strong>Bs {{ '%.2f'|format(recaudacion_por_modo.Efectivo) }}</strong>
+        </div>
+        <div class="d-flex justify-content-between border-top pt-3 mt-3">
+            <span><i class="bi bi-qr-code me-1 text-success"></i> QR</span>
+            <strong>Bs {{ '%.2f'|format(recaudacion_por_modo.QR) }}</strong>
+        </div>
+        <div class="text-muted small mt-3">{{ cantidad_pagos }} pagos registrados</div>
+    </div>
+</div>

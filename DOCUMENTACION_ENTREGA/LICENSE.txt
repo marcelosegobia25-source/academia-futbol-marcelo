@@ -1,0 +1,266 @@
+# LICENSE.txt
+## Licencia de Software - Sistema de Gestión Academia Deportiva
+
+**Versión:** 1.0.0  
+**Fecha:** 16 de Agosto de 2026
+
+---
+
+## ACUERDO DE LICENCIA DE SOFTWARE
+
+Este documento constituye un acuerdo legal entre usted (el "Usuario") y el Propietario del Software (la "Institución") para el uso del Sistema de Gestión de Academia Deportiva (el "Software").
+
+### 1. CONCESIÓN DE LICENCIA
+
+Se le otorga una licencia **NO EXCLUSIVA**, **NO TRANSFERIBLE** y **LIMITADA** para usar el Software únicamente para los fines descritos en este acuerdo.
+
+#### 1.1 Alcance de la Licencia
+- Instalación en una (1) computadora por licencia adquirida
+- Uso por personal autorizado de la institución
+- Acceso para up a 50 usuarios simultáneos
+- Base de datos local con los datos de la institución
+
+#### 1.2 Restricciones
+El usuario **NO PUEDE:**
+- Copiar, duplicar o reproducir el Software
+- Modificar o alterar el código fuente
+- Descompilar, desensamblar u obtener código fuente
+- Transferir a terceros
+- Usar en múltiples computadoras simultáneamente
+- Comercializar o revender
+- Crear versiones derivadas
+- Usar en fines ilícitos
+
+### 2. PROPIEDAD INTELECTUAL
+
+El Software y toda su documentación son propiedad exclusiva de la Institución.
+
+- ✓ Código fuente: Propiedad intelectual
+- ✓ Diseño: Propiedad intelectual
+- ✓ Estructura de BD: Propiedad intelectual
+- ✓ Documentación: Propiedad intelectual
+- ✓ Marcas: Registradas y protegidas
+
+**Los derechos no otorgados en esta licencia se reservan expresamente.**
+
+### 3. RESTRICCIONES DE USO
+
+#### 3.1 Usos Permitidos
+- Administración interna de la institución
+- Gestión de datos de alumnos y finanzas
+- Generación de reportes internos
+- Respaldos y recuperación de datos
+
+#### 3.2 Usos NO Permitidos
+- Acceso o uso no autorizado
+- Uso para fines comerciales externos
+- Transmisión de datos a terceros sin consentimiento
+- Acceso por personas no autorizadas
+- Uso en actividades ilícitas
+- Violación de privacidad o protección de datos
+
+### 4. PRIVACIDAD Y PROTECCIÓN DE DATOS
+
+#### 4.1 Datos Personales
+El Software procesa datos personales de menores de edad. La Institución es responsable de:
+- Obtener consentimiento de tutores
+- Cumplir leyes de protección de datos locales
+- Mantener datos seguros
+- No compartir datos sin autorización
+
+#### 4.2 Cumplimiento Normativo
+La Institución debe cumplir con:
+- Leyes de protección de privacidad
+- Regulaciones educativas locales
+- Políticas internas de seguridad
+- Normativas sobre datos de menores
+
+### 5. SOPORTE Y MANTENIMIENTO
+
+#### 5.1 Periodo de Soporte
+- Soporte técnico: 24 meses desde fecha de compra
+- Actualizaciones de seguridad: Incluidas
+- Nuevas características: Según plan contratado
+- Mantenimiento preventivo: Incluido
+
+#### 5.2 Responsabilidades de Soporte
+La Institución proporciona:
+- Asistencia técnica remota
+- Actualización de seguridad
+- Reparación de errores
+- Capacitación inicial
+
+#### 5.3 Responsabilidades del Usuario
+El Usuario debe:
+- Mantener respaldos regulares
+- Reportar problemas oportunamente
+- Seguir procedimientos de seguridad
+- Actualizar el sistema cuando sea recomendado
+
+### 6. GARANTÍA LIMITADA
+
+#### 6.1 Garantía Ofrecida
+El Software se proporciona **"TAL COMO ESTÁ"** con garantía limitada de:
+- Funcionamiento según especificaciones documentadas
+- 90 días de cobertura contra defectos
+- Reparación o reemplazo si falla
+
+#### 6.2 Exclusiones de Garantía
+**NO SE GARANTIZA:**
+- Funcionamiento ininterrumpido
+- Cumplimiento de propósitos específicos no documentados
+- Compatibilidad con software de terceros
+- Resultados específicos de uso
+
+#### 6.3 Remedio Exclusivo
+En caso de incumplimiento de garantía:
+- Se reparará el Software
+- Si no se puede reparar, se reembolsará la licencia
+- **NO hay responsabilidad por daños indirectos**
+
+### 7. LIMITACIÓN DE RESPONSABILIDAD
+
+#### 7.1 Limitación de Daños
+LA INSTITUCIÓN **NO SERÁ RESPONSABLE** por:
+- Pérdida de datos
+- Pérdida de ingresos
+- Daños indirectos o consecuentes
+- Lucro cesante
+- Interrupción de negocios
+
+#### 7.2 Límite Máximo
+La responsabilidad de la Institución no excederá el monto pagado por la licencia.
+
+#### 7.3 Excepciones
+Lo anterior no limita la responsabilidad por:
+- Muerte o lesiones personales
+- Fraude o negligencia grave
+- Violación de leyes aplicables
+
+### 8. TÉRMINOS FINANCIEROS
+
+#### 8.1 Pago de Licencia
+- Pagadero según contrato separado
+- Licencia perpetua (pago único)
+- Renovación de soporte: Anual
+
+#### 8.2 Actualización
+- Actualizaciones incluidas en período de soporte
+- Después de período de soporte: Bajo costo
+
+#### 8.3 Cancelación
+- Si se cancela licencia: Se debe devolver el Software
+- Los datos quedan con la Institución
+- Los datos NO pueden ser compartidos
+
+### 9. CUMPLIMIENTO Y AUDITORÍA
+
+#### 9.1 Derecho de Auditoría
+La Institución se reserva el derecho de:
+- Verificar cumplimiento de licencia
+- Auditar instalaciones
+- Revisar logs de uso
+- Con notificación previa
+
+#### 9.2 Cumplimiento
+El Usuario debe mantener registros de:
+- Instalaciones y versiones
+- Usuarios autorizados
+- Uso del Software
+- Actualizaciones aplicadas
+
+### 10. TERMINACIÓN DE LICENCIA
+
+#### 10.1 Causas de Terminación
+La licencia se termina si:
+- Vence el período de licencia
+- El Usuario incumple los términos
+- Se suspende pago de renovación
+- Por violación de restricciones
+
+#### 10.2 Efectos de Terminación
+Tras terminación:
+- El Software debe dejar de usarse
+- Los datos quedan con la Institución
+- Se debe devolver toda documentación
+- Acceso se cierra inmediatamente
+
+#### 10.3 Supervivencia
+Las secciones 2, 4, 6, 7 y 8 sobreviven terminación de licencia.
+
+### 11. CONFIDENCIALIDAD
+
+#### 11.1 Información Confidencial
+El Usuario reconoce que el Software contiene:
+- Código propietario
+- Algoritmos patentados
+- Secrets de configuración
+- Estructura de datos
+
+#### 11.2 Obligación
+El Usuario se compromete a:
+- Mantener Software confidencial
+- No divulgar a terceros
+- Proteger contra acceso no autorizado
+- Limitar acceso a personal necesario
+
+### 12. PROTECCIÓN CONTRA MALWARE
+
+#### 12.1 Responsabilidad del Usuario
+El Usuario debe:
+- Mantener antivirus actualizado
+- Realizar escaneos regulares
+- Aplicar parches de SO
+- Usar firewall
+
+#### 12.2 Protección del Software
+La Institución proporciona:
+- Software libre de malware
+- Verificación de integridad
+- Respaldos verificados
+- Detección de cambios no autorizados
+
+### 13. LEY APLICABLE Y JURISDICCIÓN
+
+Este acuerdo se rige por las leyes de la República de Bolivia.
+
+Cualquier disputa será resuelta en los tribunales de:
+- Primera Instancia: Comunal
+- Segunda Instancia: Departamental
+- Tribunal de Recursos: Corte Superior
+
+### 14. DISPOSICIONES FINALES
+
+#### 14.1 Acuerdo Completo
+Este acuerdo constituye el acuerdo completo entre las partes.
+
+#### 14.2 Modificaciones
+Cualquier modificación debe ser por escrito y firmada por ambas partes.
+
+#### 14.3 Divisibilidad
+Si una cláusula es inválida, las demás permanecen vigentes.
+
+#### 14.4 No Renuncia
+La falta de ejercicio de un derecho no constituye renuncia.
+
+### 15. CONTACTO PARA CONSULTAS
+
+Para consultas sobre esta licencia:
+
+📧 **Email:** licencias@academia.com  
+📞 **Teléfono:** [Número]  
+📍 **Dirección:** [Dirección]
+
+---
+
+## ACEPTACIÓN
+
+Al instalar o usar el Software, el Usuario acepta estar vinculado por los términos y condiciones de esta Licencia.
+
+Si no acepta estos términos, **NO instale ni use el Software**.
+
+---
+
+**© 2026 - Todos los derechos reservados**
+
+Sistema de Gestión Academia Deportiva v1.0.0

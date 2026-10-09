@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block titulo %}{{ alumno.nombre_completo }}{% endblock %}
+{% block contenido %}
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div><span class="eyebrow">Ficha del alumno</span><h2 class="mb-0">Perfil integral</h2></div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('alumnos.ficha_pdf', id_alumno=alumno.id_alumno) }}" class="btn btn-danger"><i class="bi bi-file-earmark-person"></i> Descargar ficha</a>
+        <a href="{{ url_for('alumnos.editar', id_alumno=alumno.id_alumno) }}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Editar información</a>
+    </div>
+</div>
+
+<section class="card student-profile-sheet mb-4">
+    <div class="student-profile-hero profile-sheet-header">
+        <div class="student-avatar-wrap">
+            {% if alumno.foto %}<img src="{{ url_for('alumnos.foto_privada', id_alumno=alumno.id_alumno) }}" class="student-avatar" alt="Foto de {{ alumno.nombre_completo }}">
+            {% else %}<div class="student-avatar-placeholder"><i class="bi bi-person"></i></div>{% endif %}
+        </div>
+        <div class="student-profile-main">
+            {% if alumno.fecha_retiro %}<small class="text-muted d-block mb-2">Último retiro: {{ alumno.fecha_retiro.strftime('%d/%m/%Y') }}{% if alumno.fecha_ultima_reactivacion %} · Reactivación: {{ alumno.fecha_ultima_reactivacion.strftime('%d/%m/%Y') }}{% endif %}</small>{% endif %}
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1"><h3 class="mb-0">{{ alumno.nombre_completo }}</h3><span class="badge {{ 'bg-success' if alumno.estado == 'Activo' else 'bg-secondary' }}">{{ alumno.estado }}</span></div>
+            <p class="text-muted mb-2">{{ alumno.codigo_interno }} · {{ alumno.categoria.nombre if alumno.categoria else 'Sin categoría' }} · {{ alumno.edad }} años</p>
+            {% if dias_cumple <= 30 %}
+            <div class="alert alert-info py-2 px-3 mb-2">
+                <i class="bi bi-cake2"></i>
+                {% if dias_cumple == 0 %}<strong>Hoy cumple {{ edad_proxima }} años.</strong>
+                {% else %}Cumplirá <strong>{{ edad_proxima }} años</strong> el {{ proximo_cumple.strftime('%d/%m/%Y') }} (en {{ dias_cumple }} días).{% endif %}
+                {% if categoria_proxima and (not alumno.categoria or categoria_proxima.id_categoria != alumno.id_categoria) %}
+                Conviene prever su cambio a <strong>{{ categoria_proxima.nombre_mostrado }}</strong>.
+                {% endif %}
+            </div>
+            {% endif %}
+            <div class="d-flex flex-wrap gap-2">{% if alumno.equipos %}{% for equipo in alumno.equipos %}<span class="profile-tag"><i class="bi bi-shield-check"></i> {{ equipo.nombre }}</span>{% endfor %}{% else %}<span class="profile-tag text-muted"><i class="bi bi-shield"></i> Sin equipo</span>{% endif %}{% if alumno.posicion %}<span class="profile-tag"><i class="bi bi-person-badge"></i> {{ alumno.posicion }}</span>{% endif %}</div>
+        </div>
+    </div>
+
+    <div class="profile-sheet-body">
+        <div class="profile-sheet-columns">
+            <section class="profile-sheet-section">
+                <div class="profile-section-title"><i class="bi bi-person-vcard"></i><div><h5>Información personal</h5><small>Identificación y contacto</small></div></div>
+                <div class="profile-data-grid profile-data-compact">
+                    <div><span>CI</span><strong>{{ alumno.ci or '—' }}</strong></div><div><span>Sexo</span><strong>{{ alumno.sexo or '—' }}</strong></div>
+                    <div><span>Fecha de nacimiento</span><strong>{{ alumno.fecha_nacimiento.strftime('%d/%m/%Y') }}</strong></div><div><span>Teléfono</span><strong>{{ alumno.telefono or '—' }}</strong></div>
+                    <div class="wide"><span>Dirección</span><strong>{{ alumno.direccion or '—' }}</strong></div>
+                    <div><span>Tutor principal</span><strong>{{ alumno.tutor or '—' }}</strong></div><div><span>Tutor secundario</span><strong>{{ alumno.tutor2 or '—' }}</strong></div>
+                </div>
+            </section>
+
+            <section class="profile-sheet-section profile-sheet-sport">
+                <div class="profile-section-title"><i class="bi bi-activity"></i><div><h5>Perfil deportivo</h5><small>Características y asignación</small></div></div>
+                <div class="profile-data-grid profile-data-compact">
+                    <div><span>Posición</span><strong>{{ alumno.posicion or '—' }}</strong></div><div><span>Pierna hábil</span><strong>{{ alumno.pierna_habil or '—' }}</strong></div>
+                    <div><span>Turno de entrenamiento</span><strong>{{ alumno.turno or 'Sin asignar' }}</strong></div>
+                    <div><span>Peso</span><strong>{{ (alumno.peso|string ~ ' kg') if alumno.peso else '—' }}</strong></div><div><span>Estatura</span><strong>{{ (alumno.estatura|string ~ ' m') if alumno.estatura else '—' }}</strong></div>
+                    <div><span>Beca</span><strong>{{ alumno.beca }}</strong></div><div><span>Vigencia</span><strong>{{ alumno.beca_fecha_fin.strftime('%d/%m/%Y') if alumno.beca_fecha_fin else 'Sin límite' }}</strong></div>
+                </div>
+                <form method="post" action="{{ url_for('alumnos.recalcular_categoria', id_alumno=alumno.id_alumno) }}" class="mt-3"><button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-repeat"></i> Recalcular categoría</button></form>
+            </section>
+        </div>
+
+        <section class="profile-sheet-section profile-sheet-championships">
+            <div class="profile-section-title"><i class="bi bi-trophy"></i><div><h5>Campeonatos</h5><small>Estado de habilitación competitiva</small></div></div>
+            {% if alumno.campeonatos_habilitados %}<div class="championship-list">{% for ac in alumno.campeonatos_habilitados %}<div><span>{{ ac.campeonato.nombre }}</span><span class="badge {{ 'bg-success' if ac.habilitado else 'bg-secondary' }}">{{ 'Habilitado' if ac.habilitado else 'Deshabilitado' }}</span></div>{% endfor %}</div>
+            {% else %}<div class="empty-inline"><i class="bi bi-trophy"></i> No está registrado en ningún campeonato.</div>{% endif %}
+        </section>
+    </div>
+</section>
+
+<section class="card attendance-profile-section mb-4">
+    <div class="card-header attendance-profile-header">
+        <div><span class="eyebrow">Seguimiento deportivo</span><h3 class="mb-0">Asistencia y programación</h3><small>Registro guardado desde los entrenamientos de su categoría y equipo.</small></div>
+        <div class="attendance-rate"><strong>{{ porcentaje_asistencia }}%</strong><span>Asistencia</span></div>
+    </div>
+    <div class="card-body">
+        <div class="attendance-stat-grid mb-4">
+            <div class="attendance-stat attendance-present"><i class="bi bi-check-circle-fill"></i><span><strong>{{ resumen_asistencia.Presente }}</strong>Presentes</span></div>
+            <div class="attendance-stat attendance-late"><i class="bi bi-clock-fill"></i><span><strong>{{ resumen_asistencia.Tarde }}</strong>Tardanzas</span></div>
+            <div class="attendance-stat attendance-absent"><i class="bi bi-x-circle-fill"></i><span><strong>{{ resumen_asistencia.Ausente }}</strong>Ausencias</span></div>
+            <div class="attendance-stat attendance-excused"><i class="bi bi-file-earmark-check-fill"></i><span><strong>{{ resumen_asistencia.Justificado }}</strong>Justificadas</span></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-xl-8">
+                <div class="d-flex justify-content-between align-items-center mb-2"><h5 class="mb-0">Historial de asistencia</h5><a class="btn btn-sm btn-outline-primary" href="{{ url_for('alumnos.asistencias', id_alumno=alumno.id_alumno, periodo='todas') }}">Ver y filtrar todo</a></div>
+                <div class="table-responsive attendance-history"><table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Fecha</th><th>Entrenamiento</th><th>Horario</th><th>Estado</th><th>Justificación</th></tr></thead>
+                    <tbody>{% for registro in asistencias %}{% set entrenamiento = registro.sesion.entrenamiento %}<tr>
+                        <td><strong>{{ registro.sesion.fecha.strftime('%d/%m/%Y') }}</strong><small class="d-block text-muted">{{ dias_semana[registro.sesion.fecha.weekday()] }}</small></td>
+                        <td>{{ entrenamiento.equipo.nombre if entrenamiento.equipo else (entrenamiento.categoria.nombre if entrenamiento.categoria else 'General') }}{% if entrenamiento.lugar %}<small class="d-block text-muted"><i class="bi bi-geo-alt"></i> {{ entrenamiento.lugar }}</small>{% endif %}</td>
+                        <td>{{ entrenamiento.hora_inicio.strftime('%H:%M') }}{% if entrenamiento.hora_fin %} – {{ entrenamiento.hora_fin.strftime('%H:%M') }}{% endif %}</td>
+                        <td><span class="badge {{ 'bg-success' if registro.estado == 'Presente' else ('bg-warning text-dark' if registro.estado == 'Tarde' else ('bg-danger' if registro.estado == 'Ausente' else 'bg-info text-dark')) }}">{{ registro.estado }}</span></td>
+                        <td>{{ registro.justificacion or '—' }}</td>
+                    </tr>{% else %}<tr><td colspan="5" class="text-center text-muted py-4"><i class="bi bi-calendar2-check fs-3 d-block mb-2"></i>Aún no se registró asistencia para este alumno.</td></tr>{% endfor %}</tbody>
+                </table></div>
+            </div>
+            <div class="col-xl-4">
+                <h5 class="mb-2">Programación asignada</h5>
+                <div class="assigned-training-list">{% for entrenamiento in entrenamientos_asignados %}<article>
+                    <div class="assigned-training-day"><strong>{{ dias_semana[entrenamiento.dia_semana] }}</strong><span>{{ entrenamiento.hora_inicio.strftime('%H:%M') }}{% if entrenamiento.hora_fin %} – {{ entrenamiento.hora_fin.strftime('%H:%M') }}{% endif %}</span></div>
+                    <div><strong>{{ entrenamiento.equipo.nombre if entrenamiento.equipo else (entrenamiento.categoria.nombre if entrenamiento.categoria else 'General') }}</strong><small>{% if entrenamiento.lugar %}<i class="bi bi-geo-alt"></i> {{ entrenamiento.lugar }}{% else %}Lugar no definido{% endif %}</small></div>
+                </article>{% else %}<div class="empty-inline"><i class="bi bi-calendar-x"></i> No existe una programación activa para su categoría o equipo.</div>{% endfor %}</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="payment-profile-section">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div><span class="eyebrow">Administración financiera</span><h3 class="mb-0">Mensualidad y pagos</h3></div>
+        {% if alumno.estado == 'Activo' %}<a href="{{ url_for('pagos.crear', id_alumno=alumno.id_alumno) }}" class="btn btn-success"><i class="bi bi-cash-coin"></i> Registrar pago</a>
+        {% else %}<button type="button" class="btn btn-secondary" disabled><i class="bi bi-lock"></i> Pago bloqueado</button>{% endif %}
+    </div>
+
+    {% set em = alumno.estado_mensualidad %}
+    <div class="card mensualidad-status-card mensualidad-{{ em|lower|replace(' ', '-')|replace('ó','o') }} p-3 mb-3">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <div><span class="small text-muted d-block">Estado actual de la mensualidad</span><strong class="fs-4">{{ em }}</strong>{% if alumno.ultimo_pago %}<small class="text-muted d-block">Cobertura hasta {{ alumno.ultimo_pago.fecha_vencimiento.strftime('%d/%m/%Y') }}</small>{% else %}<small class="text-muted d-block">No existen pagos registrados</small>{% endif %}</div>
+            <span class="mensualidad-status-icon {{ 'bg-success-subtle text-success' if em == 'Vigente' else ('bg-warning-subtle text-warning-emphasis' if em == 'Próximo a vencer' else ('bg-danger-subtle text-danger' if em == 'Vencido' else 'bg-secondary-subtle text-secondary')) }}"><i class="bi {{ 'bi-check-circle' if em == 'Vigente' else ('bi-clock-history' if em == 'Próximo a vencer' else ('bi-exclamation-circle' if em == 'Vencido' else 'bi-dash-circle')) }}"></i></span>
+        </div>
+    </div>
+    {% if alumno.estado == 'Retirado' %}<div class="alert alert-warning"><i class="bi bi-lock"></i> Los pagos están bloqueados mientras el alumno permanezca retirado.</div>{% endif %}
+
+    {% if alumno.obligaciones %}
+    <div class="card overflow-hidden mb-3">
+        <div class="card-header"><strong>Obligaciones y saldos</strong></div>
+        <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+            <thead><tr><th>Concepto</th><th>Periodo</th><th>Total</th><th>Abonado</th><th>Saldo</th><th>Estado</th></tr></thead>
+            <tbody>{% for o in alumno.obligaciones|sort(attribute='periodo', reverse=true) %}<tr>
+                <td>{{ o.concepto }}</td><td>{{ o.periodo }}</td><td>{{ '%.2f'|format(o.total) }}</td>
+                <td>{{ '%.2f'|format(o.pagado) }}</td><td><strong>{{ '%.2f'|format(o.saldo) }}</strong></td>
+                <td><span class="badge {{ 'bg-success' if o.estado in ['Pagada','Cubierto por beca'] else ('bg-warning text-dark' if o.estado == 'Parcial' else 'bg-danger') }}">{{ o.estado }}</span></td>
+            </tr>{% endfor %}</tbody>
+        </table></div>
+    </div>
+    {% endif %}
+
+    <div class="card p-3 mb-3">
+        <form method="post" action="{{ url_for('pagos.cambiar_fecha_base', id_alumno=alumno.id_alumno) }}" class="d-flex flex-wrap align-items-end gap-2">
+            <div>
+                <label class="form-label small mb-1">Fecha base de continuidad</label>
+                <input type="date" class="form-control form-control-sm" name="fecha_base_pago"
+                       value="{{ alumno.fecha_base_pago.isoformat() if alumno.fecha_base_pago else '' }}" required>
+            </div>
+            <div>
+                <label class="form-label small mb-1">Motivo obligatorio</label>
+                <input type="text" class="form-control form-control-sm" name="motivo" maxlength="255" required>
+            </div>
+            <button type="submit" class="btn btn-sm btn-outline-primary"
+                    onclick="return confirm('Se recalcularán los vencimientos de los pagos activos. ¿Continuar?');">
+                <i class="bi bi-calendar-check"></i> Actualizar y recalcular
+            </button>
+            <small class="text-muted">La modificación conserva el historial y ajusta la continuidad.</small>
+        </form>
+    </div>
+
+    <div class="card overflow-hidden">
+        <div class="card-header d-flex justify-content-between align-items-center"><strong>Historial completo de pagos</strong><span class="small text-muted">El más reciente primero</span></div>
+        <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Mes</th><th>Fecha de pago</th><th>Vencimiento</th><th>Estado</th><th>Modo</th><th class="text-end">Recibo</th></tr></thead><tbody>
+            {% for p in alumno.pagos %}<tr class="{{ 'table-secondary' if not p.activo }}"><td><strong>{{ p.mes_pagado }}</strong>{% if not p.activo and p.anulacion %}<small class="d-block text-muted">{{ p.anulacion.motivo }}</small>{% endif %}</td><td>{{ p.fecha_pago.strftime('%d/%m/%Y') }}</td><td>{{ p.fecha_vencimiento.strftime('%d/%m/%Y') }}</td><td><span class="badge {{ 'bg-secondary' if p.estado == 'Anulado' else ('bg-success' if p.estado == 'Vigente' else ('bg-warning text-dark' if p.estado == 'Próximo a vencer' else 'bg-primary')) }}">{{ p.estado }}</span></td><td>{{ 'Cubierto por beca' if p.es_beca else p.modo_pago }}</td><td class="text-end">{% if p.activo %}<a href="{{ url_for('pagos.recibo_pdf', id_pago=p.id_pago, copia=1) }}" class="btn btn-sm btn-outline-secondary" title="Descargar copia del recibo"><i class="bi bi-files"></i></a>{% else %}<span class="small text-muted">Sin recibo válido</span>{% endif %}</td></tr>
+            {% else %}<tr><td colspan="6" class="text-center text-muted py-4">Aún no tiene pagos registrados.</td></tr>{% endfor %}
+        </tbody></table></div>
+    </div>
+</section>
+{% if alumno.inscripciones %}
+<section class="card mt-4">
+    <div class="card-header"><strong>Inscripciones por gestión</strong></div>
+    <div class="table-responsive"><table class="table table-sm mb-0">
+        <thead><tr><th>Gestión</th><th>Fecha</th><th>Estado</th><th>Categoría</th><th>Equipo principal</th><th>Tarifa</th><th>Beca</th></tr></thead>
+        <tbody>{% for i in alumno.inscripciones %}<tr>
+            <td>{{ i.gestion }}</td><td>{{ i.fecha_inscripcion.strftime('%d/%m/%Y') }}</td><td>{{ i.estado }}</td>
+            <td>{{ i.categoria.nombre_mostrado if i.categoria else '—' }}</td><td>{{ i.equipo_principal.nombre if i.equipo_principal else '—' }}</td>
+            <td>{{ '%.2f'|format(i.monto_tarifa if i.monto_tarifa is not none else (i.tarifa.monto if i.tarifa else 0)) }}</td><td>{{ '%.0f'|format(i.porcentaje_beca) }} %</td>
+        </tr>{% endfor %}</tbody>
+    </table></div>
+</section>
+{% endif %}
+{% if alumno.historial_categorias or alumno.historial_equipos %}
+<section class="card mt-4">
+    <div class="card-header"><strong>Historial de categorías y equipos</strong></div>
+    <div class="card-body row g-4">
+        <div class="col-lg-6"><h6>Categorías</h6>{% for h in alumno.historial_categorias %}<div class="border-bottom py-2"><strong>{{ h.categoria.nombre_mostrado }}</strong> · {{ h.tipo_asignacion }}<small class="d-block text-muted">{{ h.fecha_inicio.strftime('%d/%m/%Y') }} — {{ h.fecha_fin.strftime('%d/%m/%Y') if h.fecha_fin else 'Actual' }}</small></div>{% else %}<span class="text-muted">Sin historial.</span>{% endfor %}</div>
+        <div class="col-lg-6"><h6>Equipos</h6>{% for h in alumno.historial_equipos %}<div class="border-bottom py-2"><strong>{{ h.equipo.nombre }}</strong>{% if h.principal %} · Principal{% endif %}<small class="d-block text-muted">Gestión {{ h.gestion }} · {{ h.fecha_inicio.strftime('%d/%m/%Y') }} — {{ h.fecha_fin.strftime('%d/%m/%Y') if h.fecha_fin else 'Actual' }}</small></div>{% else %}<span class="text-muted">Sin historial.</span>{% endfor %}</div>
+    </div>
+</section>
+{% endif %}
+{% if alumno.ventas %}
+<section class="card mt-4">
+    <div class="card-header"><strong>Compras de uniformes y productos</strong></div>
+    <div class="table-responsive"><table class="table table-sm mb-0">
+        <thead><tr><th>Fecha</th><th>Detalle</th><th>Total</th><th>Estado</th><th>Recibo</th></tr></thead>
+        <tbody>{% for venta in alumno.ventas %}<tr class="{{ 'table-secondary' if not venta.activo }}">
+            <td>{{ venta.fecha.strftime('%d/%m/%Y') }}</td>
+            <td>{% for detalle in venta.detalles %}{{ detalle.cantidad }} × {{ detalle.variante.nombre_completo }}{% if not loop.last %}<br>{% endif %}{% endfor %}</td>
+            <td>{{ '%.2f'|format(venta.total) }}</td><td>{{ 'Vigente' if venta.activo else 'Anulada' }}</td>
+            <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('gestion.venta_recibo', id_venta=venta.id_venta) }}"><i class="bi bi-file-pdf"></i></a></td>
+        </tr>{% endfor %}</tbody>
+    </table></div>
+</section>
+{% endif %}
+{% if alumno.historial %}
+<section class="card mt-4">
+    <div class="card-header"><strong>Historial deportivo y administrativo</strong></div>
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Fecha</th><th>Cambio</th><th>Anterior</th><th>Nuevo</th><th>Motivo</th></tr></thead>
+            <tbody>{% for cambio in alumno.historial[:20] %}
+                <tr><td>{{ cambio.creado_en.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ cambio.tipo|capitalize }}</td><td>{{ cambio.valor_anterior or '—' }}</td><td>{{ cambio.valor_nuevo or '—' }}</td><td>{{ cambio.motivo or '—' }}</td></tr>
+            {% endfor %}</tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

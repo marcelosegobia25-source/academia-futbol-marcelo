@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio - Academia de Fútbol{% endblock %}
+{% block contenido %}
+<div class="card dashboard-hero mb-4">
+    <div class="dashboard-brand-block">
+        {% if marca.logo %}<img src="{{ url_for('configuracion.logo') }}" alt="Logo" class="dashboard-crest">{% else %}<i class="bi bi-shield-check display-2"></i>{% endif %}
+        <div><div class="eyebrow">{{ marca.nombre_academia }}</div><h1 class="page-title mb-1">Panel principal</h1><p class="text-muted mb-0">{{ marca.eslogan or 'Gestión deportiva y administrativa en un solo lugar.' }}</p></div>
+    </div>
+    <a href="{{ url_for('alumnos.crear') }}" class="btn btn-success"><i class="bi bi-person-plus me-1"></i> Nuevo alumno</a>
+</div>
+<div class="row g-3">
+    {% set accesos = [
+        ('alumnos.listar', 'bi-people', 'Gestionar alumnos', 'Fichas, categoría, equipo y estado'),
+        ('pagos.listar', 'bi-cash-coin', 'Gestionar mensualidades', 'Pagos, recibos y vencimientos'),
+        ('agenda.listar', 'bi-journal-text', 'Gestionar agenda', 'Eventos y partidos programados'),
+        ('campeonatos.listar', 'bi-trophy', 'Gestionar campeonatos', 'Fixture, posiciones y jugadores habilitados'),
+        ('calendario.ver', 'bi-calendar3', 'Calendario', 'Agenda + campeonatos + entrenamientos fijos'),
+        ('pagos.exportar_form', 'bi-file-earmark-excel', 'Reportes', 'Exportar pagos a Excel'),
+    ] %}
+    {% for endpoint, icono, titulo, descripcion in accesos %}
+    <div class="col-md-4">
+        <a href="{{ url_for(endpoint) }}" class="text-decoration-none">
+            <div class="card h-100 access-card">
+                <div class="card-body">
+                    <i class="bi {{ icono }} fs-1 text-success"></i>
+                    <h5 class="card-title mt-2">{{ titulo }}</h5>
+                    <p class="card-text text-muted">{{ descripcion }}</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

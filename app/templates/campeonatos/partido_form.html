@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if partido else 'Agregar' }} partido{% endblock %}
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <span class="eyebrow">Fixture manual</span>
+        <h2 class="mb-0">{{ 'Editar partido' if partido else 'Agregar partido' }}</h2>
+        <p class="text-muted mb-0">{{ campeonato.nombre }}</p>
+    </div>
+    <a href="{{ url_for('campeonatos.detalle', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-outline-secondary">Volver</a>
+</div>
+<form method="post" class="card shadow-sm p-4">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Categoría</label>
+            <select name="id_categoria" id="categoria-partido" class="form-select" required>
+                {% for categoria in campeonato.categorias %}
+                <option value="{{ categoria.id_categoria }}" {% if partido and partido.id_categoria == categoria.id_categoria %}selected{% endif %}>{{ categoria.nombre_mostrado }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Fase</label>
+            <select name="fase" class="form-select">
+                {% for fase in fases %}<option value="{{ fase }}" {% if partido and partido.fase == fase %}selected{% endif %}>{{ fase }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Grupo</label>
+            <input name="grupo" maxlength="30" class="form-control" value="{{ partido.grupo or '' if partido else '' }}" placeholder="A">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Jornada</label>
+            <input type="number" min="1" name="jornada" class="form-control" value="{{ partido.jornada or '' if partido else '' }}">
+        </div>
+        <div class="col-md-5">
+            <label class="form-label">Local</label>
+            <select name="id_equipo" class="form-select equipo-por-categoria" required>
+                {% for id_categoria, equipos in participantes.items() %}
+                    {% for equipo in equipos %}
+                    <option data-categoria="{{ id_categoria }}" value="{{ equipo.id_equipo }}" {% if partido and partido.id_equipo == equipo.id_equipo %}selected{% endif %}>{{ equipo.nombre }}</option>
+                    {% endfor %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-5">
+            <label class="form-label">Visitante</label>
+            <select name="id_equipo_rival" class="form-select equipo-por-categoria" required>
+                {% for id_categoria, equipos in participantes.items() %}
+                    {% for equipo in equipos %}
+                    <option data-categoria="{{ id_categoria }}" value="{{ equipo.id_equipo }}" {% if partido and partido.id_equipo_rival == equipo.id_equipo %}selected{% endif %}>{{ equipo.nombre }}</option>
+                    {% endfor %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Orden de llave</label>
+            <input type="number" min="1" name="orden_llave" class="form-control" value="{{ partido.orden_llave or '' if partido else '' }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Fecha</label>
+            <input type="date" name="fecha" class="form-control" required value="{{ partido.fecha.isoformat() if partido else campeonato.fecha_inicio.isoformat() }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Hora</label>
+            <input type="time" name="hora" class="form-control" value="{{ partido.hora.strftime('%H:%M') if partido and partido.hora else '' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Cancha</label>
+            <input name="cancha" class="form-control" list="lista-lugares" value="{{ partido.cancha if partido else campeonato.lugar or '' }}">
+            <datalist id="lista-lugares">{% for lugar in lugares %}<option value="{{ lugar.nombre }}">{% endfor %}</datalist>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Estado</label>
+            <select name="estado_partido" class="form-select">
+                {% for estado in estados_partido %}<option value="{{ estado }}" {% if partido and partido.estado_partido == estado %}selected{% endif %}>{{ estado }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-12">
+            <label class="form-label">Observación</label>
+            <textarea name="observacion" maxlength="255" class="form-control" rows="2">{{ partido.observacion or '' if partido else '' }}</textarea>
+        </div>
+    </div>
+    <div class="mt-3 border rounded p-3"><div class="form-check"><input class="form-check-input" type="checkbox" name="autorizar_conflicto" value="1" id="autorizar-conflicto"><label class="form-check-label" for="autorizar-conflicto">Autorizar conflicto (solo administrador)</label></div><input name="motivo_conflicto" maxlength="255" class="form-control mt-2" autocomplete="off" placeholder="Motivo obligatorio"></div>
+    <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-success" type="submit">Guardar partido</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('campeonatos.detalle', id_campeonato=campeonato.id_campeonato) }}">Cancelar</a>
+    </div>
+</form>
+<script>
+(() => {
+    const categoria = document.getElementById('categoria-partido');
+    const selects = document.querySelectorAll('.equipo-por-categoria');
+    function filtrar() {
+        selects.forEach(select => {
+            [...select.options].forEach(opcion => opcion.hidden = opcion.dataset.categoria !== categoria.value);
+            if (select.selectedOptions[0]?.hidden) {
+                const primera = [...select.options].find(opcion => !opcion.hidden);
+                if (primera) primera.selected = true;
+            }
+        });
+    }
+    categoria.addEventListener('change', filtrar);
+    filtrar();
+})();
+</script>
+{% endblock %}

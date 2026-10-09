@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block titulo %}Información general - {{ marca.nombre_academia }}{% endblock %}
+{% block contenido %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <div class="eyebrow">Resumen operativo</div>
+        <h1 class="page-title mb-1">Información general</h1>
+        <p class="text-muted mb-0">Estado de la academia al {{ hoy.strftime('%d/%m/%Y') }}.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <form method="post" action="{{ url_for('informacion.respaldo_completo') }}"
+              onsubmit="descargarRespaldoCompleto(event, this)">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-cloud-arrow-down me-1"></i> Crear respaldo completo
+            </button>
+        </form>
+        <form method="post" action="{{ url_for('informacion.abrir_descargas') }}">
+            <button type="submit" class="btn btn-outline-light">
+                <i class="bi bi-folder2-open me-1"></i> Abrir Descargas
+            </button>
+        </form>
+        <a href="{{ url_for('pagos.caja') }}" class="btn btn-outline-light"><i class="bi bi-calculator"></i> Cierre de caja</a>
+        <a href="{{ url_for('informacion.auditoria') }}" class="btn btn-outline-light"><i class="bi bi-shield-check"></i> Auditoría interna</a>
+        <a href="{{ url_for('alumnos.crear') }}" class="btn btn-success"><i class="bi bi-person-plus me-1"></i> Nuevo alumno</a>
+    </div>
+</div>
+<div class="alert alert-light d-flex flex-wrap justify-content-between gap-2">
+    <span><i class="bi bi-database-check"></i> Último respaldo completo: <span id="ultimo-respaldo-completo">{{ ultimo_respaldo.name if ultimo_respaldo else 'No disponible' }}</span></span>
+    <span><i class="bi bi-folder-check"></i> Documentos: {{ carpeta_descargas }}</span>
+    <span><i class="bi bi-cash-stack"></i> Último cierre: {{ ultimo_cierre.fecha.strftime('%d/%m/%Y') if ultimo_cierre else 'Pendiente' }}{% if ultimo_cierre and ultimo_cierre.diferencia %} · Diferencia Bs {{ ultimo_cierre.diferencia }}{% endif %}</span>
+</div>
+{% if cuotas_pendientes %}<div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2"><span><i class="bi bi-calendar-exclamation"></i> <strong>{{ cuotas_pendientes|length }} pago(s) programado(s)</strong> vencidos o próximos durante los siguientes 30 días.</span><a href="{{ url_for('gestion.pagos_programados') }}" class="btn btn-sm btn-warning">Revisar pagos</a></div>{% endif %}
+
+<div class="row g-3 mb-4">
+    {% set tarjetas = [
+        ('bi-person-check', 'Jugadores activos', indicadores.activos, 'estado=Activo'),
+        ('bi-check-circle', 'Mensualidades vigentes', indicadores.vigentes, 'estado=Activo&estado_mensualidad=Vigente'),
+        ('bi-exclamation-circle', 'Alumnos que deben', indicadores.deben, 'estado=Activo&estado_mensualidad=Con%20deuda'),
+        ('bi-person-dash', 'Alumnos retirados', indicadores.retirados, 'estado=Retirado')
+    ] %}
+    {% for icono, etiqueta, valor, consulta in tarjetas %}
+    <div class="col-sm-6 col-xl-3">
+        <a href="{{ url_for('alumnos.listar') }}{% if consulta %}?{{ consulta }}{% endif %}" class="text-decoration-none text-reset">
+            <div class="card overview-stat h-100"><div class="card-body">
+                <div class="overview-stat-icon"><i class="bi {{ icono }}"></i></div>
+                <div class="stat-value">{{ valor }}</div>
+                <div class="text-muted small mt-2">{{ etiqueta }}</div>
+            </div></div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center"><div><h5 class="mb-0">Resumen de módulos</h5><small class="text-muted">Indicadores operativos del mes actual.</small></div></div>
+    <div class="card-body"><div class="row g-3">
+        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('gestion.contabilidad') }}"><div class="p-3 border rounded h-100"><i class="bi bi-graph-up-arrow text-success"></i><small class="d-block text-muted">Saldo financiero del mes</small><strong class="fs-4">Bs {{ '%.2f'|format(indicadores.saldo_finanzas_mes) }}</strong><span class="d-block small">Ingresos {{ '%.2f'|format(indicadores.ingresos_finanzas_mes) }} · Egresos {{ '%.2f'|format(indicadores.egresos_finanzas_mes) }}</span></div></a></div>
+        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('pagos.listar') }}"><div class="p-3 border rounded h-100"><i class="bi bi-receipt text-danger"></i><small class="d-block text-muted">Obligaciones pendientes</small><strong class="fs-4">{{ indicadores.obligaciones_pendientes }}</strong><span class="d-block small">Saldo Bs {{ '%.2f'|format(indicadores.saldo_pendiente) }}</span></div></a></div>
+        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('gestion.inventario') }}"><div class="p-3 border rounded h-100"><i class="bi bi-box-seam text-warning"></i><small class="d-block text-muted">Inventario</small><strong class="fs-4">{{ indicadores.stock_bajo }} stock bajo</strong><span class="d-block small">{{ indicadores.compras_mes }} compras · {{ indicadores.ventas_mes }} ventas · {{ indicadores.devoluciones_mes }} devoluciones</span></div></a></div>
+        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('calendario.personal') }}"><div class="p-3 border rounded h-100"><i class="bi bi-person-workspace text-primary"></i><small class="d-block text-muted">Actividad deportiva</small><strong class="fs-4">{{ indicadores.personal_activo }} profesores</strong><span class="d-block small">Asistencia del mes: {{ indicadores.asistencia_mes }} %</span></div></a></div>
+        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('gestion.pagos_programados') }}"><div class="p-3 border rounded h-100"><small class="text-muted">Pagos próximos</small><strong class="fs-4 d-block">{{ cuotas_pendientes|length }}</strong><span class="small">Vencidos o dentro de 30 días</span></div></a></div>
+        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('gestion.inventario_conteo') }}"><div class="p-3 border rounded h-100"><small class="text-muted">Conteos pendientes</small><strong class="fs-4 d-block">{{ indicadores.conteos_pendientes }}</strong><span class="small">Requieren aprobación</span></div></a></div>
+        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('pagos.caja') }}"><div class="p-3 border rounded h-100"><small class="text-muted">Cajas abiertas</small><strong class="fs-4 d-block">{{ indicadores.cajas_abiertas }}</strong><span class="small">Sesiones activas o reabiertas</span></div></a></div>
+        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('alumnos.listar') }}"><div class="p-3 border rounded h-100"><small class="text-muted">Inscripciones {{ hoy.year }}</small><strong class="fs-4 d-block">{{ indicadores.inscripciones_activas }}</strong><span class="small">Inscripciones activas</span></div></a></div>
+    </div></div>
+</div>
+
+{% if proximos_cumpleanos %}<div class="card mb-4"><div class="card-header"><h5 class="mb-0">Próximos cumpleaños y revisión de categoría</h5></div><div class="card-body row g-2">{% for alumno, cumple, dias in proximos_cumpleanos %}<div class="col-md-6 col-xl-4"><a href="{{ url_for('alumnos.detalle', id_alumno=alumno.id_alumno) }}" class="d-flex justify-content-between border rounded p-2 text-decoration-none text-reset"><span><strong>{{ alumno.nombre_completo }}</strong><small class="d-block text-muted">{{ alumno.categoria.nombre_mostrado if alumno.categoria else 'Sin categoría' }}</small></span><span class="badge text-bg-info align-self-center">{{ 'Hoy' if dias==0 else dias|string ~ ' días' }}</span></a></div>{% endfor %}</div></div>{% endif %}
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-7">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <div><h5 class="mb-0">Estado de mensualidades</h5><small class="text-muted">Solo alumnos activos; cada alumno se cuenta una vez.</small></div>
+                <a href="{{ url_for('pagos.listar') }}" class="btn btn-sm btn-outline-success">Ver pagos</a>
+            </div>
+            <div class="card-body">
+                <div class="payment-overview-grid">
+                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Vigente') }}" class="payment-overview-item status-current"><i class="bi bi-check-circle"></i><strong>{{ indicadores.vigentes }}</strong><span>Vigentes</span></a>
+                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Próximo a vencer') }}" class="payment-overview-item status-warning"><i class="bi bi-clock"></i><strong>{{ indicadores.proximos }}</strong><span>Próximos a vencer</span></a>
+                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Vencido') }}" class="payment-overview-item status-overdue"><i class="bi bi-exclamation-triangle"></i><strong>{{ indicadores.vencidos }}</strong><span>Vencidos</span></a>
+                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Sin pagos') }}" class="payment-overview-item status-empty"><i class="bi bi-dash-circle"></i><strong>{{ indicadores.sin_pagos }}</strong><span>Sin pagos</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-5">
+        {% with
+            recaudacion_mes=indicadores.recaudacion_mes,
+            cantidad_pagos=indicadores.pagos_mes
+        %}
+            {% include "informacion/_recaudacion_mes.html" %}
+        {% endwith %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-end gap-2">
+        <div><h4 class="mb-1">Jugadores por categoría</h4><p class="text-muted mb-0">Solo alumnos activos; cada categoría muestra su total único y el desglose por equipo.</p></div>
+        <span class="badge text-bg-light">{{ indicadores.categorias }} categorías</span>
+    </div>
+    <div class="category-summary-list">
+        {% for fila in resumen_categorias %}
+        <div class="category-summary-row">
+            <a href="{{ url_for('alumnos.listar', id_categoria=fila.categoria.id_categoria, estado='Activo') }}" class="category-summary-name">
+                <span>{{ fila.categoria.nombre_mostrado }}</span>
+                <strong>{{ fila.total }} jugadores</strong>
+            </a>
+            <div class="category-summary-teams">
+                {% for detalle in fila.equipos %}
+                <a href="{{ url_for('alumnos.listar', id_categoria=fila.categoria.id_categoria, id_equipo=detalle.equipo.id_equipo, estado='Activo') }}" class="category-summary-team">
+                    <span>{{ detalle.equipo.nombre }}</span>
+                    <strong>{{ detalle.total }}</strong>
+                </a>
+                {% endfor %}
+                {% if fila.sin_equipo %}
+                <a href="{{ url_for('alumnos.listar', id_categoria=fila.categoria.id_categoria, estado='Activo') }}" class="category-summary-team unassigned">
+                    <span>Sin equipo</span><strong>{{ fila.sin_equipo }}</strong>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">No hay categorías registradas.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div><h5 class="mb-0">Integrantes activos por equipo</h5><small class="text-muted">Los alumnos retirados no se incluyen.</small></div>
+                <span class="badge text-bg-light">{{ indicadores.equipos }} equipos</span>
+            </div>
+            <div class="table-responsive overview-table-scroll"><table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Equipo</th><th>Categoría</th><th>Jugadores</th><th>Deben</th></tr></thead>
+                <tbody>
+                {% for fila in resumen_equipos %}
+                    <tr><td><a href="{{ url_for('alumnos.listar', id_equipo=fila.equipo.id_equipo, estado='Activo') }}" class="fw-semibold text-decoration-none">{{ fila.equipo.nombre }}</a></td><td>{{ fila.equipo.categoria.nombre_mostrado if fila.equipo.categoria else 'Todas' }}</td><td>{{ fila.total }}</td><td><span class="{{ 'text-danger fw-semibold' if fila.deben else 'text-muted' }}">{{ fila.deben }}</span></td></tr>
+                {% else %}
+                    <tr><td colspan="4" class="text-center text-muted py-4">No hay equipos registrados.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-5">
+        <div class="card h-100">
+            <div class="card-header"><h5 class="mb-0">Becas activas</h5></div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between py-2"><span>Beca completa</span><strong>{{ becas.Completa }}</strong></div>
+                <div class="d-flex justify-content-between py-2 border-top"><span>Media beca</span><strong>{{ becas.Media }}</strong></div>
+                <div class="d-flex justify-content-between py-2 border-top"><span>Becas vencidas</span><strong>{{ becas_vencidas }}</strong></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-7">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">Próxima programación</h5><a href="{{ url_for('calendario.ver') }}" class="btn btn-sm btn-outline-success">Abrir calendario</a></div>
+            <div class="card-body py-2">
+                {% for evento in proximos_eventos %}
+                <div class="upcoming-event">
+                    <div class="upcoming-date"><strong>{{ evento.fecha.strftime('%d') }}</strong><span>{{ evento.fecha.strftime('%m/%Y') }}</span></div>
+                    <div class="min-width-0"><strong class="d-block">{{ evento.descripcion }}</strong><small class="text-muted">{{ evento.hora.strftime('%H:%M') if evento.hora else 'Sin hora' }}{% if evento.lugar %} · {{ evento.lugar }}{% endif %}</small></div>
+                    <span class="badge text-bg-light ms-auto">{{ evento.tipo }}</span>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">No hay eventos próximos programados.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

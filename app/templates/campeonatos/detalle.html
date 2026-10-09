@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block titulo %}{{ campeonato.nombre }}{% endblock %}
+{% block contenido %}
+<section class="championship-hero mb-4">
+    <div>
+        <span class="eyebrow">Campeonato · {{ campeonato.formato }}</span>
+        <h2 class="mb-1">{{ campeonato.nombre }}</h2>
+        <p class="mb-2">
+            {{ campeonato.fecha_inicio.strftime('%d/%m/%Y') }}
+            {% if campeonato.fecha_fin %} – {{ campeonato.fecha_fin.strftime('%d/%m/%Y') }}{% endif %}
+            · {{ campeonato.lugar or 'Sin lugar definido' }}
+            {% if campeonato.lugar_catalogo and campeonato.lugar_catalogo.google_maps_url %}
+            <a href="{{ campeonato.lugar_catalogo.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-light ms-2"><i class="bi bi-map"></i> Ver mapa</a>
+            {% endif %}
+        </p>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <span class="badge text-bg-{{ 'success' if campeonato.estado == 'En curso' else 'secondary' }}">{{ campeonato.estado }}</span>
+            <span>{{ finalizados }} de {{ total_partidos }} partidos finalizados</span>
+        </div>
+        <div class="progress mt-3" style="height:8px;max-width:520px">
+            <div class="progress-bar bg-success" style="width:{{ progreso }}%"></div>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-content-start">
+        <a href="{{ url_for('campeonatos.exportar_fixture_excel', id_campeonato=campeonato.id_campeonato, id_categoria=filtros.get('id_categoria'), fase=filtros.get('fase')) }}" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Fixture Excel</a>
+        <a href="{{ url_for('campeonatos.exportar_fixture_pdf', id_campeonato=campeonato.id_campeonato, id_categoria=filtros.get('id_categoria'), fase=filtros.get('fase')) }}" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf"></i> Fixture PDF</a>
+        {% if campeonato.estado not in ['Finalizado', 'Cancelado'] %}
+        <a href="{{ url_for('campeonatos.editar', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Configurar</a>
+        <a href="{{ url_for('campeonatos.jugadores', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-outline-success"><i class="bi bi-person-check"></i> Convocados</a>
+        <a href="{{ url_for('campeonatos.crear_partido_manual', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-dark"><i class="bi bi-plus-lg"></i> Partido manual</a>
+        <form method="post" action="{{ url_for('campeonatos.generar_fixture', id_campeonato=campeonato.id_campeonato) }}" onsubmit="return confirm('Se reemplazará el fixture solo si todavía no existen resultados. ¿Continuar?');">
+            <button class="btn btn-success"><i class="bi bi-shuffle"></i> Generar liga</button>
+        </form>
+        {% else %}
+        <form method="post" action="{{ url_for('campeonatos.reabrir', id_campeonato=campeonato.id_campeonato) }}" onsubmit="return confirm('¿Reabrir campeonato y restaurar la convocatoria?');">
+            <input type="text" name="motivo" class="form-control d-inline-block" style="width:220px" maxlength="255" placeholder="Motivo obligatorio" required>
+            <button class="btn btn-warning"><i class="bi bi-unlock"></i> Reabrir</button>
+        </form>
+        {% endif %}
+    </div>
+</section>
+{% if campeones %}
+<div class="row g-2 mb-3">
+    {% for categoria, equipo in campeones %}
+    <div class="col-md-4">
+        <div class="alert alert-warning mb-0 d-flex align-items-center gap-3">
+            <i class="bi bi-trophy-fill fs-3"></i>
+            <div><small>Campeón · {{ categoria.nombre_mostrado }}</small><strong class="d-block">{{ equipo.nombre }}</strong></div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<ul class="nav nav-pills championship-tabs mb-3" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#fixture">Fixture</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#posiciones">Posiciones</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#eliminatorias">Cuartos, semis y final</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#participantes">Participantes</button></li>
+</ul>
+
+<div class="tab-content">
+<div class="tab-pane fade show active" id="fixture">
+    <form method="get" class="card card-body shadow-sm mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Categoría</label>
+                <select name="id_categoria" class="form-select">
+                    <option value="">Todas</option>
+                    {% for categoria in campeonato.categorias %}
+                    <option value="{{ categoria.id_categoria }}" {% if filtros.get('id_categoria')|int == categoria.id_categoria %}selected{% endif %}>{{ categoria.nombre_mostrado }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Fase</label>
+                <select name="fase" class="form-select">
+                    <option value="">Todas</option>
+                    {% for fase in fases %}<option value="{{ fase }}" {% if filtros.get('fase') == fase %}selected{% endif %}>{{ fase }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button class="btn btn-dark">Filtrar</button>
+                <a href="{{ url_for('campeonatos.detalle', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Jornada</th><th>Fecha</th><th>Fase</th><th>Categoría</th><th>Local</th><th>Visitante</th><th>Resultado</th><th>Cancha</th><th>Acciones</th></tr></thead>
+                <tbody>
+                {% for p in partidos %}
+                <tr>
+                    <td>{{ p.jornada or '—' }}</td>
+                    <td>{{ p.fecha.strftime('%d/%m/%Y') }}{% if p.hora %}<small class="d-block text-muted">{{ p.hora.strftime('%H:%M') }}</small>{% endif %}</td>
+                    <td><span class="badge text-bg-light">{{ p.fase }}</span></td>
+                    <td>{{ p.categoria.nombre_mostrado }}</td>
+                    <td class="fw-semibold">{{ p.equipo.nombre }}</td>
+                    <td class="fw-semibold">{{ p.equipo_rival.nombre if p.equipo_rival else p.rival }}</td>
+                    <td>
+                        {% if p.resultado %}
+                        <strong>{{ p.resultado }}</strong>
+                        {% if p.penales_local is not none %}<small class="d-block">Pen. {{ p.penales_local }}–{{ p.penales_visita }}</small>{% endif %}
+                        {% else %}<span class="badge text-bg-warning">{{ p.estado_partido }}</span>{% endif %}
+                    </td>
+                    <td>
+                        {{ p.cancha or '—' }}
+                        {% if p.lugar_catalogo and p.lugar_catalogo.google_maps_url %}
+                        <button type="button" class="btn btn-sm btn-outline-success ms-1" title="Copiar enlace de la cancha" onclick='copiarEnlace(this, {{ p.lugar_catalogo.google_maps_url|tojson }})'><i class="bi bi-copy"></i> Copiar link</button>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% if campeonato.estado not in ['Finalizado', 'Cancelado'] %}
+                            <form method="post" action="{{ url_for('campeonatos.registrar_resultado', id_partido=p.id_partido) }}" class="score-form">
+                                <input type="number" min="0" max="99" name="goles_local" value="{{ p.goles_local if p.goles_local is not none else '' }}" placeholder="L" required>
+                                <input type="number" min="0" max="99" name="goles_visita" value="{{ p.goles_visita if p.goles_visita is not none else '' }}" placeholder="V" required>
+                                {% if p.es_eliminatorio %}
+                                <input type="number" min="0" max="99" name="penales_local" value="{{ p.penales_local if p.penales_local is not none else '' }}" placeholder="PL">
+                                <input type="number" min="0" max="99" name="penales_visita" value="{{ p.penales_visita if p.penales_visita is not none else '' }}" placeholder="PV">
+                                {% endif %}
+                                {% if p.resultado %}<input type="text" name="motivo_correccion" maxlength="255" placeholder="Motivo" title="Motivo obligatorio de corrección" required style="width:95px">{% endif %}
+                                <button class="btn btn-sm btn-success" title="Guardar resultado"><i class="bi bi-check-lg"></i></button>
+                            </form>
+                            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('campeonatos.editar_partido_manual', id_campeonato=campeonato.id_campeonato, id_partido=p.id_partido) }}"><i class="bi bi-pencil"></i></a>
+                            {% if p.estado_partido != 'Finalizado' %}
+                            <form method="post" action="{{ url_for('campeonatos.registrar_walkover', id_partido=p.id_partido) }}" class="d-flex gap-1" onsubmit="return confirm('¿Registrar este partido como walkover?');">
+                                <select name="ganador" class="form-select form-select-sm" style="width:100px" required>
+                                    <option value="">W.O.</option>
+                                    <option value="{{ p.id_equipo }}">{{ p.equipo.nombre }}</option>
+                                    <option value="{{ p.id_equipo_rival }}">{{ p.equipo_rival.nombre if p.equipo_rival else p.rival }}</option>
+                                </select>
+                                <button class="btn btn-sm btn-outline-warning" title="Registrar walkover"><i class="bi bi-flag"></i></button>
+                            </form>
+                            {% endif %}
+                            {% if p.estado_partido != 'Finalizado' %}
+                            <form method="post" action="{{ url_for('campeonatos.eliminar_partido_manual', id_campeonato=campeonato.id_campeonato, id_partido=p.id_partido) }}" onsubmit="return confirm('¿Eliminar este partido?');">
+                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="9" class="text-center text-muted py-5">Todavía no existen partidos. Genere la liga o agréguelos manualmente.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="tab-pane fade" id="posiciones">
+<div class="d-flex flex-wrap justify-content-end gap-2 mb-3">
+    <a href="{{ url_for('campeonatos.exportar_posiciones_excel', id_campeonato=campeonato.id_campeonato, id_categoria=filtros.get('id_categoria')) }}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Posiciones Excel</a>
+    <a href="{{ url_for('campeonatos.exportar_posiciones_pdf', id_campeonato=campeonato.id_campeonato, id_categoria=filtros.get('id_categoria')) }}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf"></i> Posiciones PDF</a>
+</div>
+{% for cat, filas in posiciones_por_categoria.items() %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><strong>Tabla de posiciones — {{ cat.nombre_mostrado }}</strong></div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead>
+                <tbody>
+                {% for f in filas %}
+                <tr class="{{ 'table-success' if loop.index <= campeonato.clasificados else '' }}">
+                    <td>{{ loop.index }}</td><td class="fw-semibold">{{ f.equipo.nombre }}</td>
+                    <td>{{ f.pj }}</td><td>{{ f.pg }}</td><td>{{ f.pe }}</td><td>{{ f.pp }}</td>
+                    <td>{{ f.gf }}</td><td>{{ f.gc }}</td><td>{{ f.dg }}</td><td class="fw-bold">{{ f.pts }}</td>
+                </tr>
+                {% else %}<tr><td colspan="10" class="text-center text-muted py-4">Sin tabla todavía.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if campeonato.estado not in ['Finalizado', 'Cancelado'] %}
+        <div class="card-footer bg-white">
+            <form method="post" action="{{ url_for('campeonatos.generar_eliminatorias', id_campeonato=campeonato.id_campeonato) }}" onsubmit="return confirm('¿Crear las llaves con los equipos mejor clasificados?');">
+                <input type="hidden" name="id_categoria" value="{{ cat.id_categoria }}">
+                <button class="btn btn-sm btn-dark"><i class="bi bi-diagram-3"></i> Crear eliminatorias de {{ cat.nombre_mostrado }}</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+{% endfor %}
+</div>
+
+<div class="tab-pane fade" id="eliminatorias">
+    <div class="knockout-board">
+    {% for fase in ['Cuartos', 'Semifinal', 'Final', 'Tercer puesto'] %}
+        <div class="knockout-column">
+            <h5>{{ fase }}</h5>
+            {% for p in eliminatorias[fase] %}
+            <article class="knockout-match">
+                <small>{{ p.categoria.nombre_mostrado }} · Llave {{ p.orden_llave or loop.index }}</small>
+                <div><span>{{ p.equipo.nombre }}</span><strong>{{ p.goles_local if p.goles_local is not none else '—' }}</strong></div>
+                <div><span>{{ p.equipo_rival.nombre if p.equipo_rival else p.rival }}</span><strong>{{ p.goles_visita if p.goles_visita is not none else '—' }}</strong></div>
+                {% if p.penales_local is not none %}<small>Penales {{ p.penales_local }}–{{ p.penales_visita }}</small>{% endif %}
+            </article>
+            {% else %}<div class="knockout-empty">Sin partidos</div>{% endfor %}
+        </div>
+    {% endfor %}
+    </div>
+</div>
+
+<div class="tab-pane fade" id="participantes">
+    <div class="row g-3">
+    {% for categoria, participantes in participantes_por_categoria.items() %}
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between"><strong>{{ categoria.nombre_mostrado }}</strong><span class="badge text-bg-dark">{{ participantes|length }}</span></div>
+                <div class="card-body">
+                {% for equipo in participantes %}
+                    <div class="participant-row"><span>{{ equipo.nombre }}</span><span class="badge {{ 'text-bg-secondary' if equipo.es_rival else 'text-bg-success' }}">{{ 'Rival' if equipo.es_rival else 'Academia' }}</span></div>
+                {% else %}<span class="text-muted">Sin participantes.</span>{% endfor %}
+                {% set config = configuraciones[categoria.id_categoria] %}
+                <form method="post" action="{{ url_for('campeonatos.configurar_categoria', id_campeonato=campeonato.id_campeonato, id_categoria=categoria.id_categoria) }}" class="border-top mt-3 pt-3">
+                    <div class="row g-2">
+                        <div class="col-12"><label class="small fw-semibold">Formato de la categoría</label><select name="formato" class="form-select form-select-sm">{% for formato in formatos %}<option value="{{ formato }}" {% if config.formato == formato %}selected{% endif %}>{{ formato }}</option>{% endfor %}</select></div>
+                        <div class="col-6"><label class="small">Vueltas</label><select name="vueltas" class="form-select form-select-sm"><option value="1" {% if config.vueltas == 1 %}selected{% endif %}>1</option><option value="2" {% if config.vueltas == 2 %}selected{% endif %}>2</option></select></div>
+                        <div class="col-6"><label class="small">Clasificados</label><select name="clasificados" class="form-select form-select-sm">{% for cantidad in [2,4,8] %}<option value="{{ cantidad }}" {% if config.clasificados == cantidad %}selected{% endif %}>{{ cantidad }}</option>{% endfor %}</select></div>
+                        <div class="col-12"><label class="form-check small"><input type="checkbox" name="tercer_puesto" value="1" class="form-check-input" {% if config.tercer_puesto %}checked{% endif %}> Partido por tercer puesto</label></div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary mt-2" {% if total_partidos %}disabled title="El fixture ya está creado"{% endif %}>Guardar formato</button>
+                </form>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+</div>
+
+{% if campeonato.estado not in ['Finalizado', 'Cancelado'] %}
+<section class="card border-danger shadow-sm mt-4">
+    <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div><h5 class="mb-1">Cerrar campeonato</h5><p class="text-muted mb-0">Archiva la convocatoria y deja el campeonato en modo consulta.</p></div>
+        <form method="post" action="{{ url_for('campeonatos.finalizar', id_campeonato=campeonato.id_campeonato) }}" class="d-flex flex-wrap gap-2" onsubmit="return confirm('¿Finalizar el campeonato? Los datos no se eliminarán.');">
+            <input type="text" name="motivo" class="form-control" style="width:260px" placeholder="Motivo opcional">
+            <label class="form-check align-self-center"><input class="form-check-input" type="checkbox" name="forzar" value="1"> Cerrar aunque haya pendientes</label>
+            <label class="form-check align-self-center"><input class="form-check-input" type="checkbox" name="sin_campeon" value="1"> Autorizar categorías sin campeón</label>
+            <button class="btn btn-danger"><i class="bi bi-lock"></i> Finalizar campeonato</button>
+        </form>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

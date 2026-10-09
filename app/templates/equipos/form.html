@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if equipo else 'Nuevo' }} equipo{% endblock %}
+{% block contenido %}
+<h2 class="mb-3">{{ 'Editar equipo' if equipo else 'Nuevo equipo' }}</h2>
+<form method="post" class="card shadow-sm p-4" style="max-width: 500px;">
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control" required value="{{ equipo.nombre if equipo else '' }}">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Categoría</label>
+        <select name="id_categoria" class="form-select">
+            <option value="">Todas las categorías</option>
+            {% for c in categorias %}
+            <option value="{{ c.id_categoria }}" {% if equipo and equipo.id_categoria == c.id_categoria %}selected{% endif %}>Categoría {{ c.nombre }}</option>
+            {% endfor %}
+        </select>
+        <small class="text-muted">Elige una categoría específica o deja “Todas” para que el equipo pueda usarse en cualquier categoría.</small>
+    </div>
+    <label class="form-check mb-3"><input type="checkbox" class="form-check-input" name="activo" value="1" {% if not equipo or equipo.activo %}checked{% endif %}> Equipo activo y disponible</label>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="{{ url_for('equipos.listar') }}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

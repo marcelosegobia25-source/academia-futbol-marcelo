@@ -1,0 +1,186 @@
+@startuml
+
+class Cliente {
+-idCliente:int
+-codigoCliente:varchar
+-ci:varchar
+-nombreCompleto:varchar
+-telefono:varchar
+-email:varchar
+-direccion:varchar
+-referencia:varchar
+-latitud:decimal
+-longitud:decimal
+-fechaRegistro:date
+-estado:varchar
+}
+
+class Zona {
+-idZona:int
+-nombreZona:varchar
+-descripcion:varchar
+-estado:boolean
+}
+
+class Usuario {
+-idUsuario:int
+-nombreUsuario:varchar
+-password:varchar
+-nombreCompleto:varchar
+-telefono:varchar
+-correo:varchar
+-estado:boolean
+}
+
+class Rol {
+-idRol:int
+-nombre:varchar
+-descripcion:varchar
+}
+
+class Permiso {
+-idPermiso:int
+-nombre:varchar
+-descripcion:varchar
+}
+
+class Bitacora {
+-idBitacora:int
+-fechaHora:datetime
+-accion:varchar
+-modulo:varchar
+-descripcion:text
+-ipUsuario:varchar
+}
+
+class Reporte {
+-idReporte:int
+-tipoReporte:varchar
+-fechaGeneracion:date
+-descripcion:varchar
+}
+
+class PlanInternet {
+-idPlan:int
+-nombrePlan:varchar
+-velocidad:varchar
+-precio:decimal
+-descripcion:varchar
+}
+
+class ServicioInternet {
+-idServicio:int
+-fechaActivacion:date
+-fechaInstalacion:date
+-fechaCorte:date
+-estado:varchar
+}
+
+class EstadoServicio {
+-idEstado:int
+-nombreEstado:varchar
+-descripcion:varchar
+}
+
+class Tecnico {
+-idTecnico:int
+-nombre:varchar
+-telefono:varchar
+-especialidad:varchar
+}
+
+class Instalacion {
+-idInstalacion:int
+-fechaSolicitud:date
+-fechaProgramada:date
+-fechaRealizada:date
+-costo:decimal
+-observacion:text
+-estado:varchar
+}
+
+class Pago {
+-idPago:int
+-fechaPago:date
+-monto:decimal
+-metodoPago:varchar
+-periodoPagado:varchar
+-comprobante:varchar
+}
+
+class MetodoPago {
+-idMetodo:int
+-nombre:varchar
+}
+
+class Equipo {
+-idEquipo:int
+-tipo:varchar
+-marca:varchar
+-modelo:varchar
+-numeroSerie:varchar
+-MAC:varchar
+-IP:varchar
+-propiedad:varchar
+-estado:varchar
+}
+
+class HistorialEquipo {
+-idHistorial:int
+-fechaAsignacion:date
+-fechaRetiro:date
+-motivo:varchar
+}
+
+class HistorialPlan {
+-idHistorial:int
+-fechaCambio:date
+-planAnterior:varchar
+-planNuevo:varchar
+}
+
+class Deuda {
+-idDeuda:int
+-periodo:varchar
+-monto:decimal
+-fechaVencimiento:date
+-estado:varchar
+}
+
+
+' Relaciones
+
+Zona "1" -- "*" Cliente : pertenece
+
+Cliente "1" -- "*" ServicioInternet : tiene
+
+PlanInternet "1" -- "*" ServicioInternet : asigna
+
+EstadoServicio "1" -- "*" ServicioInternet : estado
+
+ServicioInternet "1" -- "*" Pago
+
+MetodoPago "1" -- "*" Pago
+
+ServicioInternet "1" -- "*" Instalacion
+
+Tecnico "1" -- "*" Instalacion
+
+ServicioInternet "1" -- "*" Equipo
+
+Equipo "1" -- "*" HistorialEquipo
+
+ServicioInternet "1" -- "*" HistorialPlan
+
+Cliente "1" -- "*" Deuda
+
+Usuario "*" -- "*" Rol
+
+Rol "*" -- "*" Permiso
+
+Usuario "1" -- "*" Bitacora
+
+Usuario "1" -- "*" Reporte
+
+
+@enduml

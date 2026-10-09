@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block titulo %}Registrar pago{% endblock %}
+{% block contenido %}
+<h2 class="mb-3">Registrar pago — {{ alumno.nombre_completo }}</h2>
+
+{% if es_primer_pago %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Este es el <strong>primer pago</strong> del alumno. La fecha que indique aquí
+    definirá la fecha base para calcular todos los vencimientos futuros (puede modificarla luego editando el alumno).
+</div>
+{% endif %}
+
+<form method="post" class="card shadow-sm p-4" style="max-width: 600px;">
+    <div class="mb-3">
+        <label class="form-label">Mes que se paga</label>
+        <input type="month" name="mes_pagado" class="form-control" required value="{{ mes_sugerido }}">
+        <small class="text-muted">Si el mes tiene saldo pendiente, puede registrar otro abono.</small>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-4"><label class="form-label">Abono</label><input type="number" step="0.01" min="0.01" name="monto_abono" class="form-control" placeholder="Saldo completo"><small class="text-muted">Vacío cobra todo el saldo.</small></div>
+        <div class="col-md-4"><label class="form-label">Descuento</label><input type="number" step="0.01" min="0" name="descuento" value="0" class="form-control"></div>
+        <div class="col-md-4"><label class="form-label">Recargo</label><input type="number" step="0.01" min="0" name="recargo" value="0" class="form-control"></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Fecha de pago {% if es_primer_pago %}(manual — define la fecha base){% endif %}</label>
+        <input type="date" name="fecha_pago" class="form-control" required
+               value="{{ hoy }}" {% if not es_primer_pago %}readonly{% endif %}>
+    </div>
+
+    {% if alumno.beca_vigente == 'Completa' %}<div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" name="es_beca" id="es_beca">
+        <label class="form-check-label" for="es_beca">Cubierto por beca (pago opcional / sin costo)</label>
+    </div>{% endif %}
+
+    <div class="mb-3">
+        <label class="form-label">Modo de pago</label>
+        <select name="modo_pago" id="modo-pago" class="form-select">
+            {% for m in modos %}
+            <option value="{{ m }}">{{ m }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3" id="campo-operacion-qr" hidden>
+        <label class="form-label">Número de operación o referencia QR</label>
+        <input type="text" name="numero_operacion" maxlength="80" class="form-control">
+        <small class="text-muted">Permite conciliar el pago con el comprobante bancario.</small>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Registrar pago</button>
+        <a href="{{ url_for('alumnos.detalle', id_alumno=alumno.id_alumno) }}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+<script>
+(() => {
+    const modo = document.getElementById('modo-pago');
+    const contenedor = document.getElementById('campo-operacion-qr');
+    const campo = contenedor.querySelector('input');
+    function actualizar() {
+        const esQr = modo.value === 'QR';
+        contenedor.hidden = !esQr;
+        campo.required = esQr;
+    }
+    modo.addEventListener('change', actualizar);
+    actualizar();
+})();
+</script>
+{% endblock %}

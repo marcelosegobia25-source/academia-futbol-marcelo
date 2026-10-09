@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %}Asistencia de jugadores{% endblock %}
+{% block contenido %}
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div><span class="eyebrow">Seguimiento deportivo</span><h2 class="mb-0">Asistencia de jugadores</h2><small class="text-muted">Consulte los registros guardados por jugador, fecha, equipo y turno.</small></div>
+    <a href="{{ url_for('alumnos.listar') }}" class="btn btn-outline-secondary"><i class="bi bi-people"></i> Volver a alumnos</a>
+</div>
+
+<form method="get" class="card attendance-query-card mb-4">
+    <div class="card-header"><strong><i class="bi bi-funnel"></i> Selección y filtros</strong><a href="{{ url_for('alumnos.asistencias') }}">Limpiar</a></div>
+    <div class="card-body attendance-query-grid">
+        <div class="attendance-player-field"><label>Jugador</label><select class="form-select" name="id_alumno"><option value="">Todos los jugadores</option>{% for alumno in alumnos %}<option value="{{ alumno.id_alumno }}" {% if filtros.get('id_alumno')|string == alumno.id_alumno|string %}selected{% endif %}>{{ alumno.apellido }}, {{ alumno.nombre }} · {{ alumno.codigo_interno }}</option>{% endfor %}</select></div>
+        <div><label>Período</label><select class="form-select" name="periodo" id="periodo-asistencia"><option value="semana" {% if periodo == 'semana' %}selected{% endif %}>Semana actual</option><option value="ultimas3" {% if periodo == 'ultimas3' %}selected{% endif %}>Últimas 3 asistencias</option><option value="ultimas10" {% if periodo == 'ultimas10' %}selected{% endif %}>Últimas 10 asistencias</option><option value="mes" {% if periodo == 'mes' %}selected{% endif %}>Mes actual</option><option value="rango" {% if periodo == 'rango' %}selected{% endif %}>Rango de fechas</option><option value="todas" {% if periodo == 'todas' %}selected{% endif %}>Todo el historial</option></select></div>
+        <div><label>Estado</label><select class="form-select" name="estado_asistencia"><option value="">Todos</option>{% for estado in ['Presente','Tarde','Ausente','Justificado'] %}<option value="{{ estado }}" {% if filtros.get('estado_asistencia') == estado %}selected{% endif %}>{{ estado }}</option>{% endfor %}</select></div>
+        <div><label>Categoría</label><select class="form-select" name="id_categoria"><option value="">Todas</option>{% for categoria in categorias %}<option value="{{ categoria.id_categoria }}" {% if filtros.get('id_categoria')|string == categoria.id_categoria|string %}selected{% endif %}>{{ categoria.nombre }}</option>{% endfor %}</select></div>
+        <div><label>Equipo</label><select class="form-select" name="id_equipo"><option value="">Todos</option>{% for equipo in equipos %}<option value="{{ equipo.id_equipo }}" {% if filtros.get('id_equipo')|string == equipo.id_equipo|string %}selected{% endif %}>{{ equipo.nombre }}</option>{% endfor %}</select></div>
+        <div><label>Turno</label><select class="form-select" name="turno"><option value="">Todos</option>{% for turno in turnos %}<option value="{{ turno }}" {% if filtros.get('turno') == turno %}selected{% endif %}>{{ turno }}</option>{% endfor %}</select></div>
+        <div class="range-date"><label>Desde</label><input class="form-control" type="date" name="fecha_desde" value="{{ filtros.get('fecha_desde','') }}"></div>
+        <div class="range-date"><label>Hasta</label><input class="form-control" type="date" name="fecha_hasta" value="{{ filtros.get('fecha_hasta','') }}"></div>
+        <div class="attendance-filter-action"><button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Consultar asistencia</button></div>
+    </div>
+</form>
+
+{% if alumno_seleccionado %}<div class="attendance-selected-player mb-3"><div><span>Jugador seleccionado</span><strong>{{ alumno_seleccionado.nombre_completo }}</strong><small>{{ alumno_seleccionado.categoria.nombre if alumno_seleccionado.categoria else 'Sin categoría' }} · {{ alumno_seleccionado.turno or 'Sin turno asignado' }}</small></div><a href="{{ url_for('alumnos.detalle', id_alumno=alumno_seleccionado.id_alumno) }}">Abrir perfil <i class="bi bi-arrow-right"></i></a></div>{% endif %}
+
+<div class="attendance-stat-grid mb-4">
+    <div class="attendance-stat attendance-present"><i class="bi bi-check-circle-fill"></i><span><strong>{{ resumen.Presente }}</strong>Presentes</span></div>
+    <div class="attendance-stat attendance-late"><i class="bi bi-clock-fill"></i><span><strong>{{ resumen.Tarde }}</strong>Tardanzas</span></div>
+    <div class="attendance-stat attendance-absent"><i class="bi bi-x-circle-fill"></i><span><strong>{{ resumen.Ausente }}</strong>Ausencias</span></div>
+    <div class="attendance-stat attendance-excused"><i class="bi bi-file-earmark-check-fill"></i><span><strong>{{ resumen.Justificado }}</strong>Justificadas</span></div>
+    <div class="attendance-stat attendance-total"><i class="bi bi-percent"></i><span><strong>{{ porcentaje }}%</strong>Asistencia · {{ total }} registros</span></div>
+</div>
+
+<div class="card overflow-hidden">
+    <div class="card-header d-flex justify-content-between"><strong>Resultados</strong><span class="text-muted small">{% if fecha_desde %}{{ fecha_desde.strftime('%d/%m/%Y') }}{% endif %}{% if fecha_desde and fecha_hasta %} – {% endif %}{% if fecha_hasta %}{{ fecha_hasta.strftime('%d/%m/%Y') }}{% endif %}</span></div>
+    <div class="table-responsive"><table class="table table-hover align-middle mb-0 attendance-results-table"><thead><tr><th>Fecha</th><th>Jugador</th><th>Categoría / equipo</th><th>Entrenamiento</th><th>Turno</th><th>Estado</th><th>Justificación</th></tr></thead><tbody>
+        {% for registro in registros %}{% set entrenamiento = registro.sesion.entrenamiento %}<tr>
+            <td><strong>{{ registro.sesion.fecha.strftime('%d/%m/%Y') }}</strong><small>{{ dias_semana[registro.sesion.fecha.weekday()] }}</small></td>
+            <td><a href="{{ url_for('alumnos.detalle', id_alumno=registro.alumno.id_alumno) }}"><strong>{{ registro.alumno.nombre_completo }}</strong><small>{{ registro.alumno.codigo_interno }}</small></a></td>
+            <td>{{ registro.alumno.categoria.nombre if registro.alumno.categoria else '—' }}<small>{{ registro.alumno.equipos|map(attribute='nombre')|join(', ') or 'Sin equipo' }}</small></td>
+            <td>{{ entrenamiento.hora_inicio.strftime('%H:%M') }}{% if entrenamiento.hora_fin %} – {{ entrenamiento.hora_fin.strftime('%H:%M') }}{% endif %}<small>{{ entrenamiento.lugar or 'Lugar no definido' }}</small></td>
+            <td>{{ registro.alumno.turno or entrenamiento.turno }}</td>
+            <td><span class="badge {{ 'bg-success' if registro.estado == 'Presente' else ('bg-warning text-dark' if registro.estado == 'Tarde' else ('bg-danger' if registro.estado == 'Ausente' else 'bg-info text-dark')) }}">{{ registro.estado }}</span></td>
+            <td>{{ registro.justificacion or '—' }}</td>
+        </tr>{% else %}<tr><td colspan="7" class="text-center text-muted py-5"><i class="bi bi-calendar2-x fs-2 d-block mb-2"></i>No hay asistencias que coincidan con los filtros seleccionados.</td></tr>{% endfor %}
+    </tbody></table></div>
+</div>
+{% endblock %}

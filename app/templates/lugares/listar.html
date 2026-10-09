@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titulo %}Canchas y lugares{% endblock %}
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <div class="eyebrow">Administración</div>
+        <h2 class="mb-1"><i class="bi bi-geo-alt"></i> Canchas y lugares</h2>
+        <p class="text-muted mb-0">Espacios disponibles para partidos, campeonatos, eventos y entrenamientos.</p>
+    </div>
+    <a href="{{ url_for('lugares.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo lugar</a>
+</div>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead><tr><th>Nombre</th><th>Tipo</th><th>Dirección</th><th>Mapa</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            {% for lugar in lugares %}
+                <tr>
+                    <td><strong>{{ lugar.nombre }}</strong></td>
+                    <td>{{ lugar.tipo }}</td>
+                    <td>{{ lugar.direccion or '-' }}</td>
+                    <td>
+                        {% if lugar.google_maps_url %}
+                        <a href="{{ lugar.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success"><i class="bi bi-map"></i> Abrir</a>
+                        {% else %}<span class="text-muted">—</span>{% endif %}
+                    </td>
+                    <td><span class="badge {{ 'text-bg-success' if lugar.activo else 'text-bg-secondary' }}">{{ 'Activo' if lugar.activo else 'Inactivo' }}</span></td>
+                    <td class="text-end">
+                        <a href="{{ url_for('lugares.editar', id_lugar=lugar.id_lugar) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <form method="post" action="{{ url_for('lugares.eliminar', id_lugar=lugar.id_lugar) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta cancha o lugar?');">
+                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-5">No hay canchas ni lugares registrados.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

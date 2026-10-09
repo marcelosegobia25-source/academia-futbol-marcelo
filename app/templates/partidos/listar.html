@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}Partidos{% endblock %}
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-flag"></i> Partidos</h2>
+    <a href="{{ url_for('partidos.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Programar partido</a>
+</div>
+
+<form id="form-filtros-partidos" hx-get="{{ url_for('partidos.listar') }}" hx-target="#tabla-partidos"
+      hx-trigger="change, submit, keyup changed delay:400ms from:input[type=text]">
+<div class="card shadow-sm mb-3">
+    <div class="card-body row g-2 align-items-end">
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Equipo local</label>
+            <select class="form-select form-select-sm" name="id_equipo">
+                <option value="">Todos</option>
+                {% for e in equipos %}<option value="{{ e.id_equipo }}" {% if filtros.get('id_equipo')|string == e.id_equipo|string %}selected{% endif %}>{{ e.nombre }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Sub (categoría)</label>
+            <select class="form-select form-select-sm" name="id_categoria">
+                <option value="">Todas</option>
+                {% for c in categorias %}<option value="{{ c.id_categoria }}" {% if filtros.get('id_categoria')|string == c.id_categoria|string %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Rival</label>
+            <input type="text" class="form-control form-control-sm" name="rival" value="{{ filtros.get('rival','') }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Cancha</label>
+            <input type="text" class="form-control form-control-sm" name="cancha" value="{{ filtros.get('cancha','') }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Fecha</label>
+            <input type="date" class="form-control form-control-sm" name="fecha" value="{{ filtros.get('fecha','') }}">
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button type="submit" name="rango" value="mes_actual" class="btn btn-sm btn-outline-primary flex-fill">Mes actual</button>
+            <button type="submit" name="rango" value="mes_siguiente" class="btn btn-sm btn-outline-primary flex-fill">Mes siguiente</button>
+        </div>
+        <div class="col-12 text-end"><a href="{{ url_for('partidos.listar') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x-lg"></i> Limpiar filtros</a></div>
+    </div>
+</div>
+</form>
+
+<form id="form-convocatoria" method="post" action="{{ url_for('partidos.convocatoria_pdf') }}">
+    <div id="tabla-partidos">{% include "partidos/_tabla.html" %}</div>
+    <button type="submit" class="btn btn-outline-danger mt-2">
+        <i class="bi bi-file-earmark-pdf"></i> Generar convocatoria PDF de los partidos seleccionados
+    </button>
+</form>
+{% endblock %}

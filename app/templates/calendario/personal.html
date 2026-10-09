@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block titulo %}Personal deportivo{% endblock %}{% block contenido %}
+<h2 class="mb-3">Profesores y entrenadores</h2>
+<form method="post" class="card card-body mb-4"><div class="row g-2">
+<div class="col-md-3"><input name="nombre" class="form-control" placeholder="Nombre completo" required></div>
+<div class="col-md-2"><input name="documento" class="form-control" placeholder="Documento"></div>
+<div class="col-md-2"><input name="telefono" class="form-control" placeholder="Teléfono"></div>
+<div class="col-md-2"><input name="especialidad" class="form-control" placeholder="Especialidad"></div>
+<div class="col-md-2"><select name="tipo" class="form-select"><option>Entrenador</option><option>Profesor</option><option>Preparador físico</option></select></div>
+<div class="col-md-1"><button class="btn btn-success w-100">Añadir</button></div></div></form>
+<div class="card table-responsive"><table class="table mb-0"><thead><tr><th>Nombre</th><th>Tipo</th><th>Especialidad</th><th>Contacto</th><th>Estado</th><th></th></tr></thead><tbody>
+{% for p in personal %}<tr><td>{{ p.nombre }}</td><td>{{ p.tipo }}</td><td>{{ p.especialidad or '—' }}</td><td>{{ p.telefono or p.correo or '—' }}</td><td>{{ 'Activo' if p.activo else 'Retirado' }}</td><td><form method="post" action="{{ url_for('calendario.personal_estado', id_personal=p.id_personal) }}"><button class="btn btn-sm btn-outline-secondary">{{ 'Retirar' if p.activo else 'Reactivar' }}</button></form></td></tr>{% else %}<tr><td colspan="6" class="text-center py-4">Sin personal registrado.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

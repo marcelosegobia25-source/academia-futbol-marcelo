@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block titulo %}Jugadores — {{ campeonato.nombre }}{% endblock %}
+{% block contenido %}
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div><span class="eyebrow">Inscripción de plantel</span><h2 class="mb-0">Habilitación de jugadores</h2><p class="text-muted mb-0 mt-1">{{ campeonato.nombre }}</p></div>
+    <a href="{{ url_for('campeonatos.detalle', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Volver al campeonato</a>
+</div>
+
+<form method="get" class="card player-filterbar mb-3">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold">Categoría</label>
+            <select name="id_categoria" class="form-select">
+                <option value="">Todas las categorías del campeonato</option>
+                {% for categoria in categorias %}<option value="{{ categoria.id_categoria }}" {% if filtros.get('id_categoria')|string == categoria.id_categoria|string %}selected{% endif %}>{{ categoria.nombre }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold">Equipo</label>
+            <select name="id_equipo" class="form-select">
+                <option value="">Todos los equipos del campeonato</option>
+                {% for equipo in equipos %}<option value="{{ equipo.id_equipo }}" {% if filtros.get('id_equipo')|string == equipo.id_equipo|string %}selected{% endif %}>{{ equipo.nombre }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-success flex-grow-1"><i class="bi bi-funnel"></i> Aplicar filtros</button>
+            <a href="{{ url_for('campeonatos.jugadores', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-outline-secondary" title="Limpiar filtros"><i class="bi bi-x-lg"></i></a>
+        </div>
+    </div>
+</form>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="small text-muted">{{ candidatos|length }} jugador{{ '' if candidatos|length == 1 else 'es' }} encontrado{{ '' if candidatos|length == 1 else 's' }}</span>
+    <span class="small text-muted"><span class="badge bg-success">Habilitado</span> <span class="badge bg-secondary">Deshabilitado</span></span>
+</div>
+
+<div class="card shadow-sm overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light"><tr><th>Alumno</th><th>Categoría</th><th>Equipos</th><th>Estado</th><th class="text-end">Acción</th></tr></thead>
+            <tbody>
+                {% for a in candidatos %}
+                <tr>
+                    <td><div class="fw-semibold">{{ a.nombre_completo }}</div><small class="text-muted">{{ a.posicion or 'Sin posición' }}</small></td>
+                    <td>{{ a.categoria.nombre if a.categoria else '—' }}</td>
+                    <td>{{ a.equipos | map(attribute='nombre') | join(', ') if a.equipos else 'Sin equipo' }}</td>
+                    <td>{% set hab = habilitados.get(a.id_alumno, False) %}<span class="badge {{ 'bg-success' if hab else 'bg-secondary' }}">{{ 'Habilitado' if hab else 'Deshabilitado' }}</span></td>
+                    <td class="text-end">
+                        <form method="post" action="{{ url_for('campeonatos.toggle_jugador', id_campeonato=campeonato.id_campeonato, id_alumno=a.id_alumno) }}">
+                            <input type="hidden" name="id_categoria" value="{{ filtros.get('id_categoria','') }}">
+                            <input type="hidden" name="id_equipo" value="{{ filtros.get('id_equipo','') }}">
+                            <button type="submit" class="btn btn-sm {{ 'btn-outline-danger' if hab else 'btn-outline-success' }}">{{ 'Deshabilitar' if hab else 'Habilitar' }}</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-people fs-2 d-block mb-2"></i>No hay jugadores que coincidan con los filtros seleccionados.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

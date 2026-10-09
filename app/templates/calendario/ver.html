@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block titulo %}Calendario{% endblock %}
+{% block contenido %}
+{% set colores = {'Evento': 'calendar-event', 'Partido': 'calendar-match', 'Entrenamiento': 'calendar-training', 'Campeonato': 'calendar-championship'} %}
+{% set iconos = {'Evento': 'bi-journal-text', 'Partido': 'bi-flag-fill', 'Entrenamiento': 'bi-stopwatch-fill', 'Campeonato': 'bi-trophy-fill'} %}
+
+<section class="calendar-hero mb-4">
+    <div>
+        <span class="eyebrow">Programación deportiva</span>
+        <h1 class="page-title mb-1">{{ nombre_mes }} {{ anio }}</h1>
+        <p class="text-muted mb-0">Todas las actividades, partidos, entrenamientos y campeonatos del mes.</p>
+    </div>
+    <div class="calendar-summary">
+        <div><strong>{{ total_actividades }}</strong><span>Actividades</span></div>
+        <div><strong>{{ dias_con_actividad }}</strong><span>Días ocupados</span></div>
+    </div>
+</section>
+
+<div class="calendar-toolbar mb-3">
+    <div class="btn-group" aria-label="Navegación del calendario">
+        <a href="{{ url_for('calendario.ver', anio=anio_mes_anterior, mes=mes_anterior, id_categoria=filtros.get('id_categoria'), id_equipo=filtros.get('id_equipo')) }}" class="btn btn-outline-primary" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></a>
+        <a href="{{ url_for('calendario.ver', id_categoria=filtros.get('id_categoria'), id_equipo=filtros.get('id_equipo')) }}" class="btn btn-outline-primary">Mes actual</a>
+        <a href="{{ url_for('calendario.ver', anio=anio_mes_siguiente, mes=mes_siguiente, id_categoria=filtros.get('id_categoria'), id_equipo=filtros.get('id_equipo')) }}" class="btn btn-outline-primary" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></a>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('calendario.listar_entrenamientos') }}" class="btn btn-outline-secondary"><i class="bi bi-clock-history"></i> Entrenamientos</a>
+        <a href="{{ url_for('calendario.exportar_mensual_pdf', anio=anio, mes=mes, id_categoria=filtros.get('id_categoria'), id_equipo=filtros.get('id_equipo')) }}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf"></i> PDF mensual</a>
+        <form method="get" action="{{ url_for('calendario.exportar_semanal_pdf') }}" class="calendar-weekly-export">
+            <input type="hidden" name="id_categoria" value="{{ filtros.get('id_categoria', '') }}">
+            <input type="hidden" name="id_equipo" value="{{ filtros.get('id_equipo', '') }}">
+            <input type="date" name="fecha" value="{{ fecha_semana.isoformat() }}" class="form-control" aria-label="Fecha incluida en la semana">
+            <button class="btn btn-outline-danger text-nowrap"><i class="bi bi-calendar-week"></i> PDF semanal</button>
+        </form>
+    </div>
+</div>
+
+<form method="get" class="card calendar-filters mb-3">
+    <input type="hidden" name="anio" value="{{ anio }}"><input type="hidden" name="mes" value="{{ mes }}">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4"><label class="form-label" for="filtro-categoria">Categoría</label><select class="form-select" id="filtro-categoria" name="id_categoria"><option value="">Todas las categorías</option>{% for categoria in categorias %}<option value="{{ categoria.id_categoria }}" {% if filtros.get('id_categoria')|int == categoria.id_categoria %}selected{% endif %}>{{ categoria.nombre }}</option>{% endfor %}</select></div>
+        <div class="col-md-4"><label class="form-label" for="filtro-equipo">Equipo</label><select class="form-select" id="filtro-equipo" name="id_equipo"><option value="">Todos los equipos</option>{% for equipo in equipos %}<option value="{{ equipo.id_equipo }}" {% if filtros.get('id_equipo')|int == equipo.id_equipo %}selected{% endif %}>{{ equipo.nombre }}{% if equipo.categoria %} · {{ equipo.categoria.nombre }}{% endif %}</option>{% endfor %}</select></div>
+        <div class="col-md-4"><div class="d-flex gap-2"><button class="btn btn-primary flex-grow-1" type="submit"><i class="bi bi-funnel"></i> Aplicar filtros</button><a href="{{ url_for('calendario.ver', anio=anio, mes=mes) }}" class="btn btn-outline-secondary">Limpiar</a></div></div>
+    </div>
+</form>
+
+<div class="calendar-legend mb-3">
+    {% for tipo in ['Evento', 'Partido', 'Entrenamiento', 'Campeonato'] %}<span class="{{ colores[tipo] }}"><i class="bi {{ iconos[tipo] }}"></i> {{ tipo }} <strong>{{ resumen_tipos.get(tipo, 0) }}</strong></span>{% endfor %}
+</div>
+
+<div class="card calendar-shell mb-4">
+    <div class="table-responsive">
+        <table class="table calendar-table">
+            <thead><tr><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th><th>Domingo</th></tr></thead>
+            <tbody>{% for semana in semanas %}<tr>{% for dia in semana %}<td class="calendar-day {{ 'calendar-empty' if not dia }} {{ 'calendar-today' if dia and hoy == hoy.replace(year=anio, month=mes, day=dia) }} {{ 'has-items' if dia and dias[dia] }}">
+                {% if dia %}<button type="button" class="calendar-day-button" data-bs-toggle="modal" data-bs-target="#dia-{{ dia }}" aria-label="Ver programación del {{ dia }} de {{ nombre_mes }}"><span>{{ dia }}</span>{% if dias[dia] %}<span class="item-count">{{ dias[dia]|length }}</span>{% endif %}</button>
+                <div class="calendar-day-items">{% for item in dias[dia][:4] %}<span class="calendar-item-preview {{ colores[item.tipo] }}" title="{{ item.texto }}">{% if item.hora %}<b>{{ item.hora.strftime('%H:%M') }}</b> {% endif %}{{ item.texto }}</span>{% endfor %}</div>
+                {% if dias[dia]|length > 4 %}<button type="button" class="calendar-more" data-bs-toggle="modal" data-bs-target="#dia-{{ dia }}">+{{ dias[dia]|length - 4 }} actividades más</button>{% endif %}{% endif %}
+            </td>{% endfor %}</tr>{% endfor %}</tbody>
+        </table>
+    </div>
+</div>
+
+<section class="monthly-agenda">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3"><div><span class="eyebrow">Vista completa</span><h2 class="h4 mb-0">{% if agenda_desde_hoy %}Agenda desde hoy{% else %}Agenda de {{ nombre_mes }}{% endif %}</h2></div><span class="text-muted small">{{ actividades_vista|length }} actividades ordenadas por fecha y hora{% if agenda_desde_hoy %} desde el {{ hoy.strftime('%d/%m/%Y') }}{% endif %}</span></div>
+    {% if actividades_vista %}<div class="monthly-agenda-list">{% for actividad in actividades_vista %}
+        {% if loop.first or actividad.fecha != loop.previtem.fecha %}<div class="agenda-date-separator"><span>{{ actividad.nombre_dia }}</span><strong>{{ actividad.fecha.strftime('%d') }}</strong><small>{{ nombre_mes }}</small></div>{% endif %}
+        <article class="agenda-card {{ colores[actividad.tipo] }}">
+            <div class="agenda-card-icon"><i class="bi {{ iconos[actividad.tipo] }}"></i></div>
+            <div class="agenda-card-content"><div class="d-flex flex-wrap justify-content-between gap-2"><strong>{{ actividad.texto }}</strong><span class="agenda-type">{{ actividad.tipo }}</span></div><div class="agenda-meta">{% if actividad.hora %}<span><i class="bi bi-clock"></i> {{ actividad.hora.strftime('%H:%M') }}{% if actividad.hora_fin %} – {{ actividad.hora_fin.strftime('%H:%M') }}{% endif %}</span>{% else %}<span><i class="bi bi-calendar-check"></i> Todo el día</span>{% endif %}{% if actividad.lugar %}<span><i class="bi bi-geo-alt"></i> {{ actividad.lugar }}{% if actividad.maps_url %} <a href="{{ actividad.maps_url }}" target="_blank" rel="noopener noreferrer">Ver mapa</a>{% endif %}</span>{% endif %}</div>{% if actividad.categoria or actividad.equipo %}<div class="agenda-tags">{% if actividad.categoria %}<span>{{ actividad.categoria }}</span>{% endif %}{% if actividad.equipo %}<span>{{ actividad.equipo }}</span>{% endif %}</div>{% endif %}</div>
+        </article>
+    {% endfor %}</div>{% else %}<div class="card empty-agenda"><i class="bi bi-calendar2-check"></i><h3>{% if agenda_desde_hoy %}No quedan actividades programadas este mes{% else %}No hay actividades este mes{% endif %}</h3><p>Pruebe otro mes o quite los filtros aplicados.</p></div>{% endif %}
+</section>
+
+{% for dia, items in dias.items() %}<div class="modal fade" id="dia-{{ dia }}" tabindex="-1" aria-labelledby="titulo-dia-{{ dia }}" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><div><span class="eyebrow">Programación completa</span><h5 class="modal-title" id="titulo-dia-{{ dia }}">{{ dia }} de {{ nombre_mes }} de {{ anio }}</h5></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body px-4">{% for item in items %}<article class="agenda-detail-item"><div class="agenda-type-icon {{ colores[item.tipo] }}"><i class="bi {{ iconos[item.tipo] }}"></i></div><div><div class="d-flex flex-wrap justify-content-between gap-2"><strong>{{ item.texto }}</strong><span class="badge text-bg-light">{{ item.tipo }}</span></div><div class="small text-muted mt-1">{% if item.hora %}<span class="me-3"><i class="bi bi-clock"></i> {{ item.hora.strftime('%H:%M') }}{% if item.hora_fin %} – {{ item.hora_fin.strftime('%H:%M') }}{% endif %}</span>{% endif %}{% if item.lugar %}<span><i class="bi bi-geo-alt"></i> {{ item.lugar }}</span>{% endif %}</div></div></article>{% else %}<div class="text-center py-5 text-muted"><i class="bi bi-calendar2-check fs-1 d-block mb-2"></i>No hay actividades programadas para este día.</div>{% endfor %}</div></div></div></div>{% endfor %}
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block titulo %}Movimiento contable{% endblock %}
+{% block contenido %}
+<h1 class="page-title mb-4">Registrar ingreso o egreso</h1>
+<form method="post" enctype="multipart/form-data" class="card p-4" style="max-width:760px">
+  <div class="row g-3">
+    <div class="col-md-4"><label class="form-label">Tipo</label><select name="tipo" class="form-select" required><option>Ingreso</option><option>Egreso</option></select></div>
+    <div class="col-md-4"><label class="form-label">Fecha</label><input type="date" name="fecha" value="{{ hoy }}" class="form-control" required></div>
+    <div class="col-md-4"><label class="form-label">Monto</label><input type="number" step=".01" min=".01" name="monto" class="form-control" required></div>
+    <div class="col-md-6"><label class="form-label">Categoría</label><select name="categoria" class="form-select" required><option value="">Seleccione una categoría</option>{% for c in categorias_contables %}<option value="{{ c.nombre }}">{{ c.nombre }} ({{ c.tipo }})</option>{% endfor %}</select><small><a href="{{ url_for('gestion.categorias_contables') }}">Crear o administrar categorías</a></small></div>
+    <div class="col-md-6"><label class="form-label">Concepto</label><input name="concepto" class="form-control" autocomplete="off" required></div>
+    <div class="col-md-4"><label class="form-label">Método</label><select name="modo_pago" class="form-select">{% for m in modos %}<option>{{ m }}</option>{% endfor %}</select></div>
+    <div class="col-md-4"><label class="form-label">N.º operación</label><input name="numero_operacion" class="form-control" autocomplete="off"></div>
+    <div class="col-md-4"><label class="form-label">Proveedor</label><select name="id_proveedor" class="form-select"><option value="">Sin proveedor</option>{% for p in proveedores %}<option value="{{ p.id_proveedor }}">{{ p.nombre }}</option>{% endfor %}</select></div>
+    <div class="col-md-6"><label class="form-label">Comprobante</label><input type="file" name="comprobante" accept=".pdf,.png,.jpg,.jpeg,.webp" class="form-control"><small class="text-muted">PDF o imagen, máximo 8 MB.</small></div>
+    <div class="col-12"><label class="form-label">Observación</label><textarea name="observacion" class="form-control" autocomplete="off"></textarea></div>
+  </div><button class="btn btn-success mt-4">Guardar movimiento</button>
+</form>
+{% endblock %}

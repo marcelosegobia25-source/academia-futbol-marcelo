@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if campeonato else 'Nuevo' }} campeonato{% endblock %}
+{% block contenido %}
+<h2 class="mb-3">{{ 'Editar campeonato' if campeonato else 'Nuevo campeonato' }}</h2>
+<form method="post" class="card shadow-sm p-4" style="max-width: 900px;">
+    <div class="row g-3">
+        <div class="col-12">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control" required value="{{ campeonato.nombre if campeonato else '' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Fecha inicio</label>
+            <input type="date" name="fecha_inicio" class="form-control" required value="{{ campeonato.fecha_inicio.isoformat() if campeonato else '' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Fecha fin</label>
+            <input type="date" name="fecha_fin" class="form-control" value="{{ campeonato.fecha_fin.isoformat() if campeonato and campeonato.fecha_fin else '' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Estado</label>
+            <select name="estado" class="form-select">
+                {% for e in estados %}<option value="{{ e }}" {% if campeonato and campeonato.estado == e %}selected{% endif %}>{{ e }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-12">
+            <label class="form-label">Lugar</label>
+            <input type="text" name="lugar" class="form-control" list="lugares-disponibles" value="{{ campeonato.lugar if campeonato else '' }}" placeholder="Seleccione o escriba un lugar">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Formato</label>
+            <select name="formato" class="form-select">
+                {% for formato in formatos %}
+                <option value="{{ formato }}" {% if campeonato and campeonato.formato == formato %}selected{% endif %}>{{ formato }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Vueltas</label>
+            <select name="vueltas" class="form-select">
+                <option value="1" {% if not campeonato or campeonato.vueltas == 1 %}selected{% endif %}>Una</option>
+                <option value="2" {% if campeonato and campeonato.vueltas == 2 %}selected{% endif %}>Ida y vuelta</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Clasificados</label>
+            <select name="clasificados" class="form-select">
+                {% for cantidad in [2, 4, 8] %}
+                <option value="{{ cantidad }}" {% if campeonato and campeonato.clasificados == cantidad %}selected{% endif %}>{{ cantidad }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Puntos victoria</label>
+            <input type="number" min="0" max="10" name="puntos_victoria" class="form-control" value="{{ campeonato.puntos_victoria if campeonato else 3 }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Puntos empate</label>
+            <input type="number" min="0" max="10" name="puntos_empate" class="form-control" value="{{ campeonato.puntos_empate if campeonato else 1 }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Puntos derrota</label>
+            <input type="number" min="0" max="10" name="puntos_derrota" class="form-control" value="{{ campeonato.puntos_derrota if campeonato else 0 }}">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <label class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="tercer_puesto" value="1" {% if campeonato and campeonato.tercer_puesto %}checked{% endif %}>
+                <span class="form-check-label">Partido por tercer puesto</span>
+            </label>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Categorías a jugar</label>
+            <div class="multi-choice-list">
+                {% for c in categorias %}
+                <input class="btn-check" type="checkbox" name="categorias"
+                       value="{{ c.id_categoria }}" id="categoria-campeonato-{{ c.id_categoria }}"
+                       {% if campeonato and c in campeonato.categorias %}checked{% endif %}>
+                <label class="multi-choice-item" for="categoria-campeonato-{{ c.id_categoria }}">
+                    <i class="bi bi-check-lg"></i><span>{{ c.nombre_mostrado }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            <small class="text-muted">Primero seleccione las categorías del campeonato.</small>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Equipos propios</label>
+            <div class="multi-choice-list">
+                {% for e in equipos %}
+                <input class="btn-check" type="checkbox" name="equipos"
+                       value="{{ e.id_equipo }}" id="equipo-propio-{{ e.id_equipo }}"
+                       {% if campeonato and e in campeonato.equipos %}checked{% endif %}>
+                <label class="multi-choice-item" for="equipo-propio-{{ e.id_equipo }}">
+                    <i class="bi bi-check-lg"></i>
+                    <span><strong>{{ e.nombre }}</strong><small>{{ e.categoria.nombre_mostrado if e.categoria else 'Todas las categorías' }}</small></span>
+                </label>
+                {% endfor %}
+            </div>
+            <small class="text-muted">Equipos de la academia que participarán.</small>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <label class="form-label">Rivales</label>
+                <a href="{{ url_for('campeonatos.crear_rival') }}" class="small text-decoration-none">Registrar nuevo</a>
+            </div>
+            <div class="multi-choice-list">
+                {% for e in rivales %}
+                <input class="btn-check" type="checkbox" name="equipos"
+                       value="{{ e.id_equipo }}" id="equipo-rival-{{ e.id_equipo }}"
+                       {% if campeonato and e in campeonato.equipos %}checked{% endif %}>
+                <label class="multi-choice-item" for="equipo-rival-{{ e.id_equipo }}">
+                    <i class="bi bi-check-lg"></i>
+                    <span><strong>{{ e.nombre }}</strong><small>{{ e.categoria.nombre_mostrado if e.categoria else 'Todas las categorías' }}</small></span>
+                </label>
+                {% else %}
+                <span class="multi-choice-empty">No hay rivales registrados</span>
+                {% endfor %}
+            </div>
+            <small class="text-muted">Solo se usarán rivales compatibles con la categoría.</small>
+        </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="{{ url_for('campeonatos.listar') }}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+<datalist id="lugares-disponibles">
+    {% for lugar in lugares %}<option value="{{ lugar.nombre }}">{{ lugar.tipo }}{% if lugar.direccion %} · {{ lugar.direccion }}{% endif %}</option>{% endfor %}
+</datalist>
+{% endblock %}

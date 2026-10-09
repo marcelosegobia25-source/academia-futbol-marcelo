@@ -1,0 +1,66 @@
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light sticky-top-thead">
+                <tr>
+                    <th>ID</th>
+                    <th>Foto</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Categoría</th>
+                    <th>Edad</th>
+                    <th>Posición</th>
+                    <th>Turno</th>
+                    <th>Beca</th>
+                    <th>Sexo</th>
+                    <th>Campeonatos activos</th>
+                    <th>Estado mensualidad</th>
+                    <th>Equipos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in alumnos %}
+                <tr onclick="window.location='{{ url_for('alumnos.detalle', id_alumno=a.id_alumno) }}'">
+                    <td><strong>{{ a.codigo_interno }}</strong></td>
+                    <td>
+                        {% if a.foto %}
+                        <img src="{{ url_for('alumnos.foto_privada', id_alumno=a.id_alumno) }}" class="foto-alumno" style="width:40px;height:40px;">
+                        {% else %}
+                        <i class="bi bi-person-circle fs-3 text-secondary"></i>
+                        {% endif %}
+                    </td>
+                    <td>{{ a.nombre }}</td>
+                    <td>{{ a.apellido }}</td>
+                    <td>{{ a.categoria.nombre if a.categoria else '—' }}</td>
+                    <td>{{ a.edad }}</td>
+                    <td>{{ a.posicion or '—' }}</td>
+                    <td>{{ a.turno or '—' }}</td>
+                    <td>{{ a.beca }}</td>
+                    <td>{{ a.sexo or '—' }}</td>
+                    <td>{{ a.campeonatos_activos | join(', ') if a.campeonatos_activos else '—' }}</td>
+                    <td>
+                        {% set em = a.estado_mensualidad %}
+                        <span class="badge {{ 'bg-success' if em == 'Vigente' else ('bg-warning text-dark' if em == 'Próximo a vencer' else ('bg-danger' if em == 'Vencido' else 'bg-secondary')) }}">{{ em }}</span>
+                    </td>
+                    <td>{{ a.equipos | map(attribute='nombre') | join(', ') if a.equipos else '—' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="13" class="text-center text-muted py-4">No se encontraron alumnos con esos filtros.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if paginacion and paginacion.pages > 1 %}
+<nav class="mt-3" aria-label="Páginas de alumnos">
+    <ul class="pagination pagination-sm justify-content-center">
+        {% for pagina in paginacion.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if pagina %}
+            <li class="page-item {{ 'active' if pagina == paginacion.page }}">
+                <a class="page-link" hx-get="{{ url_for('alumnos.listar') }}?{{ base_paginacion }}{% if base_paginacion %}&{% endif %}page={{ pagina }}" hx-target="#tabla-alumnos" href="{{ url_for('alumnos.listar') }}?{{ base_paginacion }}{% if base_paginacion %}&{% endif %}page={{ pagina }}">{{ pagina }}</a>
+            </li>
+            {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+        {% endfor %}
+    </ul>
+</nav>
+{% endif %}

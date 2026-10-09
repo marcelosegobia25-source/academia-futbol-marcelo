@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titulo %}Cambiar contraseña{% endblock %}
+{% block contenido %}
+<div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <div class="eyebrow">Seguridad</div>
+        <h1 class="page-title mb-1">Cambiar contraseña</h1>
+        <p class="text-muted mb-0">La contraseña debe contener exactamente cinco números.</p>
+    </div>
+    <a href="{{ url_for('configuracion.panel') }}" class="btn btn-outline-secondary">Volver</a>
+</div>
+
+<div class="card" style="max-width: 620px;">
+    <div class="card-body p-4">
+        <form method="post" autocomplete="off">
+            <div class="mb-3">
+                <label for="contrasena_actual" class="form-label">Contraseña actual</label>
+                <input id="contrasena_actual" name="contrasena_actual" type="password"
+                       class="form-control" inputmode="numeric" pattern="[0-9]{5}"
+                       minlength="5" maxlength="5" autocomplete="current-password" required>
+            </div>
+            <div class="mb-3">
+                <label for="contrasena_nueva" class="form-label">Nueva contraseña</label>
+                <input id="contrasena_nueva" name="contrasena_nueva" type="password"
+                       class="form-control" inputmode="numeric" pattern="[0-9]{5}"
+                       minlength="5" maxlength="5" autocomplete="new-password" required>
+            </div>
+            <div class="mb-4">
+                <label for="confirmar_contrasena" class="form-label">Confirmar nueva contraseña</label>
+                <input id="confirmar_contrasena" name="confirmar_contrasena" type="password"
+                       class="form-control" inputmode="numeric" pattern="[0-9]{5}"
+                       minlength="5" maxlength="5" autocomplete="new-password" required>
+            </div>
+            <button class="btn btn-success" type="submit">
+                <i class="bi bi-check2-circle me-1"></i> Actualizar contraseña
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

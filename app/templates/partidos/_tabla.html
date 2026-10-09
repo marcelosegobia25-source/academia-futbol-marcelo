@@ -1,0 +1,36 @@
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr><th></th><th>Fecha</th><th>Hora</th><th>Sub</th><th>Equipo local</th><th>Rival</th><th>Cancha</th><th>Resultado</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for p in partidos %}
+                <tr>
+                    <td><input type="checkbox" name="seleccionados" value="{{ p.id_partido }}" form="form-convocatoria"></td>
+                    <td>{{ p.fecha.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ p.hora.strftime('%H:%M') if p.hora else '—' }}</td>
+                    <td>{{ p.categoria.nombre }}</td>
+                    <td>{{ p.equipo.nombre }}</td>
+                    <td>{{ p.rival }}</td>
+                    <td>
+                        {{ p.cancha or '—' }}
+                        {% if p.lugar_catalogo and p.lugar_catalogo.google_maps_url %}
+                        <button type="button" class="btn btn-sm btn-outline-success ms-1" title="Copiar enlace de la cancha" onclick='copiarEnlace(this, {{ p.lugar_catalogo.google_maps_url|tojson }})'><i class="bi bi-copy"></i> Copiar link</button>
+                        {% endif %}
+                    </td>
+                    <td>{{ p.resultado or 'Pendiente' }}</td>
+                    <td class="text-end">
+                        <a href="{{ url_for('partidos.editar', id_partido=p.id_partido) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <form method="post" action="{{ url_for('partidos.eliminar', id_partido=p.id_partido) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este partido?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="9" class="text-center text-muted py-4">No hay partidos que coincidan con la búsqueda.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

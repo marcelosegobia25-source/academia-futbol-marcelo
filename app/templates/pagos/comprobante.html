@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titulo %}Comprobante de pago{% endblock %}
+{% block contenido %}
+<div class="card shadow-sm p-4 mx-auto" style="max-width: 500px;">
+    <div class="text-center mb-3">
+        <i class="bi bi-check-circle-fill text-success" style="font-size:48px;"></i>
+        <h4 class="mt-2">Pago registrado con éxito</h4>
+    </div>
+    <table class="table table-sm">
+        <tr><th>Alumno</th><td>{{ alumno.nombre_completo }}</td></tr>
+        <tr><th>Mes pagado</th><td>{{ pago.mes_pagado }}</td></tr>
+        <tr><th>Fecha de pago</th><td>{{ pago.fecha_pago.strftime('%d/%m/%Y') }}</td></tr>
+        <tr><th>Vencimiento</th><td>{{ pago.fecha_vencimiento.strftime('%d/%m/%Y') }}</td></tr>
+        <tr><th>Modo de pago</th><td>{{ 'Beca' if pago.es_beca else pago.modo_pago }}</td></tr>
+        <tr><th>Importe abonado</th><td>{{ '%.2f'|format(pago.monto) }}</td></tr>
+        {% if pago.aplicacion %}<tr><th>Saldo restante</th><td>{{ '%.2f'|format(pago.aplicacion.obligacion.saldo) }}</td></tr>{% endif %}
+        <tr><th>Estado</th><td>{{ pago.estado }}</td></tr>
+    </table>
+    <div class="d-grid gap-2">
+        <a href="{{ url_for('pagos.recibo_pdf', id_pago=pago.id_pago) }}" class="btn btn-success" id="btn-descarga">
+            <i class="bi bi-file-earmark-pdf"></i> Descargar comprobante (PDF)
+        </a>
+        <a href="{{ url_for('alumnos.detalle', id_alumno=alumno.id_alumno) }}" class="btn btn-outline-secondary">
+            Volver a la ficha del alumno
+        </a>
+    </div>
+</div>
+<script>
+    // Descarga automática del comprobante, según requerimiento.
+    window.addEventListener('DOMContentLoaded', function () {
+        window.location.href = document.getElementById('btn-descarga').href;
+    });
+</script>
+{% endblock %}

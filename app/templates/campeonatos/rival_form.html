@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if rival else 'Nuevo' }} rival{% endblock %}
+{% block contenido %}
+<div class="mb-3">
+    <div class="eyebrow">Campeonatos</div>
+    <h2>{{ 'Editar rival' if rival else 'Registrar rival' }}</h2>
+</div>
+<form method="post" class="card p-4" style="max-width: 560px;">
+    <div class="mb-3">
+        <label class="form-label">Nombre del equipo rival</label>
+        <input type="text" name="nombre" class="form-control" maxlength="120" required value="{{ rival.nombre if rival else '' }}" placeholder="Ej.: Deportivo Municipal">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Categoría</label>
+        <select name="id_categoria" class="form-select">
+            <option value="" {% if rival and rival.id_categoria is none %}selected{% endif %}>Todas las categorías</option>
+            {% for categoria in categorias %}
+            <option value="{{ categoria.id_categoria }}" {% if rival and rival.id_categoria == categoria.id_categoria %}selected{% endif %}>{{ categoria.nombre_mostrado }}</option>
+            {% endfor %}
+        </select>
+        <small class="text-muted">Seleccione una categoría específica o “Todas las categorías” para utilizar el rival en cualquiera.</small>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-success">Guardar rival</button>
+        <a href="{{ url_for('campeonatos.rivales') }}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

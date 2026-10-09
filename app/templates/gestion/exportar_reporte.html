@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block titulo %}Exportar reporte{% endblock %}
+{% block contenido %}
+<div class="mb-4"><div class="eyebrow">Descarga configurable</div><h1 class="page-title">Exportar {{ modulo|replace('-', ' ')|title }}</h1><p class="text-muted">Las columnas están seleccionadas por defecto. Desmarque únicamente las que no desea incluir.</p></div>
+<form id="exportar-reporte" method="get" action="{{ ruta_excel }}" class="card p-4" style="max-width:760px">
+  {% for clave, valores in request.args.lists() %}{% if clave != 'columnas' %}{% for valor in valores %}<input type="hidden" name="{{ clave }}" value="{{ valor }}">{% endfor %}{% endif %}{% endfor %}
+  <div class="row g-3 mb-4">{% for clave, etiqueta in columnas %}<div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" name="columnas" value="{{ clave }}" checked><span class="form-check-label">{{ etiqueta }}</span></label></div>{% endfor %}</div>
+  <div class="d-flex flex-wrap gap-2">
+    <button type="submit" class="btn btn-success" formaction="{{ ruta_excel }}"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</button>
+    <button type="submit" class="btn btn-danger" formaction="{{ ruta_pdf }}"><i class="bi bi-file-earmark-pdf"></i> Descargar PDF</button>
+    <button type="reset" class="btn btn-outline-secondary">Restaurar selección</button>
+  </div>
+</form>
+{% endblock %}

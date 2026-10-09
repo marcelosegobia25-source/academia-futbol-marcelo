@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block titulo %}Alumnos{% endblock %}
+{% block contenido %}
+<div class="page-heading d-flex justify-content-between align-items-center mb-3">
+    <div><span class="eyebrow">Gestión de plantel</span><h2 class="mb-0">Alumnos</h2></div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('alumnos.asistencias') }}" class="btn btn-outline-primary"><i class="bi bi-calendar2-check"></i> Ver asistencias</a>
+        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportarAlumnos"><i class="bi bi-download"></i> Exportar</button>
+        <a href="{{ url_for('alumnos.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo alumno</a>
+    </div>
+</div>
+
+<form id="form-filtros" hx-get="{{ url_for('alumnos.listar') }}" hx-target="#tabla-alumnos"
+      hx-trigger="change, keyup changed delay:400ms from:input[type=text]" class="card alumnos-filterbar mb-3">
+    <div class="filterbar-title"><span><i class="bi bi-funnel"></i> Filtros del listado</span><a href="{{ url_for('alumnos.listar') }}">Limpiar</a></div>
+    <div class="filter-grid">
+        <div class="filter-field"><label>ID interno</label><input type="number" min="1" class="form-control form-control-sm" name="id_alumno" value="{{ filtros.get('id_alumno','') }}" placeholder="Ej. 137"></div>
+        <div class="filter-field filter-search"><label>Nombre</label><input type="text" class="form-control form-control-sm" name="nombre" value="{{ filtros.get('nombre','') }}" placeholder="Buscar nombre"></div>
+        <div class="filter-field filter-search"><label>Apellido</label><input type="text" class="form-control form-control-sm" name="apellido" value="{{ filtros.get('apellido','') }}" placeholder="Buscar apellido"></div>
+        <div class="filter-field"><label>Edad</label><input type="number" class="form-control form-control-sm" name="edad" value="{{ filtros.get('edad','') }}" placeholder="Todas"></div>
+        <div class="filter-field"><label>Categoría</label><select class="form-select form-select-sm" name="id_categoria"><option value="">Todas</option>{% for c in categorias %}<option value="{{ c.id_categoria }}" {% if filtros.get('id_categoria')|string == c.id_categoria|string %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}</select></div>
+        <div class="filter-field"><label>Posición</label><select class="form-select form-select-sm" name="posicion"><option value="">Todas</option>{% for p in posiciones %}<option value="{{ p }}" {% if filtros.get('posicion') == p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></div>
+        <div class="filter-field"><label>Beca</label><select class="form-select form-select-sm" name="beca"><option value="">Todas</option>{% for b in becas %}<option value="{{ b }}" {% if filtros.get('beca') == b %}selected{% endif %}>{{ b }}</option>{% endfor %}</select></div>
+        <div class="filter-field"><label>Sexo</label><select class="form-select form-select-sm" name="sexo"><option value="">Todos</option>{% for s in sexos %}<option value="{{ s }}" {% if filtros.get('sexo') == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+        <div class="filter-field"><label>Turno</label><select class="form-select form-select-sm" name="turno"><option value="">Todos</option>{% for turno in turnos %}<option value="{{ turno }}" {% if filtros.get('turno') == turno %}selected{% endif %}>{{ turno }}</option>{% endfor %}</select></div>
+        <div class="filter-field"><label>Estado</label><select class="form-select form-select-sm" name="estado"><option value="">Todos</option>{% for e in estados %}<option value="{{ e }}" {% if filtros.get('estado', 'Activo') == e %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+        <div class="filter-field"><label>Campeonato</label><select class="form-select form-select-sm" name="id_campeonato"><option value="">Todos</option>{% for c in campeonatos %}<option value="{{ c.id_campeonato }}" {% if filtros.get('id_campeonato')|string == c.id_campeonato|string %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}</select></div>
+        <div class="filter-field"><label>Mensualidad</label><select class="form-select form-select-sm" name="estado_mensualidad"><option value="">Todos</option><option value="Con deuda" {% if filtros.get('estado_mensualidad') == 'Con deuda' %}selected{% endif %}>Con deuda</option>{% for e in estados_pago %}<option value="{{ e }}" {% if filtros.get('estado_mensualidad') == e %}selected{% endif %}>{{ e }}</option>{% endfor %}<option value="Sin pagos" {% if filtros.get('estado_mensualidad') == 'Sin pagos' %}selected{% endif %}>Sin pagos</option></select></div>
+        <div class="filter-field"><label>Equipo</label><select class="form-select form-select-sm" name="id_equipo"><option value="">Todos</option>{% for e in equipos %}<option value="{{ e.id_equipo }}" {% if filtros.get('id_equipo')|string == e.id_equipo|string %}selected{% endif %}>{{ e.nombre }}</option>{% endfor %}</select></div>
+        <div class="filter-field"><label>Orden</label><select class="form-select form-select-sm" name="orden"><option value="alfabetico" {% if filtros.get('orden','alfabetico') == 'alfabetico' %}selected{% endif %}>Apellido</option><option value="categoria" {% if filtros.get('orden') == 'categoria' %}selected{% endif %}>Categoría</option></select></div>
+    </div>
+</form>
+
+<div id="tabla-alumnos" class="tabla-scroll alumnos-table-area">{% include "alumnos/_tabla.html" %}</div>
+
+<div class="modal fade" id="exportarAlumnos" tabindex="-1" aria-labelledby="tituloExportarAlumnos" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header"><div><span class="eyebrow">Personalizar archivo</span><h5 class="modal-title" id="tituloExportarAlumnos">Exportar alumnos</h5></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <p class="text-muted small">Seleccione las columnas que desea incluir. Se exportarán solamente los alumnos que coincidan con los filtros actuales.</p>
+                <form id="config-exportar-alumnos" class="export-column-grid">
+                    <div class="export-name-field"><label class="form-label fw-semibold" for="nombre-exportacion-alumnos">Nombre de la exportación</label><input id="nombre-exportacion-alumnos" class="form-control" type="text" name="nombre_archivo" value="Listado de alumnos" maxlength="100"><small class="text-muted">Se utilizará como título y nombre del archivo.</small></div>
+                    {% set columnas = [('alumno','Nombre y apellido'),('ci','CI'),('categoria','Categoría'),('edad','Edad'),('equipos','Equipos'),('posicion','Posición'),('turno','Turno'),('beca','Beca'),('sexo','Sexo'),('campeonatos','Campeonatos activos'),('mensualidad','Estado mensualidad'),('estado','Estado alumno'),('telefono','Teléfono')] %}
+                    {% for clave, etiqueta in columnas %}
+                    <div><input class="btn-check" id="alumno-col-{{ clave }}" type="checkbox" name="columnas" value="{{ clave }}"><label class="export-chip" for="alumno-col-{{ clave }}"><i class="bi bi-check2"></i>{{ etiqueta }}</label></div>
+                    {% endfor %}
+                </form>
+                {% if marca.logo %}<div class="mt-3"><input class="btn-check" id="alumnos-incluir-escudo" type="checkbox" name="incluir_escudo" value="1" form="config-exportar-alumnos"><label class="export-logo-option" for="alumnos-incluir-escudo"><img src="{{ url_for('configuracion.logo') }}" alt=""><span><strong>Incluir logo institucional</strong><small>Se añadirá como marca de agua</small></span><i class="bi bi-check-circle-fill"></i></label></div>{% endif %}
+                <div class="export-spec mt-3"><i class="bi bi-file-earmark-pdf fs-5"></i><span><strong>Configuración PDF:</strong> tamaño carta; la orientación, el ancho de las columnas y la tipografía se ajustan automáticamente para evitar solapamientos.</span></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-outline-success" onclick="exportarConfigurado(event, 'form-filtros', 'config-exportar-alumnos', '{{ url_for('alumnos.exportar_excel') }}')"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</button>
+                <button type="button" class="btn btn-danger" onclick="exportarConfigurado(event, 'form-filtros', 'config-exportar-alumnos', '{{ url_for('alumnos.exportar_pdf') }}')"><i class="bi bi-file-earmark-pdf"></i> Descargar PDF</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

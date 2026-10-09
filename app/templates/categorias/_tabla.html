@@ -1,0 +1,58 @@
+<div class="category-management-grid">
+    {% for fila in resumen_categorias %}
+    <article class="card category-management-card">
+        <div class="card-body">
+            <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                <div>
+                    <div class="eyebrow">Categoría</div>
+                    <h4 class="mb-1">{{ fila.categoria.nombre_mostrado }}</h4>
+                    <span class="text-muted small">
+                        {% if fila.categoria.edad_min is not none and fila.categoria.edad_max is not none %}
+                            {{ fila.categoria.edad_min }} a {{ fila.categoria.edad_max }} años
+                        {% else %}
+                            Rango de edad abierto
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light" data-bs-toggle="dropdown" aria-label="Acciones"><i class="bi bi-three-dots-vertical"></i></button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a href="{{ url_for('categorias.editar', id_categoria=fila.categoria.id_categoria) }}" class="dropdown-item"><i class="bi bi-pencil me-2"></i>Editar</a>
+                        <form method="post" action="{{ url_for('categorias.eliminar', id_categoria=fila.categoria.id_categoria) }}" onsubmit="return confirm('¿Eliminar esta categoría?');">
+                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash me-2"></i>Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-stat-row">
+                <div><strong>{{ fila.total }}</strong><span>Alumnos únicos</span></div>
+                <div><strong>{{ fila.activos }}</strong><span>Activos</span></div>
+                <div><strong>{{ fila.cantidad_equipos }}</strong><span>Equipos disponibles</span></div>
+            </div>
+
+            <div class="category-team-list mt-3">
+                {% for detalle in fila.equipos %}
+                <a href="{{ url_for('alumnos.listar', id_categoria=fila.categoria.id_categoria, id_equipo=detalle.equipo.id_equipo) }}" class="category-team-row">
+                    <span>
+                        <i class="bi bi-shield-check"></i>
+                        <span><strong>{{ detalle.equipo.nombre }}</strong>{% if detalle.equipo.id_categoria is none %}<small>Equipo general</small>{% endif %}</span>
+                    </span>
+                    <span class="category-team-count">{{ detalle.total }}</span>
+                </a>
+                {% else %}
+                <div class="empty-inline">No hay equipos disponibles.</div>
+                {% endfor %}
+                {% if fila.sin_equipo %}
+                <a href="{{ url_for('alumnos.listar', id_categoria=fila.categoria.id_categoria) }}" class="category-team-row category-team-unassigned">
+                    <span><i class="bi bi-person-dash"></i><span><strong>Sin equipo</strong><small>Alumnos de la categoría sin asignación</small></span></span>
+                    <span class="category-team-count">{{ fila.sin_equipo }}</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+    {% else %}
+    <div class="card"><div class="card-body text-center text-muted py-5">No hay categorías registradas.</div></div>
+    {% endfor %}
+</div>

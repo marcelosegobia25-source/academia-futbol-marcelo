@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titulo %}Exportar pagos{% endblock %}
+{% block contenido %}
+<h2 class="mb-3"><i class="bi bi-file-earmark-excel"></i> Exportar registro de pagos</h2>
+<form method="get" action="{{ url_for('pagos.exportar') }}" class="card shadow-sm p-4" style="max-width: 500px;">
+    <p class="text-muted">Defina un periodo, o deje ambos campos vacíos para exportar todo el historial.</p>
+    <div class="mb-3">
+        <label class="form-label">Desde</label>
+        <input type="date" name="desde" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Hasta</label>
+        <input type="date" name="hasta" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-success"><i class="bi bi-download"></i> Descargar Excel</button>
+</form>
+{% endblock %}

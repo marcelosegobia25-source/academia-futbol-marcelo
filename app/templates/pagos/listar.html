@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block titulo %}Pagos{% endblock %}
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-cash-coin"></i> Mensualidades</h2>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('pagos.caja') }}" class="btn btn-dark"><i class="bi bi-calculator"></i> Cierre de caja</a>
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resumenSeisMeses"><i class="bi bi-table"></i> Resumen 6 meses</button>
+        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportarPagos"><i class="bi bi-download"></i> Exportar</button>
+    </div>
+</div>
+
+<form id="form-filtros-pagos" hx-get="{{ url_for('pagos.listar') }}" hx-trigger="change, keyup changed delay:400ms from:input[type=text]"
+      hx-target="#tabla-pagos">
+<div class="card shadow-sm mb-3">
+    <div class="card-body row g-2">
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Nombre</label>
+            <input type="text" class="form-control form-control-sm" name="nombre" value="{{ filtros.get('nombre','') }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Apellido</label>
+            <input type="text" class="form-control form-control-sm" name="apellido" value="{{ filtros.get('apellido','') }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Categoría</label>
+            <select class="form-select form-select-sm" name="id_categoria">
+                <option value="">Todas</option>
+                {% for c in categorias %}<option value="{{ c.id_categoria }}" {% if filtros.get('id_categoria')|string == c.id_categoria|string %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small mb-0">Edad</label>
+            <input type="number" class="form-control form-control-sm" name="edad" value="{{ filtros.get('edad','') }}">
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small mb-0">Beca</label>
+            <select class="form-select form-select-sm" name="beca">
+                <option value="">Todas</option>
+                {% for b in becas %}<option value="{{ b }}" {% if filtros.get('beca') == b %}selected{% endif %}>{{ b }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small mb-0">Sexo</label>
+            <select class="form-select form-select-sm" name="sexo">
+                <option value="">Todos</option>
+                {% for s in sexos %}<option value="{{ s }}" {% if filtros.get('sexo') == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Estado del alumno</label>
+            <select class="form-select form-select-sm" name="estado_alumno">
+                <option value="">Todos</option>
+                <option value="Activo" {% if filtros.get('estado_alumno', 'Activo') == 'Activo' %}selected{% endif %}>Activo</option>
+                <option value="Retirado" {% if filtros.get('estado_alumno') == 'Retirado' %}selected{% endif %}>Retirado</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Estado mensualidad</label>
+            <select class="form-select form-select-sm" name="estado">
+                <option value="">Todos</option>
+                {% for e in estados_pago %}<option value="{{ e }}" {% if filtros.get('estado') == e %}selected{% endif %}>{{ e }}</option>{% endfor %}
+                <option value="Anulado" {% if filtros.get('estado') == 'Anulado' %}selected{% endif %}>Anulado</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Fecha de pago</label>
+            <input type="date" class="form-control form-control-sm" name="fecha_pago" value="{{ filtros.get('fecha_pago','') }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Fecha de vencimiento</label>
+            <input type="date" class="form-control form-control-sm" name="fecha_vencimiento" value="{{ filtros.get('fecha_vencimiento','') }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-0">Mes de vencimiento</label>
+            <input type="month" class="form-control form-control-sm" name="mes_vencimiento" value="{{ filtros.get('mes_vencimiento','') }}">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <a href="{{ url_for('pagos.listar') }}" class="btn btn-sm btn-outline-secondary w-100">Limpiar filtros</a>
+        </div>
+    </div>
+</div>
+</form>
+
+<div id="tabla-pagos">
+    <div class="small text-muted mb-2"><i class="bi bi-sort-down"></i> Ordenado por fecha de pago: el más reciente aparece primero.</div>
+    {% include "pagos/_tabla.html" %}
+</div>
+
+<div class="modal fade" id="exportarPagos" tabindex="-1" aria-labelledby="tituloExportarPagos" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header"><div><span class="eyebrow">Personalizar archivo</span><h5 class="modal-title" id="tituloExportarPagos">Exportar pagos</h5></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <p class="text-muted small">Seleccione las columnas que desea incluir. Se exportarán solamente los pagos que coincidan con los filtros actuales.</p>
+                <form id="config-exportar-pagos" class="export-column-grid">
+                    <div class="export-name-field"><label class="form-label fw-semibold" for="nombre-exportacion-pagos">Nombre de la exportación</label><input id="nombre-exportacion-pagos" class="form-control" type="text" name="nombre_archivo" value="Registro de pagos" maxlength="100"><small class="text-muted">Se utilizará como título y nombre del archivo.</small></div>
+                    {% set columnas = [('id_pago','ID Pago'),('alumno','Alumno'),('ci','CI'),('categoria','Categoría'),('mes','Mes pagado'),('fecha_pago','Fecha de pago'),('hora','Hora de registro'),('vencimiento','Vencimiento'),('estado','Estado'),('modo','Modo de pago'),('operacion_qr','Operación QR'),('beca','Beca del alumno'),('monto','Monto')] %}
+                    {% for clave, etiqueta in columnas %}
+                    <div><input class="btn-check" id="pago-col-{{ clave }}" type="checkbox" name="columnas" value="{{ clave }}"><label class="export-chip" for="pago-col-{{ clave }}"><i class="bi bi-check2"></i>{{ etiqueta }}</label></div>
+                    {% endfor %}
+                </form>
+                {% if marca.logo %}<div class="mt-3"><input class="btn-check" id="pagos-incluir-escudo" type="checkbox" name="incluir_escudo" value="1" form="config-exportar-pagos"><label class="export-logo-option" for="pagos-incluir-escudo"><img src="{{ url_for('configuracion.logo') }}" alt=""><span><strong>Incluir logo institucional</strong><small>Se añadirá como marca de agua</small></span><i class="bi bi-check-circle-fill"></i></label></div>{% endif %}
+                <div class="export-spec mt-3"><i class="bi bi-file-earmark-pdf fs-5"></i><span><strong>Configuración PDF:</strong> tamaño carta; la orientación, el ancho de las columnas y la tipografía se ajustan automáticamente para evitar solapamientos.</span></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-outline-success" onclick="exportarConfigurado(event, 'form-filtros-pagos', 'config-exportar-pagos', '{{ url_for('pagos.exportar') }}')"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</button>
+                <button type="button" class="btn btn-danger" onclick="exportarConfigurado(event, 'form-filtros-pagos', 'config-exportar-pagos', '{{ url_for('pagos.exportar_pdf') }}')"><i class="bi bi-file-earmark-pdf"></i> Descargar PDF</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resumenSeisMeses" tabindex="-1" aria-labelledby="tituloResumenSeisMeses" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><div><span class="eyebrow">Reporte consolidado</span><h5 class="modal-title" id="tituloResumenSeisMeses">Resumen horizontal de 6 meses</h5></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <p class="text-muted small">Genera una fila por alumno con el mes actual y los cinco anteriores. Cada mes mostrará el estado, la fecha de pago o <strong>Sin pago</strong>.</p>
+                <form id="config-resumen-seis-meses">
+                    <div class="mb-3"><label class="form-label fw-semibold" for="nombre-resumen-seis-meses">Nombre de la exportación</label><input id="nombre-resumen-seis-meses" class="form-control" type="text" name="nombre_archivo" value="Resumen de pagos 6 meses" maxlength="100"></div>
+                    {% if marca.logo %}<input class="btn-check" id="resumen-incluir-escudo" type="checkbox" name="incluir_escudo" value="1"><label class="export-logo-option" for="resumen-incluir-escudo"><img src="{{ url_for('configuracion.logo') }}" alt=""><span><strong>Incluir logo institucional</strong><small>Se añadirá como marca de agua</small></span><i class="bi bi-check-circle-fill"></i></label>{% endif %}
+                </form>
+                <div class="export-spec mt-3"><i class="bi bi-arrows-angle-expand fs-5"></i><span><strong>PDF:</strong> tamaño carta horizontal, tabla ajustada al ancho y meses ordenados del más antiguo al actual.</span></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-outline-success" onclick="exportarConfigurado(event, 'form-filtros-pagos', 'config-resumen-seis-meses', '{{ url_for('pagos.resumen_seis_meses_excel') }}')"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</button>
+                <button type="button" class="btn btn-primary" onclick="exportarConfigurado(event, 'form-filtros-pagos', 'config-resumen-seis-meses', '{{ url_for('pagos.resumen_seis_meses_pdf') }}')"><i class="bi bi-file-earmark-pdf"></i> PDF horizontal</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

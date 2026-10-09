@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Datos generales y mensualidad{% endblock %}
+{% block contenido %}
+<h2 class="mb-3">Datos generales y mensualidad</h2>
+<form method="post" enctype="multipart/form-data" class="card shadow-sm p-4" style="max-width: 700px;">
+    <div class="mb-3"><label class="form-label">Nombre oficial</label><input name="nombre_academia" class="form-control" maxlength="150" required value="{{ config.nombre_academia }}"></div>
+    <div class="mb-3"><label class="form-label">Dirección</label><input name="direccion" class="form-control" maxlength="255" value="{{ config.direccion or '' }}"></div>
+    <div class="mb-3"><label class="form-label">Teléfono</label><input name="telefono" class="form-control" maxlength="50" value="{{ config.telefono or '' }}"></div>
+    <div class="mb-3"><label class="form-label">Eslogan</label><input name="eslogan" class="form-control" maxlength="180" value="{{ config.eslogan or '' }}"></div>
+    <div class="mb-3"><label class="form-label">Logo institucional</label><input type="file" name="logo" accept="image/png,image/jpeg,image/webp" class="form-control">{% if config.logo %}<img src="{{url_for('configuracion.logo')}}" alt="Logo actual" class="mt-2" style="max-width:120px;max-height:120px">{% endif %}</div>
+    <div class="row g-3 mb-3"><div class="col-md-4"><label>Color principal</label><input type="color" name="color_primario" value="{{config.color_primario}}" class="form-control form-control-color w-100"></div><div class="col-md-4"><label>Color secundario</label><input type="color" name="color_secundario" value="{{config.color_secundario}}" class="form-control form-control-color w-100"></div><div class="col-md-4"><label>Color de acento</label><input type="color" name="color_acento" value="{{config.color_acento}}" class="form-control form-control-color w-100"></div></div>
+    <div class="mb-3">
+        <label class="form-label">Gestión mostrada en la ficha del alumno</label>
+        <input type="number" min="2000" max="2100" name="gestion_ficha"
+               class="form-control" required value="{{ config.gestion_ficha }}">
+        <small class="text-muted">Se imprimirá como “TEMPORADA” en todas las fichas descargadas.</small>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Monto de la mensualidad completa</label>
+        <input type="number" step="0.01" min="0" name="monto_mensualidad" class="form-control" required
+               value="{{ config.monto_mensualidad }}">
+        <small class="text-muted">
+            Los alumnos con beca "Media" pagarán automáticamente el 50% de este monto,
+            y los de beca "Completa" no generan cobro.
+        </small>
+    </div>
+    <div class="row g-3 mb-3">
+        <div class="col-md-4"><label class="form-label">Moneda</label><select name="moneda" class="form-select"><option value="BOB" {% if config.moneda == 'BOB' %}selected{% endif %}>BOB</option><option value="USD" {% if config.moneda == 'USD' %}selected{% endif %}>USD</option></select></div>
+        <div class="col-md-4"><label class="form-label">Aviso previo</label><input type="number" min="1" max="30" name="dias_proximo_vencimiento" class="form-control" required value="{{ config.dias_proximo_vencimiento }}"></div>
+        <div class="col-md-4"><label class="form-label">W.O.</label><input type="number" min="1" max="20" name="marcador_walkover" class="form-control" required value="{{ config.marcador_walkover }}"></div>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="{{ url_for('configuracion.panel') }}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

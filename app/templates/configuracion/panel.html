@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block titulo %}Configuración{% endblock %}
+{% block contenido %}
+<h2 class="mb-4"><i class="bi bi-gear"></i> Configuración de la academia</h2>
+<p class="text-muted">Estos ajustes aplican únicamente a los equipos y categorías propios de la academia.
+No afectan a los equipos que se registran dentro del módulo de Campeonatos.</p>
+<div class="row g-3">
+    <div class="col-md-4">
+        <a href="{{ url_for('categorias.listar') }}" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <i class="bi bi-tags fs-1 text-success"></i>
+                    <h5 class="card-title mt-2">Categorías</h5>
+                    <p class="card-text text-muted">Crear y editar las categorías de la academia (rango de edad).</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('equipos.listar') }}" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <i class="bi bi-shield fs-1 text-success"></i>
+                    <h5 class="card-title mt-2">Equipos</h5>
+                    <p class="card-text text-muted">Crear y editar los equipos propios de la academia.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('configuracion.mensualidad') }}" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <i class="bi bi-cash-stack fs-1 text-success"></i>
+                    <h5 class="card-title mt-2">Datos generales y mensualidad</h5>
+                    <p class="card-text text-muted">
+                        Gestión {{ config.gestion_ficha }} · Monto: <strong>{{ '%.2f' % config.monto_mensualidad }}</strong>
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('configuracion.contrasena') }}" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <i class="bi bi-shield-lock fs-1 text-success"></i>
+                    <h5 class="card-title mt-2">Contraseña de acceso</h5>
+                    <p class="card-text text-muted">Cambiar la contraseña numérica de 5 dígitos.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4"><a href="{{ url_for('lugares.listar') }}" class="text-decoration-none"><div class="card h-100"><div class="card-body"><i class="bi bi-geo-alt fs-1 text-success"></i><h5 class="mt-2">Canchas y lugares</h5><p class="text-muted">Registrar ubicaciones reutilizables para partidos, agenda y entrenamientos.</p></div></div></a></div>
+    <div class="col-md-4"><a href="{{ url_for('gestion.proveedores') }}" class="text-decoration-none"><div class="card h-100"><div class="card-body"><i class="bi bi-truck fs-1 text-success"></i><h5 class="mt-2">Proveedores</h5><p class="text-muted">Personas y empresas utilizadas en compras y egresos.</p></div></div></a></div>
+    <div class="col-md-4"><a href="{{ url_for('calendario.personal') }}" class="text-decoration-none"><div class="card h-100"><div class="card-body"><i class="bi bi-person-workspace fs-1 text-success"></i><h5 class="mt-2">Profesores y entrenadores</h5><p class="text-muted">Registrar el personal que puede asignarse a entrenamientos.</p></div></div></a></div>
+    <div class="col-md-4"><a href="{{ url_for('gestion.categorias_contables') }}" class="text-decoration-none"><div class="card h-100"><div class="card-body"><i class="bi bi-tags fs-1 text-success"></i><h5 class="mt-2">Categorías financieras</h5><p class="text-muted">Conceptos configurables para agrupar ingresos y egresos.</p></div></div></a></div>
+    <div class="col-md-4"><a href="{{ url_for('gestion.producto_nuevo') }}" class="text-decoration-none"><div class="card h-100"><div class="card-body"><i class="bi bi-box-seam fs-1 text-success"></i><h5 class="mt-2">Productos y variantes</h5><p class="text-muted">Añadir productos, tallas, colores, precios y niveles de stock.</p></div></div></a></div>
+    {% if puede('administrar') %}<div class="col-md-4"><a href="{{ url_for('usuarios.listar') }}" class="text-decoration-none"><div class="card h-100"><div class="card-body"><i class="bi bi-person-lock fs-1 text-success"></i><h5 class="mt-2">Usuarios y permisos</h5><p class="text-muted">Administrar accesos, roles y permisos del sistema.</p></div></div></a></div>{% endif %}
+</div>
+{% endblock %}
