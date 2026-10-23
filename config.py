@@ -40,7 +40,15 @@ def _clave_local():
 
 def _obtener_database_uri():
     """Detecta y normaliza la URL de la base de datos (PostgreSQL / SQLite)."""
-    uri = os.environ.get("DATABASE_URL", "").strip()
+    uri = (
+        os.environ.get("DATABASE_URL")
+        or os.environ.get("NAME_OF_VARIABLE")
+        or os.environ.get("DIRECT_URL")
+        or os.environ.get("SUPABASE_DATABASE_URL")
+        or os.environ.get("POSTGRES_URL")
+        or ""
+    ).strip().strip("'\"")
+
     if not uri or "[TU_CONTRASEÑA]" in uri or "[YOUR-PASSWORD]" in uri:
         return "sqlite:///" + os.path.join(INSTANCE_DIR, "academia.db")
     if uri.startswith("postgres://"):

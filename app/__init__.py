@@ -131,7 +131,29 @@ def create_app(config_class=Config):
 
     @app.route("/health")
     def health():
-        return {"status": "ok", "app": "Academia de Fútbol"}, 200
+        uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
+        masked_uri = uri
+        if "@" in uri and "://" in uri:
+            prefix, rest = uri.split("://", 1)
+            creds, host_part = rest.split("@", 1)
+            user = creds.split(":", 1)[0]
+            masked_uri = f"{prefix}://{user}:***@{host_part}"
+        motor = "PostgreSQL" if "postgresql" in uri else ("SQLite" if "sqlite" in uri else "Desconocido")
+        from app.models import Alumno, Usuario
+        try:
+            total_alumnos = Alumno.query.count()
+            total_usuarios = Usuario.query.count()
+        except Exception:
+            total_alumnos = None
+            total_usuarios = None
+        return {
+            "status": "ok",
+            "app": "Academia de Fútbol",
+            "motor_base_datos": motor,
+            "url_base_datos": masked_uri,
+            "total_alumnos": total_alumnos,
+            "total_usuarios": total_usuarios
+        }, 200
 
     @app.before_request
     def exigir_autenticacion():
