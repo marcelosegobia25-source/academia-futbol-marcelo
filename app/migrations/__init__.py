@@ -18,7 +18,7 @@ def _versiones_aplicadas():
     db.session.execute(text(
         "CREATE TABLE IF NOT EXISTS schema_migration ("
         "version INTEGER PRIMARY KEY, nombre VARCHAR(160) NOT NULL, "
-        "aplicada_en DATETIME NOT NULL)"
+        "aplicada_en TIMESTAMP NOT NULL)"
     ))
     db.session.commit()
     return {
@@ -1023,6 +1023,12 @@ def _migracion_31_turno_entrenamiento_alumnos():
     db.session.commit()
 
 
+def _migracion_32_indices_partidos_origen():
+    db.session.execute(text("CREATE INDEX IF NOT EXISTS ix_partido_origen_local ON partido(id_partido_origen_local)"))
+    db.session.execute(text("CREATE INDEX IF NOT EXISTS ix_partido_origen_visita ON partido(id_partido_origen_visita)"))
+    db.session.commit()
+
+
 MIGRACIONES = [
     (1, "Índices y restricciones únicas", _migracion_1_indices_integridad),
     (2, "Relación formal de equipo rival", _migracion_2_equipo_rival),
@@ -1055,11 +1061,20 @@ MIGRACIONES = [
     (29, "Indices y permisos operativos", _migracion_29_indices_y_permisos_operativos),
     (30, "Permisos de asistencia para roles operativos", _migracion_30_permisos_asistencia_roles_operativos),
     (31, "Turno de entrenamiento por alumno", _migracion_31_turno_entrenamiento_alumnos),
+    (32, "Índices para llaves eliminatorias de partidos", _migracion_32_indices_partidos_origen),
 ]
 
 
 def ejecutar_migraciones():
     aplicadas = _versiones_aplicadas()
+    if not aplicadas and db.engine.dialect.name == "postgresql":
+        tablas_existentes = set(inspect(db.engine).get_table_names())
+        # Si las tablas más recientes ya existen en PostgreSQL por db.create_all(), registrar migraciones base
+        if "obligacion" in tablas_existentes and "conteo_inventario" in tablas_existentes:
+            for version, nombre, _ in MIGRACIONES:
+                _registrar(version, nombre)
+            return
+
     pendientes = [(version, nombre, funcion) for version, nombre, funcion in MIGRACIONES if version not in aplicadas]
     if pendientes:
         from flask import current_app

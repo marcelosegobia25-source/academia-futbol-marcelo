@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: academia_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: academia_user
+      POSTGRES_PASSWORD: academia_password
+      POSTGRES_DB: academia_futbol
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U academia_user -d academia_futbol"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: academia_web
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://academia_user:academia_password@db:5432/academia_futbol
+      - SECRET_KEY=clave_secreta_para_desarrollo_local_12345
+      - FLASK_DEBUG=false
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./instance:/app/instance
+
+volumes:
+  pgdata:

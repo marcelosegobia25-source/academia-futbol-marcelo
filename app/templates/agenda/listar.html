@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block titulo %}Agenda{% endblock %}
 {% block contenido %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2><i class="bi bi-journal-text"></i> Agenda</h2>
+<div class="page-heading d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <span class="eyebrow">Planificación y Actividades</span>
+        <h2 class="mb-0"><i class="bi bi-journal-text text-amber me-1"></i> Agenda</h2>
+    </div>
     <a href="{{ url_for('agenda.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo evento</a>
 </div>
 <form method="get" class="card card-body mb-3">

@@ -15,12 +15,12 @@
             </button>
         </form>
         <form method="post" action="{{ url_for('informacion.abrir_descargas') }}">
-            <button type="submit" class="btn btn-outline-light">
+            <button type="submit" class="btn btn-outline-secondary">
                 <i class="bi bi-folder2-open me-1"></i> Abrir Descargas
             </button>
         </form>
-        <a href="{{ url_for('pagos.caja') }}" class="btn btn-outline-light"><i class="bi bi-calculator"></i> Cierre de caja</a>
-        <a href="{{ url_for('informacion.auditoria') }}" class="btn btn-outline-light"><i class="bi bi-shield-check"></i> Auditoría interna</a>
+        <a href="{{ url_for('pagos.caja') }}" class="btn btn-outline-secondary"><i class="bi bi-calculator"></i> Cierre de caja</a>
+        <a href="{{ url_for('informacion.auditoria') }}" class="btn btn-outline-secondary"><i class="bi bi-shield-check"></i> Auditoría interna</a>
         <a href="{{ url_for('alumnos.crear') }}" class="btn btn-success"><i class="bi bi-person-plus me-1"></i> Nuevo alumno</a>
     </div>
 </div>

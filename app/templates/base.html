@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block titulo %}Academia de Fútbol{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
@@ -14,80 +17,175 @@
     {% set modulo = request.blueprint or '' %}
     <aside class="offcanvas-lg offcanvas-start app-sidebar" tabindex="-1" id="appSidebar" aria-label="Navegación principal">
         <div class="offcanvas-header sidebar-mobile-header">
-            <span class="fw-semibold">Navegación</span>
+            <div class="d-flex align-items-center gap-2">
+                <div class="sidebar-crest-mini-wrap">
+                    {% if marca.logo %}
+                    <img src="{{ url_for('configuracion.logo') }}" alt="Logo" class="sidebar-crest-mini">
+                    {% else %}
+                    <i class="bi bi-shield-check text-emerald fs-4"></i>
+                    {% endif %}
+                </div>
+                <span class="fw-bold text-white">{{ marca.nombre_academia }}</span>
+            </div>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="Cerrar"></button>
         </div>
         <div class="sidebar-inner" style="overflow-y:auto;max-height:100vh;scrollbar-gutter:stable">
             <a class="sidebar-brand" href="{{ url_for('index') }}">
-                {% if marca.logo %}<img src="{{ url_for('configuracion.logo') }}" alt="Logo" class="sidebar-crest">{% else %}<i class="bi bi-shield-check fs-2"></i>{% endif %}
-                <span><strong>{{ marca.nombre_academia }}</strong></span>
+                <div class="sidebar-brand-crest-box">
+                    {% if marca.logo %}
+                    <img src="{{ url_for('configuracion.logo') }}" alt="Logo" class="sidebar-crest">
+                    {% else %}
+                    <i class="bi bi-shield-check fs-3 text-emerald"></i>
+                    {% endif %}
+                </div>
+                <div class="sidebar-brand-text">
+                    <span class="sidebar-brand-title"><strong>{{ marca.nombre_academia }}</strong></span>
+                    <span class="sidebar-brand-pill">SISTEMA INTEGRAL</span>
+                </div>
             </a>
             <div class="module-search dropdown mb-3" id="moduleSearch">
-                <input id="moduleSearchInput" class="form-control form-control-sm" type="search" placeholder="Buscar módulo…" autocomplete="off" aria-label="Buscar módulo" aria-expanded="false">
-                <div id="moduleSearchMenu" class="dropdown-menu w-100 shadow" style="max-height:320px;overflow:auto">
-                    <a class="dropdown-item" data-module href="{{ url_for('informacion.general') }}">Información general</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('alumnos.listar') }}">Alumnos</a><a class="dropdown-item" data-module href="{{ url_for('alumnos.asistencias') }}">Asistencia de jugadores</a><a class="dropdown-item" data-module href="{{ url_for('pagos.listar') }}">Pagos y mensualidades</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('partidos.listar') }}">Partidos</a><a class="dropdown-item" data-module href="{{ url_for('agenda.listar') }}">Agenda</a><a class="dropdown-item" data-module href="{{ url_for('calendario.ver') }}">Calendario</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('calendario.listar_entrenamientos') }}">Entrenamientos y asistencia</a><a class="dropdown-item" data-module href="{{ url_for('calendario.personal') }}">Profesores y entrenadores</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('campeonatos.listar') }}">Campeonatos</a><a class="dropdown-item" data-module href="{{ url_for('gestion.contabilidad') }}">Contabilidad</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('gestion.pagos_programados') }}">Pagos programados</a><a class="dropdown-item" data-module href="{{ url_for('gestion.inventario') }}">Inventario</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('gestion.inventario_conteo') }}">Conteo físico</a><a class="dropdown-item" data-module href="{{ url_for('gestion.compras') }}">Compras</a><a class="dropdown-item" data-module href="{{ url_for('gestion.ventas') }}">Ventas y devoluciones</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('gestion.proveedores') }}">Proveedores</a><a class="dropdown-item" data-module href="{{ url_for('categorias.listar') }}">Categorías</a><a class="dropdown-item" data-module href="{{ url_for('equipos.listar') }}">Equipos</a><a class="dropdown-item" data-module href="{{ url_for('lugares.listar') }}">Canchas y lugares</a><a class="dropdown-item" data-module href="{{ url_for('configuracion.panel') }}">Configuración</a>
+                <div class="module-search-input-wrapper">
+                    <i class="bi bi-search module-search-icon"></i>
+                    <input id="moduleSearchInput" class="form-control form-control-sm" type="search" placeholder="Buscar módulo…" autocomplete="off" aria-label="Buscar módulo" aria-expanded="false">
+                </div>
+                <div id="moduleSearchMenu" class="dropdown-menu w-100 shadow" style="max-height:340px;overflow:auto">
+                    <a class="dropdown-item" data-module href="{{ url_for('index') }}"><i class="bi bi-speedometer2 me-2"></i>Inicio / Centro de Mando</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('informacion.general') }}"><i class="bi bi-grid-1x2 me-2"></i>Información general</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('alumnos.listar') }}"><i class="bi bi-people me-2"></i>Alumnos</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('alumnos.asistencias') }}"><i class="bi bi-calendar2-check me-2"></i>Asistencia de jugadores</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('pagos.listar') }}"><i class="bi bi-cash-stack me-2"></i>Pagos y mensualidades</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('partidos.listar') }}"><i class="bi bi-flag me-2"></i>Partidos</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('agenda.listar') }}"><i class="bi bi-journal-text me-2"></i>Agenda</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('calendario.ver') }}"><i class="bi bi-calendar3 me-2"></i>Calendario</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('calendario.listar_entrenamientos') }}"><i class="bi bi-clock-history me-2"></i>Entrenamientos y asistencia</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('calendario.personal') }}"><i class="bi bi-person-workspace me-2"></i>Profesores y entrenadores</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('campeonatos.listar') }}"><i class="bi bi-trophy me-2"></i>Campeonatos</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('gestion.contabilidad') }}"><i class="bi bi-graph-up-arrow me-2"></i>Contabilidad</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('gestion.pagos_programados') }}"><i class="bi bi-calendar-check me-2"></i>Pagos programados</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('gestion.inventario') }}"><i class="bi bi-box-seam me-2"></i>Inventario</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('gestion.inventario_conteo') }}"><i class="bi bi-clipboard-check me-2"></i>Conteo físico</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('gestion.compras') }}"><i class="bi bi-cart-plus me-2"></i>Compras</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('gestion.ventas') }}"><i class="bi bi-bag-check me-2"></i>Ventas y devoluciones</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('gestion.proveedores') }}"><i class="bi bi-truck me-2"></i>Proveedores</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('categorias.listar') }}"><i class="bi bi-diagram-3 me-2"></i>Categorías</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('equipos.listar') }}"><i class="bi bi-shield-check me-2"></i>Equipos</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('lugares.listar') }}"><i class="bi bi-geo-alt me-2"></i>Canchas y lugares</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('configuracion.panel') }}"><i class="bi bi-sliders me-2"></i>Configuración</a>
                 </div>
             </div>
-            <button class="sidebar-label w-100 border-0 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#menuOperaciones" aria-expanded="true">Operaciones <i class="bi bi-chevron-down"></i></button>
+            <button class="sidebar-label w-100 border-0 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#menuOperaciones" aria-expanded="true">
+                <span>Operaciones</span> <i class="bi bi-chevron-down toggle-icon"></i>
+            </button>
             <nav class="sidebar-nav collapse show" id="menuOperaciones">
+                <a class="sidebar-link {{ 'active' if request.endpoint == 'index' }}" href="{{ url_for('index') }}"><i class="bi bi-speedometer2"></i><span>Inicio</span></a>
                 <a class="sidebar-link {{ 'active' if modulo == 'informacion' }}" href="{{ url_for('informacion.general') }}"><i class="bi bi-grid-1x2"></i><span>Información general</span></a>
-                <a class="sidebar-link {{ 'active' if modulo == 'alumnos' }}" href="{{ url_for('alumnos.listar') }}"><i class="bi bi-people"></i><span>Alumnos</span></a>
+                <a class="sidebar-link {{ 'active' if modulo == 'alumnos' and request.endpoint != 'alumnos.asistencias' }}" href="{{ url_for('alumnos.listar') }}"><i class="bi bi-people"></i><span>Alumnos</span></a>
                 <a class="sidebar-link {{ 'active' if request.endpoint == 'alumnos.asistencias' }}" href="{{ url_for('alumnos.asistencias') }}"><i class="bi bi-calendar2-check"></i><span>Asistencias</span></a>
-                <a class="sidebar-link {{ 'active' if modulo == 'pagos' }}" href="{{ url_for('pagos.listar') }}"><i class="bi bi-cash-coin"></i><span>Pagos</span></a>
+                <a class="sidebar-link {{ 'active' if modulo == 'pagos' }}" href="{{ url_for('pagos.listar') }}"><i class="bi bi-cash-stack"></i><span>Pagos</span></a>
                 <a class="sidebar-link {{ 'active' if modulo == 'partidos' }}" href="{{ url_for('partidos.listar') }}"><i class="bi bi-flag"></i><span>Partidos</span></a>
                 <a class="sidebar-link {{ 'active' if modulo == 'agenda' }}" href="{{ url_for('agenda.listar') }}"><i class="bi bi-journal-text"></i><span>Agenda</span></a>
-                <a class="sidebar-link {{ 'active' if modulo == 'calendario' }}" href="{{ url_for('calendario.ver') }}"><i class="bi bi-calendar3"></i><span>Calendario</span></a>
+                <a class="sidebar-link {{ 'active' if modulo == 'calendario' and request.endpoint == 'calendario.ver' }}" href="{{ url_for('calendario.ver') }}"><i class="bi bi-calendar3"></i><span>Calendario</span></a>
                 <a class="sidebar-link {{ 'active' if modulo == 'campeonatos' }}" href="{{ url_for('campeonatos.listar') }}"><i class="bi bi-trophy"></i><span>Campeonatos</span></a>
                 <a class="sidebar-link {{ 'active' if modulo == 'gestion' and request.endpoint and 'contabilidad' in request.endpoint }}" href="{{ url_for('gestion.contabilidad') }}"><i class="bi bi-graph-up-arrow"></i><span>Contabilidad</span></a>
                 <a class="sidebar-link {{ 'active' if request.endpoint and 'programad' in request.endpoint }}" href="{{ url_for('gestion.pagos_programados') }}"><i class="bi bi-calendar-check"></i><span>Pagos programados</span></a>
                 <a class="sidebar-link {{ 'active' if modulo == 'gestion' and request.endpoint and 'inventario' in request.endpoint }}" href="{{ url_for('gestion.inventario') }}"><i class="bi bi-box-seam"></i><span>Inventario</span></a>
-                <a class="sidebar-link" href="{{ url_for('gestion.inventario_conteo') }}"><i class="bi bi-clipboard-check"></i><span>Conteo físico</span></a>
+                <a class="sidebar-link {{ 'active' if request.endpoint and 'conteo' in request.endpoint }}" href="{{ url_for('gestion.inventario_conteo') }}"><i class="bi bi-clipboard-check"></i><span>Conteo físico</span></a>
                 <a class="sidebar-link {{ 'active' if request.endpoint and 'compra' in request.endpoint }}" href="{{ url_for('gestion.compras') }}"><i class="bi bi-cart-plus"></i><span>Compras</span></a>
                 <a class="sidebar-link {{ 'active' if modulo == 'gestion' and request.endpoint and 'venta' in request.endpoint }}" href="{{ url_for('gestion.ventas') }}"><i class="bi bi-bag-check"></i><span>Ventas</span></a>
             </nav>
-            <button class="sidebar-label w-100 border-0 text-start d-flex justify-content-between align-items-center mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#menuAdministracion" aria-expanded="true">Administración <i class="bi bi-chevron-down"></i></button>
+            <button class="sidebar-label w-100 border-0 text-start d-flex justify-content-between align-items-center mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#menuAdministracion" aria-expanded="true">
+                <span>Administración</span> <i class="bi bi-chevron-down toggle-icon"></i>
+            </button>
             <nav class="sidebar-nav collapse show" id="menuAdministracion">
                 {% if puede('administrar') %}<a class="sidebar-link {{ 'active' if modulo == 'usuarios' }}" href="{{ url_for('usuarios.listar') }}"><i class="bi bi-person-lock"></i><span>Usuarios</span></a>{% endif %}
                 <a class="sidebar-link {{ 'active' if modulo == 'configuracion' }}" href="{{ url_for('configuracion.panel') }}"><i class="bi bi-sliders"></i><span>Configuración</span></a>
                 <a class="sidebar-link {{ 'active' if modulo == 'categorias' }}" href="{{ url_for('categorias.listar') }}"><i class="bi bi-diagram-3"></i><span>Categorías</span></a>
                 <a class="sidebar-link {{ 'active' if modulo == 'equipos' }}" href="{{ url_for('equipos.listar') }}"><i class="bi bi-shield-check"></i><span>Equipos</span></a>
                 <a class="sidebar-link {{ 'active' if modulo == 'lugares' }}" href="{{ url_for('lugares.listar') }}"><i class="bi bi-geo-alt"></i><span>Canchas y lugares</span></a>
-                <a class="sidebar-link" href="{{ url_for('gestion.proveedores') }}"><i class="bi bi-truck"></i><span>Proveedores</span></a>
-                <a class="sidebar-link" href="{{ url_for('calendario.personal') }}"><i class="bi bi-person-workspace"></i><span>Profesores</span></a>
-                <a class="sidebar-link" href="{{ url_for('gestion.categorias_contables') }}"><i class="bi bi-tags"></i><span>Categorías financieras</span></a>
-                <a class="sidebar-link" href="{{ url_for('gestion.producto_nuevo') }}"><i class="bi bi-box-seam"></i><span>Añadir productos</span></a>
+                <a class="sidebar-link {{ 'active' if request.endpoint and 'proveedor' in request.endpoint }}" href="{{ url_for('gestion.proveedores') }}"><i class="bi bi-truck"></i><span>Proveedores</span></a>
+                <a class="sidebar-link {{ 'active' if request.endpoint and 'personal' in request.endpoint }}" href="{{ url_for('calendario.personal') }}"><i class="bi bi-person-workspace"></i><span>Profesores</span></a>
+                <a class="sidebar-link {{ 'active' if request.endpoint and 'categorias_contables' in request.endpoint }}" href="{{ url_for('gestion.categorias_contables') }}"><i class="bi bi-tags"></i><span>Categorías financieras</span></a>
+                <a class="sidebar-link {{ 'active' if request.endpoint and 'producto_nuevo' in request.endpoint }}" href="{{ url_for('gestion.producto_nuevo') }}"><i class="bi bi-box-seam"></i><span>Añadir productos</span></a>
             </nav>
-            <div class="sidebar-footer d-flex align-items-center justify-content-between gap-2">
-                <span><i class="bi bi-circle-fill"></i> {{ usuario_actual.nombre_usuario if usuario_actual else 'Sistema local activo' }}</span>
-                <form method="post" action="{{ url_for('autenticacion.logout') }}">
-                    <button class="btn btn-sm btn-outline-light" type="submit" title="Cerrar sesión">
-                        <i class="bi bi-box-arrow-right"></i>
-                    </button>
-                </form>
+            <div class="sidebar-footer">
+                <div class="sidebar-user-card">
+                    <div class="sidebar-user-avatar">
+                        {{ usuario_actual.nombre_usuario[:2]|upper if usuario_actual else 'AD' }}
+                    </div>
+                    <div class="sidebar-user-details">
+                        <span class="sidebar-user-name">{{ usuario_actual.nombre_usuario if usuario_actual else 'Administrador' }}</span>
+                        <span class="sidebar-user-status"><i class="bi bi-circle-fill text-success"></i> En línea</span>
+                    </div>
+                    <form method="post" action="{{ url_for('autenticacion.logout') }}">
+                        <button class="btn btn-sidebar-logout" type="submit" title="Cerrar sesión">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </aside>
 
-    <header class="mobile-topbar">
-        <button class="btn sidebar-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar"><i class="bi bi-list"></i></button>
-        <span class="fw-bold">{{ marca.nombre_academia }}</span>
-    </header>
-
     <main class="app-main">
-        <div class="container-fluid app-shell py-4">
+        <header class="app-topbar">
+            <div class="topbar-left">
+                <button class="btn btn-topbar-toggle d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Abrir navegación">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="topbar-breadcrumb">
+                    <span class="breadcrumb-academy d-none d-sm-inline">{{ marca.nombre_academia }}</span>
+                    <i class="bi bi-chevron-right breadcrumb-separator d-none d-sm-inline"></i>
+                    <span class="breadcrumb-module">
+                        {% if request.endpoint == 'index' %}Panel de Control
+                        {% elif modulo == 'alumnos' %}Plantel y Alumnos
+                        {% elif modulo == 'pagos' %}Gestión de Pagos
+                        {% elif modulo == 'campeonatos' %}Campeonatos
+                        {% elif modulo == 'calendario' %}Calendario Deportivo
+                        {% elif modulo == 'partidos' %}Partidos
+                        {% elif modulo == 'agenda' %}Agenda
+                        {% elif modulo == 'informacion' %}Información General
+                        {% elif modulo == 'gestion' %}Gestión y Finanzas
+                        {% elif modulo == 'usuarios' %}Usuarios y Accesos
+                        {% elif modulo == 'configuracion' %}Configuración
+                        {% elif modulo == 'categorias' %}Categorías
+                        {% elif modulo == 'equipos' %}Equipos
+                        {% elif modulo == 'lugares' %}Canchas y Sedes
+                        {% else %}{{ modulo|capitalize or 'Módulo' }}{% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="topbar-pill topbar-date-pill d-none d-md-flex">
+                    <i class="bi bi-calendar3 text-success"></i>
+                    <span id="topbarLiveDate"></span>
+                </div>
+                <div class="topbar-pill topbar-status-pill d-none d-sm-flex">
+                    <span class="status-pulse-dot"></span>
+                    <span>Sistema Operativo</span>
+                </div>
+                <div class="topbar-user-pill">
+                    <div class="topbar-avatar">{{ usuario_actual.nombre_usuario[:2]|upper if usuario_actual else 'AD' }}</div>
+                    <div class="topbar-user-text d-none d-md-flex">
+                        <span class="fw-bold">{{ usuario_actual.nombre_usuario if usuario_actual else 'Admin' }}</span>
+                        <small class="text-muted">{{ usuario_actual.rol if usuario_actual and usuario_actual.rol else 'Gestión' }}</small>
+                    </div>
+                    <form method="post" action="{{ url_for('autenticacion.logout') }}" class="d-inline ms-1">
+                        <button class="btn btn-sm btn-icon-ghost" type="submit" title="Cerrar sesión">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <div class="container-fluid app-shell">
             {% with mensajes = get_flashed_messages(with_categories=true) %}
                 {% if mensajes %}
                     {% for categoria, mensaje in mensajes %}
                         <div class="alert alert-{{ 'danger' if categoria == 'danger' else categoria }} alert-dismissible fade show" role="alert">
-                            {{ mensaje }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <i class="bi {{ 'bi-check-circle-fill text-success' if categoria == 'success' else ('bi-exclamation-triangle-fill text-warning' if categoria == 'warning' else 'bi-info-circle-fill text-primary') }} me-2"></i>
+                            <div>{{ mensaje }}</div>
+                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
                         </div>
                     {% endfor %}
                 {% endif %}
@@ -95,6 +193,30 @@
             {% block contenido %}{% endblock %}
         </div>
     </main>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR PARA MÓVILES (Estilo App) -->
+    <nav class="mobile-bottom-nav d-lg-none" aria-label="Navegación móvil rápida">
+        <a href="{{ url_for('index') }}" class="mobile-nav-item {{ 'active' if request.endpoint == 'index' }}">
+            <i class="bi bi-speedometer2"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="{{ url_for('alumnos.listar') }}" class="mobile-nav-item {{ 'active' if modulo == 'alumnos' }}">
+            <i class="bi bi-people"></i>
+            <span>Alumnos</span>
+        </a>
+        <a href="{{ url_for('pagos.listar') }}" class="mobile-nav-item {{ 'active' if modulo == 'pagos' }}">
+            <i class="bi bi-cash-stack"></i>
+            <span>Pagos</span>
+        </a>
+        <a href="{{ url_for('partidos.listar') }}" class="mobile-nav-item {{ 'active' if modulo == 'partidos' }}">
+            <i class="bi bi-flag"></i>
+            <span>Partidos</span>
+        </a>
+        <button class="mobile-nav-item btn-mobile-menu" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Abrir menú completo">
+            <i class="bi bi-grid-fill"></i>
+            <span>Menú</span>
+        </button>
+    </nav>
 
     <script src="{{ url_for('static', filename='vendor/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/htmx.min.js') }}"></script>
@@ -222,6 +344,15 @@
             }
             window.location.assign(urlExportacion + '?' + parametros.toString());
         }
+
+        (() => {
+            const el = document.getElementById('topbarLiveDate');
+            if (el) {
+                const ahora = new Date();
+                const opciones = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+                el.textContent = ahora.toLocaleDateString('es-ES', opciones);
+            }
+        })();
     </script>
 </body>
 </html>

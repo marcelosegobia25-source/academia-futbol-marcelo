@@ -5,6 +5,12 @@ from datetime import timedelta
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(BASE_DIR, ".env"))
+except ImportError:
+    pass
+
 
 def _directorio_datos():
     """Mantiene los datos persistentes fuera del ejecutable instalado."""
@@ -32,14 +38,40 @@ def _clave_local():
     return clave
 
 
+def _obtener_database_uri():
+    """Detecta y normaliza la URL de la base de datos (PostgreSQL / SQLite)."""
+    uri = os.environ.get("DATABASE_URL", "").strip()
+    if not uri or "[TU_CONTRASEÑA]" in uri or "[YOUR-PASSWORD]" in uri:
+        return "sqlite:///" + os.path.join(INSTANCE_DIR, "academia.db")
+    if uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif uri.startswith("postgresql://") and not uri.startswith("postgresql+"):
+        uri = uri.replace("postgresql://", "postgresql+psycopg2://", 1)
+    return uri
+
+
+def _obtener_engine_options(database_uri):
+    """Configura el pool de conexiones según el motor (PostgreSQL o SQLite)."""
+    opciones = {"pool_pre_ping": True}
+    if database_uri.startswith("sqlite"):
+        opciones["connect_args"] = {"timeout": 5}
+    else:
+        # Configuración optimizada para PostgreSQL en la nube / producción
+        opciones["connect_args"] = {
+            "connect_timeout": int(os.environ.get("DB_CONNECT_TIMEOUT", 10)),
+        }
+        opciones["pool_size"] = int(os.environ.get("DB_POOL_SIZE", 10))
+        opciones["max_overflow"] = int(os.environ.get("DB_MAX_OVERFLOW", 20))
+        opciones["pool_recycle"] = int(os.environ.get("DB_POOL_RECYCLE", 300))
+    return opciones
+
+
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or _clave_local()
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL",
-        "sqlite:///" + os.path.join(INSTANCE_DIR, "academia.db"),
-    )
+    _db_uri = _obtener_database_uri()
+    SQLALCHEMY_DATABASE_URI = _db_uri
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "connect_args": {"timeout": 5}}
+    SQLALCHEMY_ENGINE_OPTIONS = _obtener_engine_options(_db_uri)
     UPLOAD_FOLDER = os.path.join(INSTANCE_DIR, "uploads", "alumnos")
     BRAND_FOLDER = os.path.join(INSTANCE_DIR, "branding")
     DOCUMENT_FOLDER = os.path.join(INSTANCE_DIR, "comprobantes")

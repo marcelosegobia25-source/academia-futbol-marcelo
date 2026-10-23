@@ -11,6 +11,25 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    # Normalizar URI para compatibilidad PostgreSQL en la nube y pruebas
+    uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
+    if uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql://", 1)
+        app.config["SQLALCHEMY_DATABASE_URI"] = uri
+
+    engine_opts = dict(app.config.get("SQLALCHEMY_ENGINE_OPTIONS") or {})
+    if uri.startswith("sqlite"):
+        engine_opts.setdefault("connect_args", {})["timeout"] = 5
+    elif uri.startswith("postgresql"):
+        connect_args = dict(engine_opts.get("connect_args") or {})
+        connect_args.pop("timeout", None)  # Prevenir TypeError con psycopg2
+        connect_args.setdefault("connect_timeout", 10)
+        engine_opts["connect_args"] = connect_args
+        engine_opts.setdefault("pool_size", 10)
+        engine_opts.setdefault("max_overflow", 20)
+        engine_opts.setdefault("pool_recycle", 300)
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_opts
+
     os.makedirs(os.path.join(app.instance_path), exist_ok=True)
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     os.makedirs(app.config["BRAND_FOLDER"], exist_ok=True)
@@ -83,7 +102,21 @@ def create_app(config_class=Config):
 
     @app.route("/")
     def index():
-        return render_template("index.html")
+        from datetime import date
+        from app.models import Alumno, Partido, Campeonato, Categoria
+        hoy = date.today()
+        alumnos_activos = Alumno.query.filter_by(estado="Activo").count()
+        partidos_pendientes = Partido.query.filter(Partido.fecha >= hoy).count()
+        campeonatos_activos = Campeonato.query.count()
+        categorias_count = Categoria.query.count()
+        return render_template(
+            "index.html",
+            alumnos_activos=alumnos_activos,
+            partidos_pendientes=partidos_pendientes,
+            campeonatos_activos=campeonatos_activos,
+            categorias_count=categorias_count,
+            hoy=hoy,
+        )
 
     @app.before_request
     def asegurar_respaldo_del_dia():
@@ -96,11 +129,15 @@ def create_app(config_class=Config):
         except Exception:
             app.logger.exception("No se pudo verificar el respaldo diario")
 
+    @app.route("/health")
+    def health():
+        return {"status": "ok", "app": "Academia de Fútbol"}, 200
+
     @app.before_request
     def exigir_autenticacion():
         if not app.config.get("AUTH_REQUIRED", True):
             return None
-        if request.endpoint in {"static", "autenticacion.login"}:
+        if request.endpoint in {"static", "autenticacion.login", "health"}:
             return None
         if session.get("autenticado"):
             from app.utils.autorizacion import cargar_usuario_actual, permiso_para_solicitud, tiene_permiso
@@ -237,7 +274,7 @@ def _migrar_esquema_legacy():
 
     columnas_pago = {columna["name"] for columna in inspect(db.engine).get_columns("pago")}
     if "eliminado_en" not in columnas_pago:
-        db.session.execute(text("ALTER TABLE pago ADD COLUMN eliminado_en DATETIME"))
+        db.session.execute(text("ALTER TABLE pago ADD COLUMN eliminado_en TIMESTAMP"))
         db.session.commit()
 
     columnas_equipo = {columna["name"] for columna in inspect(db.engine).get_columns("equipo")}

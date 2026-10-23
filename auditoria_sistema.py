@@ -2,9 +2,16 @@
 """Diagnóstico completo del sistema - Verificación de integridad de archivos y configuración."""
 
 import os
+import sys
 import json
 from pathlib import Path
 from datetime import datetime
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 def verificar_estructura():
     """Verifica la estructura de carpetas requerida."""
@@ -142,10 +149,24 @@ def verificar_base_de_datos():
     db_file = BASE_DIR / "instance" / "academia.db"
     
     problemas = []
-    if db_file.exists():
+    db_url = os.environ.get("DATABASE_URL", "").strip()
+    if db_url.startswith("postgres"):
+        print(f"🌐 Motor configurado: PostgreSQL (Nube / Servidor)")
+        try:
+            from app import create_app
+            app = create_app()
+            with app.app_context():
+                from sqlalchemy import text
+                from app.extensions import db
+                res = db.session.execute(text("SELECT version()")).fetchone()
+                print(f"✅ Conexión a PostgreSQL: OK ({res[0][:60]}...)")
+        except Exception as e:
+            print(f"⚠️  No se pudo verificar la conexión PostgreSQL: {e}")
+            problemas.append(f"Error de conexión a PostgreSQL: {e}")
+    elif db_file.exists():
         tamaño_mb = db_file.stat().st_size / (1024 * 1024)
         fecha_mod = datetime.fromtimestamp(db_file.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
-        print(f"✅ Base de datos encontrada")
+        print(f"✅ Base de datos local SQLite encontrada")
         print(f"   Tamaño: {tamaño_mb:.2f} MB")
         print(f"   Última modificación: {fecha_mod}")
         
@@ -154,7 +175,7 @@ def verificar_base_de_datos():
             print(f"   ⚠️  Base de datos muy pequeña (posiblemente vacía)")
             problemas.append("Base de datos aparentemente vacía")
     else:
-        print(f"❌ Base de datos NO encontrada")
+        print(f"❌ Base de datos local SQLite NO encontrada y DATABASE_URL no está configurada")
         problemas.append("Base de datos no existe")
     
     # Verificar backups
@@ -188,7 +209,13 @@ def verificar_modelos():
         with open(models_file, 'r', encoding='utf-8') as f:
             contenido = f.read()
             clases = contenido.count('class ')
-            print(f"✅ models.py encontrado ({clases} clases detectadas)")
+            if clases == 0:
+                modules_dir = BASE_DIR / "app" / "modules"
+                if modules_dir.exists():
+                    for mod_file in modules_dir.glob("**/domain/models.py"):
+                        with open(mod_file, 'r', encoding='utf-8') as mf:
+                            clases += mf.read().count('class ')
+            print(f"✅ models.py encontrado ({clases} clases detectadas en arquitectura modular)")
     else:
         print(f"❌ models.py NO encontrado")
         problemas.append("models.py no existe")

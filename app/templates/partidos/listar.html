@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block titulo %}Partidos{% endblock %}
 {% block contenido %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2><i class="bi bi-flag"></i> Partidos</h2>
+<div class="page-heading d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <span class="eyebrow">Encuentros y Calendario</span>
+        <h2 class="mb-0"><i class="bi bi-flag text-danger me-1"></i> Partidos</h2>
+    </div>
     <a href="{{ url_for('partidos.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Programar partido</a>
 </div>
 

@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: academia-futbol
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app --workers 2 --threads 4 --timeout 120
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: AUTH_REQUIRED
+        value: "true"
+      - key: PYTHON_VERSION
+        value: "3.11.9"

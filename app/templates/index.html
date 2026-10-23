@@ -1,34 +1,436 @@
 {% extends "base.html" %}
-{% block titulo %}Inicio - Academia de Fútbol{% endblock %}
+{% block titulo %}Panel Principal - {{ marca.nombre_academia }}{% endblock %}
 {% block contenido %}
-<div class="card dashboard-hero mb-4">
-    <div class="dashboard-brand-block">
-        {% if marca.logo %}<img src="{{ url_for('configuracion.logo') }}" alt="Logo" class="dashboard-crest">{% else %}<i class="bi bi-shield-check display-2"></i>{% endif %}
-        <div><div class="eyebrow">{{ marca.nombre_academia }}</div><h1 class="page-title mb-1">Panel principal</h1><p class="text-muted mb-0">{{ marca.eslogan or 'Gestión deportiva y administrativa en un solo lugar.' }}</p></div>
-    </div>
-    <a href="{{ url_for('alumnos.crear') }}" class="btn btn-success"><i class="bi bi-person-plus me-1"></i> Nuevo alumno</a>
-</div>
-<div class="row g-3">
-    {% set accesos = [
-        ('alumnos.listar', 'bi-people', 'Gestionar alumnos', 'Fichas, categoría, equipo y estado'),
-        ('pagos.listar', 'bi-cash-coin', 'Gestionar mensualidades', 'Pagos, recibos y vencimientos'),
-        ('agenda.listar', 'bi-journal-text', 'Gestionar agenda', 'Eventos y partidos programados'),
-        ('campeonatos.listar', 'bi-trophy', 'Gestionar campeonatos', 'Fixture, posiciones y jugadores habilitados'),
-        ('calendario.ver', 'bi-calendar3', 'Calendario', 'Agenda + campeonatos + entrenamientos fijos'),
-        ('pagos.exportar_form', 'bi-file-earmark-excel', 'Reportes', 'Exportar pagos a Excel'),
-    ] %}
-    {% for endpoint, icono, titulo, descripcion in accesos %}
-    <div class="col-md-4">
-        <a href="{{ url_for(endpoint) }}" class="text-decoration-none">
-            <div class="card h-100 access-card">
-                <div class="card-body">
-                    <i class="bi {{ icono }} fs-1 text-success"></i>
-                    <h5 class="card-title mt-2">{{ titulo }}</h5>
-                    <p class="card-text text-muted">{{ descripcion }}</p>
+
+<!-- HERO PRINCIPAL -->
+<section class="card dashboard-hero-premium mb-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="dashboard-brand-block">
+            {% if marca.logo %}
+                <img src="{{ url_for('configuracion.logo') }}" alt="Escudo de {{ marca.nombre_academia }}" class="dashboard-crest">
+            {% else %}
+                <div class="hero-crest-placeholder">
+                    <i class="bi bi-shield-check"></i>
                 </div>
+            {% endif %}
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge hero-badge"><i class="bi bi-trophy-fill text-warning me-1"></i> {{ marca.nombre_academia }}</span>
+                    <span class="badge hero-status-badge"><i class="bi bi-patch-check-fill text-success me-1"></i> Sistema Operativo</span>
+                </div>
+                <h1 class="hero-title mb-1">Centro de Comando & Gestión</h1>
+                <p class="hero-subtitle mb-0">{{ marca.eslogan or 'Plataforma integral deportiva, administrativa y financiera para academias de fútbol.' }}</p>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 hero-actions">
+            <a href="{{ url_for('alumnos.crear') }}" class="btn btn-hero-action btn-hero-primary" id="btn-nuevo-alumno">
+                <i class="bi bi-person-plus-fill me-1"></i> Nuevo Alumno
+            </a>
+            <a href="{{ url_for('pagos.listar') }}" class="btn btn-hero-action btn-hero-secondary" id="btn-registrar-pago">
+                <i class="bi bi-cash-stack me-1"></i> Pagos & Mensualidades
+            </a>
+            <a href="{{ url_for('partidos.crear') }}" class="btn btn-hero-action btn-hero-outline" id="btn-nuevo-partido">
+                <i class="bi bi-flag-fill me-1"></i> Programar Partido
+            </a>
+            <a href="{{ url_for('informacion.general') }}" class="btn btn-hero-action btn-hero-outline" id="btn-resumen-operativo">
+                <i class="bi bi-speedometer2 me-1"></i> Resumen Operativo
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- TARJETAS DE INDICADORES RÁPIDOS -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <a href="{{ url_for('alumnos.listar', estado='Activo') }}" class="text-decoration-none">
+            <div class="card dashboard-kpi-card kpi-alumnos h-100">
+                <div class="kpi-icon-wrap"><i class="bi bi-people-fill"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-value">{{ alumnos_activos or 0 }}</span>
+                    <span class="kpi-label">Jugadores Activos</span>
+                </div>
+                <span class="kpi-link-hint"><i class="bi bi-arrow-right"></i></span>
             </div>
         </a>
     </div>
-    {% endfor %}
+    <div class="col-6 col-lg-3">
+        <a href="{{ url_for('campeonatos.listar') }}" class="text-decoration-none">
+            <div class="card dashboard-kpi-card kpi-campeonatos h-100">
+                <div class="kpi-icon-wrap"><i class="bi bi-trophy-fill"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-value">{{ campeonatos_activos or 0 }}</span>
+                    <span class="kpi-label">Campeonatos Registrados</span>
+                </div>
+                <span class="kpi-link-hint"><i class="bi bi-arrow-right"></i></span>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a href="{{ url_for('partidos.listar') }}" class="text-decoration-none">
+            <div class="card dashboard-kpi-card kpi-partidos h-100">
+                <div class="kpi-icon-wrap"><i class="bi bi-flag-fill"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-value">{{ partidos_pendientes or 0 }}</span>
+                    <span class="kpi-label">Partidos Programados</span>
+                </div>
+                <span class="kpi-link-hint"><i class="bi bi-arrow-right"></i></span>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a href="{{ url_for('categorias.listar') }}" class="text-decoration-none">
+            <div class="card dashboard-kpi-card kpi-categorias h-100">
+                <div class="kpi-icon-wrap"><i class="bi bi-diagram-3-fill"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-value">{{ categorias_count or 0 }}</span>
+                    <span class="kpi-label">Categorías Formativas</span>
+                </div>
+                <span class="kpi-link-hint"><i class="bi bi-arrow-right"></i></span>
+            </div>
+        </a>
+    </div>
 </div>
+
+<!-- SECCIÓN 1: GESTIÓN DEPORTIVA Y ENTRENAMIENTOS -->
+<div class="dashboard-section-wrap mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="section-heading-group">
+            <span class="section-tag bg-deporte"><i class="bi bi-dribbble"></i> Área Deportiva</span>
+            <h2 class="section-title">Formación, Partidos & Asistencia</h2>
+        </div>
+        <span class="text-muted small">Canchas, campeonatos y convocatorias</span>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('alumnos.listar') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-emerald"><i class="bi bi-people"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Alumnos & Fichas</h5>
+                        <p class="hub-card-desc">Expediente completo, fotografías, datos de tutores, categorías y turnos.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('alumnos.asistencias') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-teal"><i class="bi bi-calendar2-check"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Control de Asistencia</h5>
+                        <p class="hub-card-desc">Puntualidad, ausencias, justificaciones y porcentaje de asistencia mensual.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('partidos.listar') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-blue"><i class="bi bi-flag"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Partidos & Convocatorias</h5>
+                        <p class="hub-card-desc">Programación oficial, resultados, rivales y generación de actas en PDF.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('campeonatos.listar') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-amber"><i class="bi bi-trophy"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Campeonatos & Fixtures</h5>
+                        <p class="hub-card-desc">Fase de grupos, tablas de posiciones automáticas, llaves y premiación.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('calendario.ver') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-indigo"><i class="bi bi-calendar3"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Calendario Deportivo</h5>
+                        <p class="hub-card-desc">Vista integrada de entrenamientos, partidos y eventos con exportación PDF.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('agenda.listar') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-purple"><i class="bi bi-journal-text"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Agenda de Eventos</h5>
+                        <p class="hub-card-desc">Reuniones de padres, viajes, evaluaciones técnicas y actividades especiales.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('calendario.personal') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-cyan"><i class="bi bi-person-workspace"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Cuerpo Técnico</h5>
+                        <p class="hub-card-desc">Profesores, preparadores físicos, asignación de horarios y disciplinas.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('campeonatos.rivales') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-rose"><i class="bi bi-shield-plus"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Clubes Rivales</h5>
+                        <p class="hub-card-desc">Catálogo de equipos oponentes clasificados por categoría deportiva.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN 2: CAJA Y ADMINISTRACIÓN FINANCIERA -->
+<div class="dashboard-section-wrap mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="section-heading-group">
+            <span class="section-tag bg-finanzas"><i class="bi bi-cash-coin"></i> Administración & Finanzas</span>
+            <h2 class="section-title">Control de Mensualidades, Caja & Cuotas</h2>
+        </div>
+        <span class="text-muted small">Flujo de caja y estados contables</span>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('pagos.listar') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-emerald"><i class="bi bi-receipt"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Pagos de Mensualidad</h5>
+                        <p class="hub-card-desc">Registro de cuotas, emisión de comprobantes oficiales y seguimiento de mora.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('pagos.caja') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-amber"><i class="bi bi-calculator"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Arqueo & Cierre de Caja</h5>
+                        <p class="hub-card-desc">Apertura por cajero, balance de efectivo, diferencias y cierres diarios.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('gestion.pagos_programados') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-blue"><i class="bi bi-calendar-check"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Pagos Programados</h5>
+                        <p class="hub-card-desc">Compromisos a plazo, matrículas en cuotas y cronograma de vencimientos.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('gestion.contabilidad') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-teal"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Contabilidad General</h5>
+                        <p class="hub-card-desc">Asientos de ingresos, egresos operativos, categorías y balance mensual.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN 3: INDUMENTARIA, VENTAS E INVENTARIO -->
+<div class="dashboard-section-wrap mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="section-heading-group">
+            <span class="section-tag bg-inventario"><i class="bi bi-box-seam"></i> Indumentaria & Tienda</span>
+            <h2 class="section-title">Stock, Compras & Punto de Venta</h2>
+        </div>
+        <span class="text-muted small">Uniformes, balones y accesorios</span>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('gestion.inventario') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-amber"><i class="bi bi-boxes"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Control de Inventario</h5>
+                        <p class="hub-card-desc">Productos, tallas, variantes, existencias mínimas y kardex de movimientos.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('gestion.ventas') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-emerald"><i class="bi bi-bag-check"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Ventas & Recibos</h5>
+                        <p class="hub-card-desc">Punto de venta directo a alumnos, emisión de notas de venta y devoluciones.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('gestion.compras') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-indigo"><i class="bi bi-cart-plus"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Compras & Abastecimiento</h5>
+                        <p class="hub-card-desc">Registro de pedidos a proveedores con incremento automático de stock.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('gestion.inventario_conteo') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-cyan"><i class="bi bi-clipboard-check"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Conteo Físico</h5>
+                        <p class="hub-card-desc">Auditoría física periódica, cuadre de existencias y aprobación de ajustes.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN 4: CATÁLOGOS, USUARIOS Y CONFIGURACIÓN -->
+<div class="dashboard-section-wrap mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="section-heading-group">
+            <span class="section-tag bg-config"><i class="bi bi-sliders"></i> Configuración & Seguridad</span>
+            <h2 class="section-title">Catálogos, Respaldos & Auditoría</h2>
+        </div>
+        <span class="text-muted small">Personalización institucional</span>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('categorias.listar') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-blue"><i class="bi bi-diagram-3"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Categorías Deportivas</h5>
+                        <p class="hub-card-desc">Definición de rangos etarios, nombres de división y orden de clasificación.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('equipos.listar') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-teal"><i class="bi bi-shield-check"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Equipos de la Academia</h5>
+                        <p class="hub-card-desc">Plantillas por categoría, colores de camiseta y capitanes asignados.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('lugares.listar') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-rose"><i class="bi bi-geo-alt"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Canchas & Sedes</h5>
+                        <p class="hub-card-desc">Campos deportivos con dirección y botón directo a Google Maps.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('configuracion.panel') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-purple"><i class="bi bi-palette"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Personalización & Marca</h5>
+                        <p class="hub-card-desc">Escudo institucional, nombre de la academia, mensualidad base y colores.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('informacion.auditoria') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-emerald"><i class="bi bi-shield-lock"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Auditoría del Sistema</h5>
+                        <p class="hub-card-desc">Registro inmutable de acciones, integridad SQLite y cuadre contable.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('gestion.proveedores') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-indigo"><i class="bi bi-truck"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Directorio de Proveedores</h5>
+                        <p class="hub-card-desc">Contactos comerciales, compras asociadas y cuentas por pagar.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        {% if puede('administrar') %}
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('usuarios.listar') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-amber"><i class="bi bi-person-lock"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Usuarios & Roles</h5>
+                        <p class="hub-card-desc">Gestión de credenciales y permisos granulares para cada puesto.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ url_for('informacion.general') }}" class="hub-card-link">
+                <div class="card hub-card h-100">
+                    <div class="hub-card-icon icon-teal"><i class="bi bi-cloud-arrow-down"></i></div>
+                    <div class="hub-card-body">
+                        <h5 class="hub-card-title">Respaldos & Descargas</h5>
+                        <p class="hub-card-desc">Generación de copias completas de seguridad en archivo comprimido ZIP.</p>
+                    </div>
+                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

@@ -607,17 +607,19 @@ def test_calendario_rechaza_mes_invalido(client):
 
 
 def test_calendario_muestra_mes_en_espanol_y_todas_las_actividades(client):
+    from app.routes.calendario import MESES_ES
+    hoy = date.today()
     for indice in range(1, 7):
         db.session.add(EventoAgenda(
-            fecha=date(2026, 8, 12), descripcion=f"Actividad completa {indice}",
+            fecha=hoy, descripcion=f"Actividad completa {indice}",
             tipo="Evento",
         ))
     db.session.commit()
 
-    respuesta = client.get("/calendario/?anio=2026&mes=8")
+    respuesta = client.get(f"/calendario/?anio={hoy.year}&mes={hoy.month}")
 
     assert respuesta.status_code == 200
-    assert b"Agosto 2026" in respuesta.data
+    assert f"{MESES_ES[hoy.month - 1]} {hoy.year}".encode() in respuesta.data
     assert b"Agenda desde hoy" in respuesta.data
     assert b"PDF semanal" in respuesta.data
     assert b'/calendario/exportar-semanal.pdf' in respuesta.data
