@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from app.extensions import db
 from app.models import Alumno, Categoria, Equipo, InscripcionGestion, HistorialCategoriaAlumno, HistorialEquipoAlumno, Tutor, AlumnoTutor, Auditoria
+from app.utils.validacion import solo_numeros_opcional
+
 
 
 class InscribirAlumnoUseCase:
@@ -30,9 +32,9 @@ class InscribirAlumnoUseCase:
             id_categoria=id_categoria,
             categoria_manual=categoria_manual,
             fecha_nacimiento=fecha_nac,
-            ci=datos.get("ci", "").strip() or None,
+            ci=solo_numeros_opcional(datos.get("ci"), "CI", 30),
             direccion=datos.get("direccion", "").strip() or None,
-            telefono=datos.get("telefono", "").strip() or None,
+            telefono=solo_numeros_opcional(datos.get("telefono"), "Teléfono", 30),
             tutor=datos.get("tutor", "").strip() or None,
             tutor2=datos.get("tutor2", "").strip() or None,
             sexo=datos.get("sexo") or None,

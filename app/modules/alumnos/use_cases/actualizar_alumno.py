@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from app.extensions import db
 from app.models import Alumno, Equipo, HistorialAlumno, HistorialCategoriaAlumno, HistorialEquipoAlumno, Auditoria
+from app.utils.validacion import solo_numeros_opcional
 
 
 class ActualizarAlumnoUseCase:
@@ -12,13 +13,17 @@ class ActualizarAlumnoUseCase:
         cambios = []
         antiguo_nombre = alumno.nombre_completo
 
-        for campo in ["nombre", "apellido", "direccion", "telefono", "tutor", "tutor2", "posicion", "pierna_habil", "turno"]:
+        for campo in ["nombre", "apellido", "direccion", "telefono", "ci", "tutor", "tutor2", "posicion", "pierna_habil", "turno"]:
             if campo in datos:
-                val = (datos[campo] or "").strip() or None
+                if campo in ("telefono", "ci"):
+                    val = solo_numeros_opcional(datos.get(campo), "CI" if campo == "ci" else "Teléfono", 30)
+                else:
+                    val = (datos[campo] or "").strip() or None
                 actual = getattr(alumno, campo)
                 if val != actual:
                     cambios.append((campo, actual, val))
                     setattr(alumno, campo, val)
+
 
         for campo in ["peso", "estatura"]:
             if campo in datos:

@@ -7,6 +7,7 @@
         <h2 class="mb-0"><i class="bi bi-cash-stack text-success me-1"></i> Mensualidades</h2>
     </div>
     <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-info" onclick="compartirPagosListado()"><i class="bi bi-share"></i> Compartir Pagos</button>
         <a href="{{ url_for('pagos.caja') }}" class="btn btn-outline-secondary"><i class="bi bi-calculator"></i> Cierre de caja</a>
         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resumenSeisMeses"><i class="bi bi-table"></i> Resumen 6 meses</button>
         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportarPagos"><i class="bi bi-download"></i> Exportar</button>
@@ -109,6 +110,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-outline-info" onclick="compartirPagosListado()"><i class="bi bi-share"></i> Compartir Lista</button>
                 <button type="button" class="btn btn-outline-success" onclick="exportarConfigurado(event, 'form-filtros-pagos', 'config-exportar-pagos', '{{ url_for('pagos.exportar') }}')"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</button>
                 <button type="button" class="btn btn-danger" onclick="exportarConfigurado(event, 'form-filtros-pagos', 'config-exportar-pagos', '{{ url_for('pagos.exportar_pdf') }}')"><i class="bi bi-file-earmark-pdf"></i> Descargar PDF</button>
             </div>
@@ -136,4 +138,54 @@
         </div>
     </div>
 </div>
+
+<script>
+function compartirPagosListado() {
+    const filas = document.querySelectorAll('#tabla-pagos table tbody tr');
+    const pagos = [];
+    let sumaTotal = 0;
+
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll('td');
+        if (celdas.length < 9) return;
+
+        const alumno = celdas[0].textContent.trim();
+        const categoria = celdas[1].textContent.trim();
+        const mes = celdas[3].textContent.trim();
+        const fechaPago = celdas[4].textContent.trim();
+        const estado = celdas[6].querySelector('.badge') ? celdas[6].querySelector('.badge').textContent.trim() : celdas[6].textContent.trim();
+        const montoStr = celdas[8].textContent.trim();
+        const monto = parseFloat(montoStr) || 0;
+
+        if (alumno && mes) {
+            sumaTotal += monto;
+            let info = `${alumno} · Mes: ${mes} (Bs ${monto.toFixed(2)} · ${estado} · ${fechaPago})`;
+            if (categoria && categoria !== '—') info += ` [${categoria}]`;
+            pagos.push(info);
+        }
+    });
+
+    if (pagos.length === 0) {
+        alert('No hay registros de pagos visibles para compartir.');
+        return;
+    }
+
+    const modalEl = document.getElementById('exportarPagos');
+    if (modalEl) {
+        const inst = bootstrap.Modal.getInstance(modalEl);
+        if (inst) inst.hide();
+    }
+
+    let texto = `💵 *REGISTRO DE PAGOS - MENSUALIDADES*\n`;
+    texto += `⚽ *Academia de Fútbol*\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    pagos.forEach((p, idx) => {
+        texto += `${idx + 1}. ${p}\n`;
+    });
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `📊 *Total:* ${pagos.length} pagos (Suma: Bs ${sumaTotal.toFixed(2)}).\n`;
+
+    compartirListaTexto('Registro de Pagos', texto);
+}
+</script>
 {% endblock %}

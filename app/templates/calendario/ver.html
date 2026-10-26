@@ -23,6 +23,7 @@
         <a href="{{ url_for('calendario.ver', anio=anio_mes_siguiente, mes=mes_siguiente, id_categoria=filtros.get('id_categoria'), id_equipo=filtros.get('id_equipo')) }}" class="btn btn-outline-primary" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></a>
     </div>
     <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-success" onclick="compartirAgendaCompleta()"><i class="bi bi-share"></i> Compartir Agenda</button>
         <a href="{{ url_for('calendario.listar_entrenamientos') }}" class="btn btn-outline-secondary"><i class="bi bi-clock-history"></i> Entrenamientos</a>
         <a href="{{ url_for('calendario.exportar_mensual_pdf', anio=anio, mes=mes, id_categoria=filtros.get('id_categoria'), id_equipo=filtros.get('id_equipo')) }}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf"></i> PDF mensual</a>
         <form method="get" action="{{ url_for('calendario.exportar_semanal_pdf') }}" class="calendar-weekly-export">
@@ -72,4 +73,57 @@
 </section>
 
 {% for dia, items in dias.items() %}<div class="modal fade" id="dia-{{ dia }}" tabindex="-1" aria-labelledby="titulo-dia-{{ dia }}" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><div><span class="eyebrow">Programación completa</span><h5 class="modal-title" id="titulo-dia-{{ dia }}">{{ dia }} de {{ nombre_mes }} de {{ anio }}</h5></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body px-4">{% for item in items %}<article class="agenda-detail-item"><div class="agenda-type-icon {{ colores[item.tipo] }}"><i class="bi {{ iconos[item.tipo] }}"></i></div><div><div class="d-flex flex-wrap justify-content-between gap-2"><strong>{{ item.texto }}</strong><span class="badge text-bg-light">{{ item.tipo }}</span></div><div class="small text-muted mt-1">{% if item.hora %}<span class="me-3"><i class="bi bi-clock"></i> {{ item.hora.strftime('%H:%M') }}{% if item.hora_fin %} – {{ item.hora_fin.strftime('%H:%M') }}{% endif %}</span>{% endif %}{% if item.lugar %}<span><i class="bi bi-geo-alt"></i> {{ item.lugar }}</span>{% endif %}</div></div></article>{% else %}<div class="text-center py-5 text-muted"><i class="bi bi-calendar2-check fs-1 d-block mb-2"></i>No hay actividades programadas para este día.</div>{% endfor %}</div></div></div></div>{% endfor %}
+
+<script>
+function compartirAgendaCompleta() {
+    const mes = "{{ nombre_mes }} {{ anio }}";
+    const tarjetas = document.querySelectorAll('.monthly-agenda-list .agenda-card');
+    const items = [];
+
+    tarjetas.forEach(card => {
+        const textoEl = card.querySelector('.agenda-card-content strong');
+        const tipoEl = card.querySelector('.agenda-type');
+        const metaEl = card.querySelector('.agenda-meta');
+        const tagsEl = card.querySelector('.agenda-tags');
+
+        const texto = textoEl ? textoEl.textContent.trim() : '';
+        const tipo = tipoEl ? tipoEl.textContent.trim() : '';
+        const meta = metaEl ? metaEl.innerText.replace(/\n+/g, ' ').replace('Ver mapa', '').trim() : '';
+        const tags = tagsEl ? tagsEl.innerText.replace(/\n+/g, ' · ').trim() : '';
+
+        // Buscar separador de fecha previo
+        let prev = card.previousElementSibling;
+        let fechaStr = '';
+        while (prev) {
+            if (prev.classList.contains('agenda-date-separator')) {
+                fechaStr = prev.innerText.replace(/\n+/g, ' ').trim();
+                break;
+            }
+            prev = prev.previousElementSibling;
+        }
+
+        if (texto) {
+            let linea = `• [${tipo}] ${texto}`;
+            if (fechaStr) linea = `📅 ${fechaStr} -> ` + linea;
+            if (meta) linea += ` (${meta})`;
+            if (tags) linea += ` [${tags}]`;
+            items.push(linea);
+        }
+    });
+
+    if (items.length === 0) {
+        alert('No hay actividades en la agenda de este mes para compartir.');
+        return;
+    }
+
+    let texto = `📅 *AGENDA DE ACTIVIDADES Y ENTRENAMIENTOS*\n`;
+    texto += `⚽ *Academia de Fútbol* · ${mes}\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    items.forEach(it => { texto += `${it}\n`; });
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `📊 *Total:* ${items.length} actividades programadas.\n`;
+
+    compartirListaTexto(`Agenda - ${mes}`, texto);
+}
+</script>
 {% endblock %}

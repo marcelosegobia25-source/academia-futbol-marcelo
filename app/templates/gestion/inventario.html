@@ -1,7 +1,16 @@
-{% extends 'base.html' %}{% block titulo %}Inventario{% endblock %}{% block contenido %}<div class="d-flex justify-content-between mb-4">
-<h1 class="page-title">Inventario</h1>
-<div class="d-flex gap-2"><a class="btn btn-outline-light" href="{{ url_for('gestion.reporte_exportar_form', modulo='inventario') }}">Exportar</a><a class="btn btn-success" href="{{url_for('gestion.producto_nuevo')}}">Nuevo producto</a></div>
-</div>{% for p in productos %}<div class="card mb-3">
+{% extends 'base.html' %}{% block titulo %}Inventario{% endblock %}{% block contenido %}
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow">Material & Equipamiento</span>
+        <h1 class="page-title mb-1">Control de Inventario</h1>
+        <p class="text-muted small mb-0">Gestión de existencias, indumentaria deportiva, tallas, variantes y alertas de stock.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" href="{{ url_for('gestion.reporte_exportar_form', modulo='inventario') }}"><i class="bi bi-download"></i> Exportar</a>
+        <a class="btn btn-success" href="{{ url_for('gestion.producto_nuevo') }}"><i class="bi bi-plus-lg"></i> Nuevo producto</a>
+    </div>
+</div>
+{% for p in productos %}<div class="card mb-3">
 <div class="card-header">
 <strong>{{p.codigo}} · {{p.nombre}}</strong> <span class="text-muted">{{p.categoria}}</span>
 </div>
@@ -74,7 +83,7 @@
 </tr>
 </thead>
 <tbody>{% for m in movimientos %}<tr>
-<td>{{m.creado_en.strftime('%d/%m/%Y %H:%M')}}</td>
+<td>{{ m.creado_en | fecha_hora_bo }}</td>
 <td>{{m.variante.nombre_completo}}</td>
 <td>{{m.tipo}}</td>
 <td>{{m.cantidad}}</td>

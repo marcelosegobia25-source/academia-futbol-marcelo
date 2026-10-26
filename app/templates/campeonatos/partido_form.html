@@ -1,13 +1,15 @@
 {% extends "base.html" %}
 {% block titulo %}{{ 'Editar' if partido else 'Agregar' }} partido{% endblock %}
 {% block contenido %}
-<div class="d-flex justify-content-between align-items-start mb-3">
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <span class="eyebrow">Fixture manual</span>
-        <h2 class="mb-0">{{ 'Editar partido' if partido else 'Agregar partido' }}</h2>
+        <span class="eyebrow"><i class="bi bi-trophy text-amber"></i> Fixture manual</span>
+        <h2 class="mb-0"><i class="bi bi-flag-fill text-emerald me-1"></i> {{ 'Editar Partido' if partido else 'Agregar Partido' }}</h2>
         <p class="text-muted mb-0">{{ campeonato.nombre }}</p>
     </div>
-    <a href="{{ url_for('campeonatos.detalle', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-outline-secondary">Volver</a>
+    <a href="{{ url_for('campeonatos.detalle', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver al Campeonato
+    </a>
 </div>
 <form method="post" class="card shadow-sm p-4">
     <div class="row g-3">

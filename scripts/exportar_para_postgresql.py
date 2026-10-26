@@ -86,6 +86,7 @@ def exportar_sql(sqlite_path: Path, salida_path: Path):
         "SET client_min_messages = warning;",
         "",
         "BEGIN;",
+        "SET CONSTRAINTS ALL DEFERRED;",
         "",
         "-- ============================================================================",
         "-- 1. LIMPIEZA PREVIA (DROP TABLES EN ORDEN INVERSO DE DEPENDENCIAS)",

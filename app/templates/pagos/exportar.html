@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 {% block titulo %}Exportar pagos{% endblock %}
 {% block contenido %}
-<h2 class="mb-3"><i class="bi bi-file-earmark-excel"></i> Exportar registro de pagos</h2>
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow"><i class="bi bi-cash-stack text-emerald"></i> Reportes Financieros</span>
+        <h2 class="mb-0"><i class="bi bi-file-earmark-excel text-emerald me-1"></i> Exportar Registro de Pagos</h2>
+        <p class="text-muted mb-0">Genere un archivo Excel detallado de recaudación y mensualidades.</p>
+    </div>
+    <a href="{{ url_for('pagos.listar') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a Pagos
+    </a>
+</div>
 <form method="get" action="{{ url_for('pagos.exportar') }}" class="card shadow-sm p-4" style="max-width: 500px;">
     <p class="text-muted">Defina un periodo, o deje ambos campos vacíos para exportar todo el historial.</p>
     <div class="mb-3">

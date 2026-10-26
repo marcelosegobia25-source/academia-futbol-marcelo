@@ -1,7 +1,10 @@
 from datetime import date, datetime, timezone
+from sqlalchemy.orm import validates
 from app.extensions import db
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy import event
+from app.utils.validacion import solo_numeros_opcional
+
 
 
 def ahora_utc():
@@ -26,6 +29,10 @@ class Configuracion(db.Model):
     color_acento = db.Column(db.String(7), nullable=False, default="#16a34a")
     contrasena_hash = db.Column(db.String(255), nullable=True)
 
+    @validates("telefono")
+    def _validar_telefono(self, key, valor):
+        return solo_numeros_opcional(valor, "Teléfono", 50)
+
     def establecer_contrasena(self, contrasena):
         self.contrasena_hash = generate_password_hash(contrasena)
 
@@ -37,6 +44,13 @@ class Configuracion(db.Model):
 
     @staticmethod
     def obtener():
+        try:
+            from flask import g, has_app_context
+            if has_app_context() and hasattr(g, "_configuracion_cache"):
+                return g._configuracion_cache
+        except ImportError:
+            has_app_context = lambda: False
+
         config = Configuracion.query.first()
         if config is None:
             config = Configuracion(monto_mensualidad=0)
@@ -48,6 +62,12 @@ class Configuracion(db.Model):
         if not config.gestion_ficha:
             config.gestion_ficha = date.today().year
             db.session.commit()
+
+        try:
+            if has_app_context():
+                g._configuracion_cache = config
+        except Exception:
+            pass
         return config
 
 

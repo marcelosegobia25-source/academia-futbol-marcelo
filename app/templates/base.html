@@ -5,12 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block titulo %}Academia de Fútbol{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Estilos locales críticos primero (carga instantánea sin latencia de red) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+    <!-- Tipografía web optimizada (carga asíncrona no bloqueante) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    </noscript>
 </head>
 <style>:root{--brand-primary:{{marca.color_primario}};--brand-secondary:{{marca.color_secundario}};--brand-accent:{{marca.color_acento}};--pitch:{{marca.color_primario}};--pitch-dark:{{marca.color_secundario}};--lime:{{marca.color_acento}}}</style>
 <body>
@@ -345,6 +352,63 @@
             window.location.assign(urlExportacion + '?' + parametros.toString());
         }
 
+        function abrirModalCompartir(titulo, texto) {
+            const modalEl = document.getElementById('modalUniversalCompartir');
+            if (!modalEl) return;
+            const tituloEl = document.getElementById('modalUniversalCompartirLabel');
+            const textarea = document.getElementById('textoParaCompartir');
+            const btnWsp = document.getElementById('btnWhatsAppListaModal');
+            const btnCopiar = document.getElementById('btnCopiarListaModal');
+            const alerta = document.getElementById('alertaCopiadoModal');
+
+            if (tituloEl) tituloEl.textContent = titulo || 'Compartir Lista';
+            if (textarea) textarea.value = texto || '';
+            if (alerta) alerta.classList.add('d-none');
+
+            if (btnWsp) {
+                btnWsp.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(texto || '');
+            }
+
+            if (btnCopiar) {
+                btnCopiar.onclick = async () => {
+                    try {
+                        await navigator.clipboard.writeText(texto || '');
+                        if (alerta) {
+                            alerta.classList.remove('d-none');
+                            setTimeout(() => alerta.classList.add('d-none'), 3000);
+                        }
+                    } catch (_) {
+                        if (textarea) {
+                            textarea.select();
+                            document.execCommand('copy');
+                            if (alerta) {
+                                alerta.classList.remove('d-none');
+                                setTimeout(() => alerta.classList.add('d-none'), 3000);
+                            }
+                        }
+                    }
+                };
+            }
+
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+
+        function compartirListaTexto(titulo, texto) {
+            if (navigator.share) {
+                navigator.share({
+                    title: titulo || 'Lista de la Academia',
+                    text: texto
+                }).catch(err => {
+                    if (err.name !== 'AbortError') {
+                        abrirModalCompartir(titulo, texto);
+                    }
+                });
+            } else {
+                abrirModalCompartir(titulo, texto);
+            }
+        }
+
         (() => {
             const el = document.getElementById('topbarLiveDate');
             if (el) {
@@ -354,5 +418,38 @@
             }
         })();
     </script>
+
+    <!-- Modal Universal de Compartir Listas -->
+    <div class="modal fade" id="modalUniversalCompartir" tabindex="-1" aria-labelledby="modalUniversalCompartirLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <span class="eyebrow"><i class="bi bi-share text-emerald"></i> Difusión Rápida</span>
+                        <h5 class="modal-title" id="modalUniversalCompartirLabel">Compartir Lista</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-2">Puedes enviar esta lista directamente por WhatsApp o copiarla para compartirla donde desees:</p>
+                    <textarea id="textoParaCompartir" class="form-control font-monospace small bg-light" rows="10" readonly></textarea>
+                    <div id="alertaCopiadoModal" class="alert alert-success mt-2 py-1 px-2 small d-none">
+                        <i class="bi bi-check-circle-fill me-1"></i> ¡Texto copiado al portapapeles con éxito!
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="btnCopiarListaModal">
+                            <i class="bi bi-clipboard"></i> Copiar texto
+                        </button>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-success btn-sm" id="btnWhatsAppListaModal">
+                            <i class="bi bi-whatsapp"></i> WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -9,6 +9,7 @@ from flask import (
 from werkzeug.utils import secure_filename
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
 
 from app.extensions import db
 from app.models import (
@@ -159,7 +160,9 @@ def _filtrar_pagos(args, paginar=False):
     fecha_pago = args.get("fecha_pago", "")
     mes_vencimiento = args.get("mes_vencimiento", "")
 
-    query = Pago.query.join(Alumno)
+    query = Pago.query.join(Alumno).options(
+        joinedload(Pago.alumno).joinedload(Alumno.categoria)
+    )
     if estado == "Anulado":
         query = query.filter(Pago.eliminado_en.is_not(None))
     else:

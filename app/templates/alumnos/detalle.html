@@ -203,7 +203,7 @@
         <table class="table table-sm mb-0">
             <thead><tr><th>Fecha</th><th>Cambio</th><th>Anterior</th><th>Nuevo</th><th>Motivo</th></tr></thead>
             <tbody>{% for cambio in alumno.historial[:20] %}
-                <tr><td>{{ cambio.creado_en.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ cambio.tipo|capitalize }}</td><td>{{ cambio.valor_anterior or '—' }}</td><td>{{ cambio.valor_nuevo or '—' }}</td><td>{{ cambio.motivo or '—' }}</td></tr>
+                <tr><td>{{ cambio.creado_en | fecha_hora_bo }}</td><td>{{ cambio.tipo|capitalize }}</td><td>{{ cambio.valor_anterior or '—' }}</td><td>{{ cambio.valor_nuevo or '—' }}</td><td>{{ cambio.motivo or '—' }}</td></tr>
             {% endfor %}</tbody>
         </table>
     </div>

@@ -11,6 +11,7 @@ class TestConfig(Config):
     AUTO_BACKUP = False
     AUTH_REQUIRED = False
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "connect_args": {"timeout": 5}}
 
 
 @pytest.fixture()

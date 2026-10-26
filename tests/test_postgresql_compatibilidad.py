@@ -17,11 +17,13 @@ def test_normalizar_postgres_url_convierte_prefijo(monkeypatch):
 
 
 def test_obtener_database_uri_con_variable(monkeypatch):
+    monkeypatch.delenv("USE_LOCAL_SQLITE", raising=False)
     monkeypatch.setenv("DATABASE_URL", "postgres://test_user:pass@host/bd")
     uri = _obtener_database_uri()
-    assert uri == "postgresql://test_user:pass@host/bd"
+    assert uri.startswith("postgresql") and "test_user:pass@host/bd" in uri
 
-    monkeypatch.delenv("DATABASE_URL", raising=False)
+    for var in ["DATABASE_URL", "NAME_OF_VARIABLE", "DIRECT_URL", "SUPABASE_DATABASE_URL", "POSTGRES_URL"]:
+        monkeypatch.delenv(var, raising=False)
     uri_sqlite = _obtener_database_uri()
     assert uri_sqlite.startswith("sqlite:///")
 

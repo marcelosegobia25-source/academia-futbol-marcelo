@@ -1,5 +1,7 @@
 from datetime import date, datetime, timezone
+from sqlalchemy.orm import validates
 from app.extensions import db
+from app.utils.validacion import solo_numeros_opcional
 
 
 def ahora_utc():
@@ -80,6 +82,15 @@ class PersonalDeportivo(db.Model):
     fecha_salida = db.Column(db.Date, nullable=True)
     activo = db.Column(db.Boolean, nullable=False, default=True)
     observacion = db.Column(db.String(255), nullable=True)
+
+    @validates("documento")
+    def _validar_documento(self, key, valor):
+        return solo_numeros_opcional(valor, "Documento", 40)
+
+    @validates("telefono")
+    def _validar_telefono(self, key, valor):
+        return solo_numeros_opcional(valor, "Teléfono", 40)
+
 
 
 class SesionEntrenamiento(db.Model):

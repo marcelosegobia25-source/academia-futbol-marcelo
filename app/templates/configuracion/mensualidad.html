@@ -1,11 +1,20 @@
 {% extends "base.html" %}
 {% block titulo %}Datos generales y mensualidad{% endblock %}
 {% block contenido %}
-<h2 class="mb-3">Datos generales y mensualidad</h2>
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow"><i class="bi bi-sliders2 text-emerald"></i> Parámetros de la Academia</span>
+        <h2 class="mb-0"><i class="bi bi-gear-fill text-emerald me-1"></i> Datos Generales y Mensualidad</h2>
+        <p class="text-muted mb-0">Identidad institucional, moneda, gestión deportiva y tarifas base.</p>
+    </div>
+    <a href="{{ url_for('configuracion.panel') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a Configuración
+    </a>
+</div>
 <form method="post" enctype="multipart/form-data" class="card shadow-sm p-4" style="max-width: 700px;">
     <div class="mb-3"><label class="form-label">Nombre oficial</label><input name="nombre_academia" class="form-control" maxlength="150" required value="{{ config.nombre_academia }}"></div>
     <div class="mb-3"><label class="form-label">Dirección</label><input name="direccion" class="form-control" maxlength="255" value="{{ config.direccion or '' }}"></div>
-    <div class="mb-3"><label class="form-label">Teléfono</label><input name="telefono" class="form-control" maxlength="50" value="{{ config.telefono or '' }}"></div>
+    <div class="mb-3"><label class="form-label">Teléfono</label><input type="text" name="telefono" id="telefono" class="form-control" maxlength="50" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Solo números" value="{{ config.telefono or '' }}"><div class="form-text">Solo números, sin letras.</div></div>
     <div class="mb-3"><label class="form-label">Eslogan</label><input name="eslogan" class="form-control" maxlength="180" value="{{ config.eslogan or '' }}"></div>
     <div class="mb-3"><label class="form-label">Logo institucional</label><input type="file" name="logo" accept="image/png,image/jpeg,image/webp" class="form-control">{% if config.logo %}<img src="{{url_for('configuracion.logo')}}" alt="Logo actual" class="mt-2" style="max-width:120px;max-height:120px">{% endif %}</div>
     <div class="row g-3 mb-3"><div class="col-md-4"><label>Color principal</label><input type="color" name="color_primario" value="{{config.color_primario}}" class="form-control form-control-color w-100"></div><div class="col-md-4"><label>Color secundario</label><input type="color" name="color_secundario" value="{{config.color_secundario}}" class="form-control form-control-color w-100"></div><div class="col-md-4"><label>Color de acento</label><input type="color" name="color_acento" value="{{config.color_acento}}" class="form-control form-control-color w-100"></div></div>

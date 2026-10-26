@@ -1029,6 +1029,31 @@ def _migracion_32_indices_partidos_origen():
     db.session.commit()
 
 
+def _migracion_33_ci_y_telefonos_numericos():
+    if db.engine.dialect.name == "postgresql":
+        restricciones = [
+            ("alumno", "ci", "ck_alumno_ci_numerico"),
+            ("alumno", "telefono", "ck_alumno_telefono_numerico"),
+            ("tutor", "documento", "ck_tutor_documento_numerico"),
+            ("tutor", "telefono", "ck_tutor_telefono_numerico"),
+            ("personal_deportivo", "documento", "ck_personal_documento_numerico"),
+            ("personal_deportivo", "telefono", "ck_personal_telefono_numerico"),
+            ("proveedor", "documento", "ck_proveedor_documento_numerico"),
+            ("proveedor", "telefono", "ck_proveedor_telefono_numerico"),
+            ("configuracion", "telefono", "ck_configuracion_telefono_numerico"),
+        ]
+        for tabla, col, ck_name in restricciones:
+            db.session.execute(text(f"""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '{ck_name}') THEN
+                        ALTER TABLE {tabla} ADD CONSTRAINT {ck_name} CHECK ({col} IS NULL OR {col} ~ '^[0-9]+$');
+                    END IF;
+                END $$;
+            """))
+        db.session.commit()
+
+
 MIGRACIONES = [
     (1, "Índices y restricciones únicas", _migracion_1_indices_integridad),
     (2, "Relación formal de equipo rival", _migracion_2_equipo_rival),
@@ -1062,6 +1087,7 @@ MIGRACIONES = [
     (30, "Permisos de asistencia para roles operativos", _migracion_30_permisos_asistencia_roles_operativos),
     (31, "Turno de entrenamiento por alumno", _migracion_31_turno_entrenamiento_alumnos),
     (32, "Índices para llaves eliminatorias de partidos", _migracion_32_indices_partidos_origen),
+    (33, "Restricción numérica para CI, documentos y teléfonos", _migracion_33_ci_y_telefonos_numericos),
 ]
 
 

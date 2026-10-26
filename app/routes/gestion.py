@@ -20,6 +20,8 @@ from app.models import (
 from app.utils.excel import exportar_tabla_excel
 from app.utils.pdf_tablas import generar_tabla_pdf
 from app.utils.personalizacion import configuracion_y_logo
+from app.utils.validacion import ErrorValidacion, solo_numeros_opcional
+
 
 
 bp = Blueprint("gestion", __name__, url_prefix="/gestion")
@@ -731,19 +733,23 @@ def proveedores():
         elif Proveedor.query.filter(db.func.lower(Proveedor.nombre) == nombre.lower()).first():
             flash("El proveedor ya existe.", "danger")
         else:
-            db.session.add(Proveedor(
-                nombre=nombre[:150], telefono=request.form.get("telefono", "").strip() or None,
-                tipo_persona=request.form.get("tipo_persona", "Persona")[:10],
-                documento=request.form.get("documento", "").strip() or None,
-                correo=request.form.get("correo", "").strip() or None,
-                contacto=request.form.get("contacto", "").strip() or None,
-                direccion=request.form.get("direccion", "").strip() or None,
-                observacion=request.form.get("observacion", "").strip() or None,
-            ))
             try:
+                documento = solo_numeros_opcional(request.form.get("documento"), "Documento", 40)
+                telefono = solo_numeros_opcional(request.form.get("telefono"), "Teléfono", 50)
+                db.session.add(Proveedor(
+                    nombre=nombre[:150], telefono=telefono,
+                    tipo_persona=request.form.get("tipo_persona", "Persona")[:10],
+                    documento=documento,
+                    correo=request.form.get("correo", "").strip() or None,
+                    contacto=request.form.get("contacto", "").strip() or None,
+                    direccion=request.form.get("direccion", "").strip() or None,
+                    observacion=request.form.get("observacion", "").strip() or None,
+                ))
                 db.session.commit()
                 flash("Proveedor registrado.", "success")
                 return redirect(url_for("gestion.proveedores"))
+            except ErrorValidacion as e:
+                flash(str(e), "danger")
             except SQLAlchemyError:
                 db.session.rollback()
                 flash("No se pudo registrar el proveedor; verifique que no esté duplicado.", "danger")

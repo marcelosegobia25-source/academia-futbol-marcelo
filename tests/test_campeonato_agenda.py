@@ -327,7 +327,7 @@ def test_finalizar_archiva_y_reabrir_restaura_convocatoria(client):
     campeonato, categoria, local, visita = preparar_campeonato()
     alumno = Alumno(
         nombre="Ana", apellido="Prueba", fecha_nacimiento=date(2013, 1, 1),
-        ci="CAM-ARCH-1", id_categoria=categoria.id_categoria, estado="Activo",
+        ci="990015", id_categoria=categoria.id_categoria, estado="Activo",
     )
     db.session.add(alumno)
     db.session.flush()

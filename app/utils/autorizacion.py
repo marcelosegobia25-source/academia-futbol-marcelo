@@ -14,9 +14,18 @@ PERMISOS = {
 }
 
 def cargar_usuario_actual():
-    from app.extensions import db
-    from app.models import Usuario
-    g.usuario_actual = db.session.get(Usuario, session.get("id_usuario")) if session.get("id_usuario") else None
+    from app.models import Usuario, Rol
+    from sqlalchemy.orm import joinedload
+    id_usuario = session.get("id_usuario")
+    if not id_usuario:
+        g.usuario_actual = None
+        return None
+    g.usuario_actual = (
+        Usuario.query
+        .options(joinedload(Usuario.rol).joinedload(Rol.permisos))
+        .filter(Usuario.id_usuario == id_usuario)
+        .first()
+    )
     return g.usuario_actual
 
 def tiene_permiso(codigo):

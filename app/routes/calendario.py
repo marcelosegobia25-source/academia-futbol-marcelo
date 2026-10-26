@@ -6,7 +6,7 @@ from app.extensions import db
 from app.models import (EventoAgenda, Campeonato, Entrenamiento, Categoria, Equipo, Lugar, Auditoria,
                         PersonalDeportivo, SesionEntrenamiento, AsistenciaEntrenamiento, Alumno)
 from app.utils.validacion import (
-    ErrorValidacion, entero, hora_hm, texto_opcional, fecha_iso,
+    ErrorValidacion, entero, hora_hm, texto_opcional, fecha_iso, solo_numeros_opcional,
 )
 from app.utils.calendario_pdf import generar_calendario_pdf
 from app.utils.descargas import enviar_buffer
@@ -30,18 +30,24 @@ def personal():
         if not nombre:
             flash("El nombre es obligatorio.", "danger")
         else:
-            creado = PersonalDeportivo(
-                nombre=nombre[:150], documento=request.form.get("documento", "").strip() or None,
-                telefono=request.form.get("telefono", "").strip() or None,
-                correo=request.form.get("correo", "").strip() or None,
-                especialidad=request.form.get("especialidad", "").strip() or None,
-                tipo=request.form.get("tipo", "Entrenador")[:20], fecha_ingreso=date.today(),
-            )
-            db.session.add(creado)
-            db.session.flush()
-            db.session.add(Auditoria(modulo="Personal", accion="Crear", entidad="PersonalDeportivo", id_entidad=creado.id_personal, valor_nuevo=creado.nombre))
-            db.session.commit(); flash("Personal deportivo registrado.", "success")
-            return redirect(url_for("calendario.personal"))
+            try:
+                documento = solo_numeros_opcional(request.form.get("documento"), "Documento", 40)
+                telefono = solo_numeros_opcional(request.form.get("telefono"), "Teléfono", 40)
+                creado = PersonalDeportivo(
+                    nombre=nombre[:150], documento=documento,
+                    telefono=telefono,
+                    correo=request.form.get("correo", "").strip() or None,
+                    especialidad=request.form.get("especialidad", "").strip() or None,
+                    tipo=request.form.get("tipo", "Entrenador")[:20], fecha_ingreso=date.today(),
+                )
+                db.session.add(creado)
+                db.session.flush()
+                db.session.add(Auditoria(modulo="Personal", accion="Crear", entidad="PersonalDeportivo", id_entidad=creado.id_personal, valor_nuevo=creado.nombre))
+                db.session.commit(); flash("Personal deportivo registrado.", "success")
+                return redirect(url_for("calendario.personal"))
+            except ErrorValidacion as e:
+                flash(str(e), "danger")
+
     return render_template("calendario/personal.html", personal=PersonalDeportivo.query.order_by(PersonalDeportivo.activo.desc(), PersonalDeportivo.nombre).all())
 
 

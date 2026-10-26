@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% block titulo %}{{ 'Editar' if equipo else 'Nuevo' }} equipo{% endblock %}
 {% block contenido %}
-<h2 class="mb-3">{{ 'Editar equipo' if equipo else 'Nuevo equipo' }}</h2>
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow">Planteles Deportivos</span>
+        <h2 class="mb-0"><i class="bi bi-shield-check text-emerald me-1"></i> {{ 'Editar Equipo' if equipo else 'Nuevo Equipo' }}</h2>
+        <p class="text-muted small mb-0">Gestión de planteles representativos por categoría en la academia.</p>
+    </div>
+    <a href="{{ url_for('equipos.listar') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Volver a Equipos</a>
+</div>
 <form method="post" class="card shadow-sm p-4" style="max-width: 500px;">
     <div class="mb-3">
         <label class="form-label">Nombre</label>

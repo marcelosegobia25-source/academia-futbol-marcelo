@@ -24,6 +24,20 @@ def texto_opcional(valor, campo, maximo=255):
     return texto
 
 
+def solo_numeros_opcional(valor, campo, maximo=50):
+    if valor is None:
+        return None
+    texto = str(valor).strip()
+    if not texto:
+        return None
+    if not re.fullmatch(r"\d+", texto):
+        raise ErrorValidacion(f"{campo} solo debe contener números, sin letras ni caracteres especiales.")
+    if len(texto) > maximo:
+        raise ErrorValidacion(f"{campo} supera el máximo de {maximo} dígitos.")
+    return texto
+
+
+
 def fecha_iso(valor, campo, requerida=True):
     if not valor:
         if requerida:

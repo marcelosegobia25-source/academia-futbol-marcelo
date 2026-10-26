@@ -1,9 +1,20 @@
 {% extends "base.html" %}
 {% block titulo %}Jugadores — {{ campeonato.nombre }}{% endblock %}
 {% block contenido %}
-<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-    <div><span class="eyebrow">Inscripción de plantel</span><h2 class="mb-0">Habilitación de jugadores</h2><p class="text-muted mb-0 mt-1">{{ campeonato.nombre }}</p></div>
-    <a href="{{ url_for('campeonatos.detalle', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Volver al campeonato</a>
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow"><i class="bi bi-person-check text-emerald"></i> Inscripción de Plantel</span>
+        <h2 class="mb-0"><i class="bi bi-people-fill text-emerald me-1"></i> Habilitación de Jugadores</h2>
+        <p class="text-muted mb-0 mt-1">{{ campeonato.nombre }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-success" onclick="compartirConvocadosCampeonato()">
+            <i class="bi bi-share"></i> Compartir Convocados
+        </button>
+        <a href="{{ url_for('campeonatos.detalle', id_campeonato=campeonato.id_campeonato) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Campeonato
+        </a>
+    </div>
 </div>
 
 <form method="get" class="card player-filterbar mb-3">
@@ -60,4 +71,53 @@
         </table>
     </div>
 </div>
+
+<script>
+function compartirConvocadosCampeonato() {
+    const campeonato = "{{ campeonato.nombre }}";
+    const filas = document.querySelectorAll('table tbody tr');
+    const habilitados = [];
+
+    filas.forEach(fila => {
+        const estadoBadge = fila.querySelector('.badge');
+        if (!estadoBadge || !estadoBadge.textContent.includes('Habilitado')) return;
+
+        const nombreEl = fila.querySelector('.fw-semibold');
+        const posEl = fila.querySelector('.text-muted');
+        const catEl = fila.children[1];
+        const eqEl = fila.children[2];
+
+        const nombre = nombreEl ? nombreEl.textContent.trim() : '';
+        const posicion = posEl ? posEl.textContent.trim() : '';
+        const categoria = catEl ? catEl.textContent.trim() : '';
+        const equipo = eqEl ? eqEl.textContent.trim() : '';
+
+        if (nombre) {
+            let info = nombre;
+            let detalles = [];
+            if (posicion && posicion !== 'Sin posición') detalles.push(posicion);
+            if (categoria && categoria !== '—') detalles.push(categoria);
+            if (equipo && equipo !== 'Sin equipo') detalles.push(equipo);
+            if (detalles.length) info += ` (${detalles.join(' · ')})`;
+            habilitados.push(info);
+        }
+    });
+
+    if (habilitados.length === 0) {
+        alert('No hay jugadores habilitados en el listado actual.');
+        return;
+    }
+
+    let texto = `🏆 *LISTA DE CONVOCADOS / HABILITADOS*\n`;
+    texto += `⚽ *Campeonato:* ${campeonato}\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    habilitados.forEach((jugador, idx) => {
+        texto += `${idx + 1}. ${jugador}\n`;
+    });
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `📊 *Total Convocados:* ${habilitados.length} jugadores.\n`;
+
+    compartirListaTexto(`Convocados - ${campeonato}`, texto);
+}
+</script>
 {% endblock %}

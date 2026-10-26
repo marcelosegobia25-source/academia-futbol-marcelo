@@ -11,6 +11,9 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
     # Normalizar URI para compatibilidad PostgreSQL en la nube y pruebas
     uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
     if uri.startswith("postgres://"):
@@ -94,11 +97,31 @@ def create_app(config_class=Config):
     app.register_blueprint(gestion_bp)
     app.register_blueprint(usuarios_bp)
 
+    from app.utils.tiempo import fecha_hora_bo, fecha_bo, hora_bo, hoy_bolivia, ahora_bolivia
+
+    @app.template_filter("fecha_hora_bo")
+    def _filtro_fecha_hora_bo(val, formato="%d/%m/%Y %H:%M"):
+        return fecha_hora_bo(val, formato)
+
+    @app.template_filter("fecha_bo")
+    def _filtro_fecha_bo(val, formato="%d/%m/%Y"):
+        return fecha_bo(val, formato)
+
+    @app.template_filter("hora_bo")
+    def _filtro_hora_bo(val, formato="%H:%M"):
+        return hora_bo(val, formato)
+
     @app.context_processor
     def personalizacion_global():
         from app.models import Configuracion
         from app.utils.autorizacion import tiene_permiso
-        return {"marca": Configuracion.obtener(), "usuario_actual": getattr(g, "usuario_actual", None), "puede": tiene_permiso}
+        return {
+            "marca": Configuracion.obtener(),
+            "usuario_actual": getattr(g, "usuario_actual", None),
+            "puede": tiene_permiso,
+            "hoy_bo": hoy_bolivia(),
+            "ahora_bo": ahora_bolivia(),
+        }
 
     @app.route("/")
     def index():
@@ -207,6 +230,8 @@ def create_app(config_class=Config):
             "frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
         )
         respuesta.headers.setdefault("Cache-Control", "no-store")
+        if request.is_secure or request.headers.get("X-Forwarded-Proto") == "https":
+            respuesta.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         return respuesta
 
     with app.app_context():

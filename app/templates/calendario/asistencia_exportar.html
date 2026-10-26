@@ -1,9 +1,21 @@
-{% extends 'base.html' %}{% block titulo %}Exportar asistencia{% endblock %}{% block contenido %}
-<div class="mb-4"><span class="eyebrow">Asistencia</span><h1 class="page-title">Exportar {{ entrenamiento.equipo.nombre if entrenamiento.equipo else (entrenamiento.categoria.nombre if entrenamiento.categoria else 'entrenamiento') }}</h1><p class="text-muted">{{ fecha.strftime('%d/%m/%Y') }} · Las columnas están seleccionadas por defecto.</p></div>
+{% extends 'base.html' %}
+{% block titulo %}Exportar asistencia{% endblock %}
+{% block contenido %}
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow"><i class="bi bi-file-earmark-arrow-down text-emerald"></i> Exportación de Asistencia</span>
+        <h2 class="mb-0"><i class="bi bi-person-check text-emerald me-1"></i> Exportar {{ entrenamiento.equipo.nombre if entrenamiento.equipo else (entrenamiento.categoria.nombre if entrenamiento.categoria else 'Entrenamiento') }}</h2>
+        <p class="text-muted mb-0">{{ fecha | fecha_bo }} · Seleccione las columnas para descargar en Excel o PDF.</p>
+    </div>
+    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+        <i class="bi bi-arrow-left"></i> Volver a Asistencia
+    </button>
+</div>
 <form id="exportar-asistencia" method="get" action="{{ url_for('calendario.asistencia_exportar', id_entrenamiento=entrenamiento.id_entrenamiento, formato='xlsx') }}" class="card p-4" style="max-width:640px">
   <input type="hidden" name="fecha" value="{{ fecha.isoformat() }}">
   <div class="d-flex flex-wrap gap-4 mb-4">{% for clave, etiqueta in [('alumno','Alumno'),('estado','Estado'),('justificacion','Justificación')] %}<label class="form-check"><input class="form-check-input" type="checkbox" name="columnas" value="{{ clave }}" checked> {{ etiqueta }}</label>{% endfor %}</div>
   <div class="d-flex flex-wrap gap-2">
+    <a href="{{ url_for('calendario.asistencia', id_entrenamiento=entrenamiento.id_entrenamiento, fecha=fecha.isoformat()) }}" class="btn btn-outline-info"><i class="bi bi-share"></i> Ver y Compartir Lista</a>
     <button type="submit" class="btn btn-success" formaction="{{ url_for('calendario.asistencia_exportar', id_entrenamiento=entrenamiento.id_entrenamiento, formato='xlsx') }}"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</button>
     <button type="submit" class="btn btn-danger" formaction="{{ url_for('calendario.asistencia_exportar', id_entrenamiento=entrenamiento.id_entrenamiento, formato='pdf') }}"><i class="bi bi-file-earmark-pdf"></i> Descargar PDF</button>
     <button type="reset" class="btn btn-outline-secondary">Restaurar selección</button>

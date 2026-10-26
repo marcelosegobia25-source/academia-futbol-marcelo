@@ -40,6 +40,10 @@ def _clave_local():
 
 def _obtener_database_uri():
     """Detecta y normaliza la URL de la base de datos (PostgreSQL / SQLite)."""
+    if os.environ.get("USE_LOCAL_SQLITE", "").lower() in {"1", "true", "yes"}:
+        ruta_db = os.path.join(INSTANCE_DIR, "academia.db").replace("\\", "/")
+        return f"sqlite:///{ruta_db}"
+
     uri = (
         os.environ.get("DATABASE_URL")
         or os.environ.get("NAME_OF_VARIABLE")
@@ -50,7 +54,14 @@ def _obtener_database_uri():
     ).strip().strip("'\"")
 
     if not uri or "[TU_CONTRASEÑA]" in uri or "[YOUR-PASSWORD]" in uri:
-        return "sqlite:///" + os.path.join(INSTANCE_DIR, "academia.db")
+        ruta_db = os.path.join(INSTANCE_DIR, "academia.db").replace("\\", "/")
+        return f"sqlite:///{ruta_db}"
+    if uri.startswith("sqlite"):
+        if uri.startswith("sqlite:///") and not uri.startswith("sqlite:////") and not (len(uri) > 11 and uri[10] == ":"):
+            ruta_rel = uri.replace("sqlite:///", "", 1)
+            ruta_abs = os.path.abspath(os.path.join(BASE_DIR, ruta_rel)).replace("\\", "/")
+            return f"sqlite:///{ruta_abs}"
+        return uri
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql+psycopg2://", 1)
     elif uri.startswith("postgresql://") and not uri.startswith("postgresql+"):
@@ -93,6 +104,15 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_NAME = "gestion_academia_session"
+    SESSION_COOKIE_SECURE = (
+        os.environ.get("SESSION_COOKIE_SECURE", "").lower() in {"1", "true", "yes"}
+        or bool(os.environ.get("RENDER"))
+        or (
+            bool(os.environ.get("DATABASE_URL"))
+            and "postgresql" in os.environ.get("DATABASE_URL", "")
+            and os.environ.get("USE_LOCAL_SQLITE", "").lower() not in {"1", "true", "yes"}
+        )
+    )
     PERMANENT_SESSION_LIFETIME = timedelta(hours=12)
     AUTH_REQUIRED = True
     WTF_CSRF_TIME_LIMIT = 8 * 60 * 60
@@ -102,3 +122,6 @@ class Config:
 
     # Días antes del vencimiento para marcar "Próximo a vencer"
     DIAS_PROXIMO_VENCIMIENTO = 5
+
+    # Caché para activos estáticos locales (CSS, JS, iconos, fuentes)
+    SEND_FILE_MAX_AGE_DEFAULT = int(os.environ.get("SEND_FILE_MAX_AGE_DEFAULT", 43200))

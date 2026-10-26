@@ -4,6 +4,7 @@
 <div class="page-heading d-flex justify-content-between align-items-center mb-3">
     <div><span class="eyebrow">Gestión de plantel</span><h2 class="mb-0">Alumnos</h2></div>
     <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-info" onclick="compartirAlumnosListado()"><i class="bi bi-share"></i> Compartir Lista</button>
         <a href="{{ url_for('alumnos.asistencias') }}" class="btn btn-outline-primary"><i class="bi bi-calendar2-check"></i> Ver asistencias</a>
         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportarAlumnos"><i class="bi bi-download"></i> Exportar</button>
         <a href="{{ url_for('alumnos.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo alumno</a>
@@ -51,10 +52,68 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-outline-info" onclick="compartirAlumnosListado()"><i class="bi bi-share"></i> Compartir Lista</button>
                 <button type="button" class="btn btn-outline-success" onclick="exportarConfigurado(event, 'form-filtros', 'config-exportar-alumnos', '{{ url_for('alumnos.exportar_excel') }}')"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</button>
                 <button type="button" class="btn btn-danger" onclick="exportarConfigurado(event, 'form-filtros', 'config-exportar-alumnos', '{{ url_for('alumnos.exportar_pdf') }}')"><i class="bi bi-file-earmark-pdf"></i> Descargar PDF</button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function compartirAlumnosListado() {
+    const filas = document.querySelectorAll('#tabla-alumnos table tbody tr');
+    const alumnos = [];
+
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll('td');
+        if (celdas.length < 13) return;
+
+        const id = celdas[0].textContent.trim();
+        const nombre = celdas[2].textContent.trim();
+        const apellido = celdas[3].textContent.trim();
+        const categoria = celdas[4].textContent.trim();
+        const edad = celdas[5].textContent.trim();
+        const posicion = celdas[6].textContent.trim();
+        const turno = celdas[7].textContent.trim();
+        const estadoMensualidad = celdas[11].textContent.trim();
+
+        if (nombre && apellido) {
+            let detalles = [];
+            if (categoria && categoria !== '—') detalles.push(`Cat: ${categoria}`);
+            if (edad) detalles.push(`${edad} años`);
+            if (posicion && posicion !== '—') detalles.push(posicion);
+            if (turno && turno !== '—') detalles.push(turno);
+            if (estadoMensualidad) detalles.push(`Pago: ${estadoMensualidad}`);
+
+            let linea = `${nombre} ${apellido}`;
+            if (detalles.length) linea += ` (${detalles.join(' · ')})`;
+            alumnos.push(linea);
+        }
+    });
+
+    if (alumnos.length === 0) {
+        alert('No hay alumnos visibles para compartir.');
+        return;
+    }
+
+    // Cerrar modal de exportación si estaba abierto
+    const modalEl = document.getElementById('exportarAlumnos');
+    if (modalEl) {
+        const inst = bootstrap.Modal.getInstance(modalEl);
+        if (inst) inst.hide();
+    }
+
+    let texto = `📋 *LISTADO DE ALUMNOS*\n`;
+    texto += `⚽ *Academia de Fútbol*\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    alumnos.forEach((al, idx) => {
+        texto += `${idx + 1}. ${al}\n`;
+    });
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `📊 *Total:* ${alumnos.length} alumnos en la lista.\n`;
+
+    compartirListaTexto('Listado de Alumnos', texto);
+}
+</script>
 {% endblock %}

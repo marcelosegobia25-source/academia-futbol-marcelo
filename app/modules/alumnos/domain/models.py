@@ -1,5 +1,7 @@
 from datetime import date, datetime, timezone
+from sqlalchemy.orm import validates
 from app.extensions import db
+from app.utils.validacion import solo_numeros_opcional
 
 
 def ahora_utc():
@@ -151,6 +153,14 @@ class Alumno(db.Model):
             return "Ninguna"
         return self.beca or "Ninguna"
 
+    @validates("ci")
+    def _validar_ci(self, key, valor):
+        return solo_numeros_opcional(valor, "CI", 30)
+
+    @validates("telefono")
+    def _validar_telefono(self, key, valor):
+        return solo_numeros_opcional(valor, "Teléfono", 30)
+
     def __repr__(self):
         return f"<Alumno {self.nombre_completo}>"
 
@@ -164,6 +174,15 @@ class Tutor(db.Model):
     correo = db.Column(db.String(120), nullable=True)
     direccion = db.Column(db.String(255), nullable=True)
     activo = db.Column(db.Boolean, nullable=False, default=True)
+
+    @validates("documento")
+    def _validar_documento(self, key, valor):
+        return solo_numeros_opcional(valor, "Documento", 40)
+
+    @validates("telefono")
+    def _validar_telefono(self, key, valor):
+        return solo_numeros_opcional(valor, "Teléfono", 40)
+
 
 
 class AlumnoTutor(db.Model):

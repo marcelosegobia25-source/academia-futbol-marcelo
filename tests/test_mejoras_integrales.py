@@ -16,7 +16,7 @@ from app.utils.excel import exportar_tabla_excel
 from app.utils.reglas import siguiente_mes_a_pagar
 
 
-def alumno_base(ci="MEJORA-1", estado="Activo"):
+def alumno_base(ci="990001", estado="Activo"):
     categoria = Categoria.query.filter_by(nombre="13").first()
     alumno = Alumno(
         nombre="María", apellido="Control", fecha_nacimiento=date(2013, 5, 1),
@@ -327,7 +327,7 @@ def test_fixture_y_posiciones_se_exportan_en_pdf_y_excel(client):
 
 
 def test_exportacion_acepta_nombre_con_caracteres_especiales(client):
-    alumno_base(ci="EXP-ESPECIAL")
+    alumno_base(ci="990002")
     parametros = {
         "nombre_archivo": "Academia / gestión: [julio]? <control & final>",
         "columnas": ["alumno", "ci", "categoria"],
@@ -354,7 +354,7 @@ def test_exportacion_configurable_rechaza_solicitud_sin_columnas(client, ruta):
 
 
 def test_perfil_muestra_historial_completo_de_pagos(client):
-    alumno, _ = alumno_base(ci="HISTORIAL-COMPLETO")
+    alumno, _ = alumno_base(ci="990003")
     for numero in range(1, 8):
         db.session.add(Pago(
             alumno=alumno,
@@ -377,7 +377,7 @@ def test_exportacion_ics_fue_retirada(client):
 
 
 def test_ficha_pdf_usa_gestion_configurada(client, app, monkeypatch):
-    alumno, _ = alumno_base(ci="FICHA-GESTION")
+    alumno, _ = alumno_base(ci="990004")
     with app.app_context():
         config = Configuracion.obtener()
         config.gestion_ficha = 2031
@@ -402,7 +402,7 @@ def test_paginacion_alumnos(client):
     db.session.add_all([
         Alumno(
             nombre=f"Alumno {i}", apellido="Paginado",
-            fecha_nacimiento=date(2013, 1, 1), ci=f"PAG-{i}",
+            fecha_nacimiento=date(2013, 1, 1), ci=f"991{i:03d}",
             id_categoria=categoria.id_categoria,
         )
         for i in range(45)
@@ -479,7 +479,7 @@ def test_reactivacion_abre_ciclo_y_preserva_historial(client):
 
 
 def test_retirado_tiene_estado_propio_y_no_aparece_como_deudor(client):
-    retirado, categoria = alumno_base(ci="RETIRADO-DEUDA", estado="Retirado")
+    retirado, categoria = alumno_base(ci="990005", estado="Retirado")
     retirado.nombre = "RetiradoUnico"
     retirado.fecha_retiro = date.today()
     db.session.add(Pago(
@@ -492,7 +492,7 @@ def test_retirado_tiene_estado_propio_y_no_aparece_como_deudor(client):
     ))
     activo = Alumno(
         nombre="ActivoDeudorUnico", apellido="Control",
-        fecha_nacimiento=date(2013, 5, 1), ci="ACTIVO-DEUDA",
+        fecha_nacimiento=date(2013, 5, 1), ci="990006",
         estado="Activo", id_categoria=categoria.id_categoria,
     )
     db.session.add(activo)
@@ -506,7 +506,7 @@ def test_retirado_tiene_estado_propio_y_no_aparece_como_deudor(client):
 
 
 def test_retirado_no_puede_registrar_pago_ni_cambiar_fecha_base(client):
-    alumno, _ = alumno_base(ci="RETIRADO-BLOQUEO", estado="Retirado")
+    alumno, _ = alumno_base(ci="990007", estado="Retirado")
     alumno.fecha_retiro = date.today()
     db.session.commit()
     cantidad_inicial = Pago.query.filter_by(id_alumno=alumno.id_alumno).count()
@@ -566,10 +566,10 @@ def test_correccion_resultado_exige_motivo(client):
 
 
 def test_numero_qr_activo_no_se_repite(client):
-    alumno, categoria = alumno_base(ci="QR-UNO")
+    alumno, categoria = alumno_base(ci="990008")
     segundo = Alumno(
         nombre="Segundo", apellido="QR", fecha_nacimiento=date(2013, 1, 1),
-        ci="QR-DOS", id_categoria=categoria.id_categoria,
+        ci="990009", id_categoria=categoria.id_categoria,
     )
     db.session.add(segundo)
     db.session.commit()
@@ -646,7 +646,7 @@ def test_calendario_filtra_campeonatos_por_categoria(client):
 
 
 def test_asistencia_guardada_aparece_en_perfil_del_alumno(client):
-    alumno, categoria = alumno_base(ci="ASISTENCIA-PERFIL")
+    alumno, categoria = alumno_base(ci="990010")
     equipo = Equipo(nombre="Equipo del perfil", id_categoria=categoria.id_categoria)
     alumno.equipos.append(equipo)
     entrenamiento = Entrenamiento(
@@ -689,12 +689,12 @@ def test_turno_alumno_se_persiste_y_aparece_en_perfil(client):
 
 
 def test_asistencia_respeta_turno_persistido_del_alumno(client):
-    alumno_manana, categoria = alumno_base(ci="TURNO-MANANA")
+    alumno_manana, categoria = alumno_base(ci="990011")
     alumno_manana.nombre = "Alumno Mañana"
     alumno_manana.turno = "Mañana"
     alumno_noche = Alumno(
         nombre="Alumno Noche", apellido="Control", fecha_nacimiento=date(2013, 5, 1),
-        ci="TURNO-NOCHE", estado="Activo", id_categoria=categoria.id_categoria, turno="Noche",
+        ci="990012", estado="Activo", id_categoria=categoria.id_categoria, turno="Noche",
     )
     entrenamiento = Entrenamiento(
         dia_semana=1, hora_inicio=time(9, 0), hora_fin=time(10, 30), categoria=categoria,
@@ -710,7 +710,7 @@ def test_asistencia_respeta_turno_persistido_del_alumno(client):
 
 
 def test_consulta_individual_de_asistencia_filtra_ultimas_tres(client):
-    alumno, categoria = alumno_base(ci="CONSULTA-ASISTENCIA")
+    alumno, categoria = alumno_base(ci="990013")
     alumno.turno = "Tarde"
     entrenamiento = Entrenamiento(
         dia_semana=0, hora_inicio=time(15, 0), hora_fin=time(16, 30), categoria=categoria,
@@ -736,7 +736,7 @@ def test_consulta_individual_de_asistencia_filtra_ultimas_tres(client):
 
 
 def test_consulta_asistencia_filtra_estado_y_turno(client):
-    alumno, categoria = alumno_base(ci="FILTRO-ASISTENCIA")
+    alumno, categoria = alumno_base(ci="990014")
     alumno.turno = "Noche"
     entrenamiento = Entrenamiento(
         dia_semana=0, hora_inicio=time(19, 0), hora_fin=time(20, 0), categoria=categoria,

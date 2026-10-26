@@ -1,5 +1,14 @@
 {% extends 'base.html' %}{% block titulo %}Nuevo pago programado{% endblock %}{% block contenido %}
-<div class="mb-4"><div class="eyebrow">Contabilidad</div><h1 class="page-title">Nuevo pago programado</h1><p class="text-white">Configure alquileres, sueldos, servicios y otras obligaciones recurrentes.</p></div>
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow"><i class="bi bi-clock-history text-emerald"></i> Compromisos Periódicos</span>
+        <h2 class="mb-0"><i class="bi bi-calendar-event text-emerald me-1"></i> Nuevo Pago Programado</h2>
+        <p class="text-muted mb-0">Configure alquileres, sueldos, servicios y otras obligaciones recurrentes.</p>
+    </div>
+    <a href="{{ url_for('gestion.pagos_programados') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a Pagos Programados
+    </a>
+</div>
 <form method="post" class="card p-4" style="max-width:900px"><div class="row g-3">
   <div class="col-md-6"><label class="form-label">Concepto</label><input name="concepto" value="{{ programado.concepto if programado else '' }}" class="form-control" placeholder="Ej. Alquiler de cancha" required></div>
   <div class="col-md-3"><label class="form-label">Categoría contable</label><select name="categoria" class="form-select" required><option value="">Seleccione</option>{% for c in categorias_contables %}<option value="{{ c.nombre }}" {{ 'disabled' if c.tipo=='Ingreso' }}>{{ c.nombre }}{{ ' (solo ingreso)' if c.tipo=='Ingreso' }}</option>{% endfor %}</select><small><a href="{{ url_for('gestion.categorias_contables', tipo='Egreso', volver='pago_programado_nuevo') }}">Crear categoría de egreso</a></small></div>

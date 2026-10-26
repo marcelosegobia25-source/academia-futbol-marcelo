@@ -1,13 +1,15 @@
 {% extends "base.html" %}
 {% block titulo %}Cambiar contraseña{% endblock %}
 {% block contenido %}
-<div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <div class="eyebrow">Seguridad</div>
-        <h1 class="page-title mb-1">Cambiar contraseña</h1>
-        <p class="text-muted mb-0">La contraseña debe contener exactamente cinco números.</p>
+        <span class="eyebrow"><i class="bi bi-shield-lock text-emerald"></i> Seguridad de Acceso</span>
+        <h2 class="mb-0"><i class="bi bi-key-fill text-emerald me-1"></i> Cambiar Contraseña</h2>
+        <p class="text-muted mb-0">La contraseña debe contener exactamente cinco números para acceso rápido.</p>
     </div>
-    <a href="{{ url_for('configuracion.panel') }}" class="btn btn-outline-secondary">Volver</a>
+    <a href="{{ url_for('configuracion.panel') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a Configuración
+    </a>
 </div>
 
 <div class="card" style="max-width: 620px;">
@@ -16,20 +18,21 @@
             <div class="mb-3">
                 <label for="contrasena_actual" class="form-label">Contraseña actual</label>
                 <input id="contrasena_actual" name="contrasena_actual" type="password"
-                       class="form-control" inputmode="numeric" pattern="[0-9]{5}"
-                       minlength="5" maxlength="5" autocomplete="current-password" required>
+                       class="form-control" pattern="[0-9]{5}|.{8,128}"
+                       minlength="5" maxlength="128" autocomplete="current-password" required>
             </div>
             <div class="mb-3">
                 <label for="contrasena_nueva" class="form-label">Nueva contraseña</label>
                 <input id="contrasena_nueva" name="contrasena_nueva" type="password"
-                       class="form-control" inputmode="numeric" pattern="[0-9]{5}"
-                       minlength="5" maxlength="5" autocomplete="new-password" required>
+                       class="form-control" pattern="[0-9]{5}|.{8,128}"
+                       minlength="5" maxlength="128" autocomplete="new-password" required>
+                <div class="form-text text-muted small mt-1">PIN de 5 números o contraseña segura (mínimo 8 caracteres).</div>
             </div>
             <div class="mb-4">
                 <label for="confirmar_contrasena" class="form-label">Confirmar nueva contraseña</label>
                 <input id="confirmar_contrasena" name="confirmar_contrasena" type="password"
-                       class="form-control" inputmode="numeric" pattern="[0-9]{5}"
-                       minlength="5" maxlength="5" autocomplete="new-password" required>
+                       class="form-control" pattern="[0-9]{5}|.{8,128}"
+                       minlength="5" maxlength="128" autocomplete="new-password" required>
             </div>
             <button class="btn btn-success" type="submit">
                 <i class="bi bi-check2-circle me-1"></i> Actualizar contraseña

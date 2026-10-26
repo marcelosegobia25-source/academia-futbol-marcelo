@@ -1,5 +1,89 @@
-{% extends "base.html" %}{% block titulo %}Asistencia{% endblock %}{% block contenido %}
-<div class="d-flex justify-content-between mb-3"><div><h2>Asistencia de entrenamiento</h2><p>{{ sesion.fecha.strftime('%d/%m/%Y') }} · {{ entrenamiento.equipo.nombre if entrenamiento.equipo else (entrenamiento.categoria.nombre if entrenamiento.categoria else 'General') }}</p></div><a class="btn btn-outline-light" href="{{ url_for('calendario.asistencia_exportar_form', id_entrenamiento=entrenamiento.id_entrenamiento, fecha=sesion.fecha.isoformat()) }}">Exportar PDF/Excel</a></div>
-<form method="post"><input type="hidden" name="fecha" value="{{ sesion.fecha.isoformat() }}"><div class="card table-responsive"><table class="table mb-0"><thead><tr><th>Alumno</th><th>Estado</th><th>Justificación</th></tr></thead><tbody>
-{% for alumno in alumnos %}{% set r=registros.get(alumno.id_alumno) %}<tr><td>{{ alumno.nombre_completo }}</td><td><select class="form-select" name="estado_{{ alumno.id_alumno }}">{% for estado in ['Presente','Ausente','Justificado','Tarde'] %}<option {{ 'selected' if r and r.estado==estado }}>{{ estado }}</option>{% endfor %}</select></td><td><input class="form-control" name="justificacion_{{ alumno.id_alumno }}" value="{{ r.justificacion if r else '' }}"></td></tr>{% else %}<tr><td colspan="3">No hay alumnos activos para este entrenamiento.</td></tr>{% endfor %}</tbody></table></div><button class="btn btn-success mt-3">Guardar asistencia</button></form>
+{% extends "base.html" %}
+{% block titulo %}Asistencia de Entrenamiento{% endblock %}
+{% block contenido %}
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow"><i class="bi bi-check2-square text-emerald"></i> Registro de Asistencia</span>
+        <h2 class="mb-0"><i class="bi bi-person-check text-emerald me-1"></i> Asistencia de Entrenamiento</h2>
+        <p class="text-muted mb-0">{{ sesion.fecha | fecha_bo }} · {{ entrenamiento.equipo.nombre if entrenamiento.equipo else (entrenamiento.categoria.nombre if entrenamiento.categoria else 'General') }}</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-success" onclick="compartirAsistencia()">
+            <i class="bi bi-share"></i> Compartir Asistencia
+        </button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('calendario.ver') }}">
+            <i class="bi bi-calendar3"></i> Ver Calendario
+        </a>
+        <a class="btn btn-outline-primary" href="{{ url_for('calendario.asistencia_exportar_form', id_entrenamiento=entrenamiento.id_entrenamiento, fecha=sesion.fecha.isoformat()) }}">
+            <i class="bi bi-file-earmark-arrow-down"></i> Exportar Asistencia
+        </a>
+    </div>
+</div>
+<form method="post" id="form-asistencia"><input type="hidden" name="fecha" value="{{ sesion.fecha.isoformat() }}"><div class="card table-responsive"><table class="table mb-0" id="tabla-asistencia"><thead><tr><th>Alumno</th><th>Estado</th><th>Justificación</th></tr></thead><tbody>
+{% for alumno in alumnos %}{% set r=registros.get(alumno.id_alumno) %}<tr><td class="col-alumno">{{ alumno.nombre_completo }}</td><td><select class="form-select select-estado" name="estado_{{ alumno.id_alumno }}">{% for estado in ['Presente','Ausente','Justificado','Tarde'] %}<option {{ 'selected' if r and r.estado==estado }}>{{ estado }}</option>{% endfor %}</select></td><td><input class="form-control input-justificacion" name="justificacion_{{ alumno.id_alumno }}" value="{{ r.justificacion if r else '' }}"></td></tr>{% else %}<tr><td colspan="3">No hay alumnos activos para este entrenamiento.</td></tr>{% endfor %}</tbody></table></div><button class="btn btn-success mt-3">Guardar asistencia</button></form>
+
+<script>
+function compartirAsistencia() {
+    const grupo = "{{ entrenamiento.equipo.nombre if entrenamiento.equipo else (entrenamiento.categoria.nombre if entrenamiento.categoria else 'General') }}";
+    const fecha = "{{ sesion.fecha | fecha_bo }}";
+    const filas = document.querySelectorAll('#tabla-asistencia tbody tr');
+
+    const presentes = [];
+    const ausentes = [];
+    const justificados = [];
+    const tardes = [];
+
+    filas.forEach(fila => {
+        const alumnoEl = fila.querySelector('.col-alumno');
+        const selectEl = fila.querySelector('.select-estado');
+        const justEl = fila.querySelector('.input-justificacion');
+        if (!alumnoEl || !selectEl) return;
+
+        const nombre = alumnoEl.textContent.trim();
+        const estado = selectEl.value;
+        const just = justEl && justEl.value.trim() ? ` (${justEl.value.trim()})` : '';
+
+        if (estado === 'Presente') presentes.push(nombre);
+        else if (estado === 'Ausente') ausentes.push(nombre + just);
+        else if (estado === 'Justificado') justificados.push(nombre + just);
+        else if (estado === 'Tarde') tardes.push(nombre + just);
+    });
+
+    const total = presentes.length + ausentes.length + justificados.length + tardes.length;
+    if (total === 0) {
+        alert('No hay alumnos registrados en esta sesión.');
+        return;
+    }
+
+    let texto = `⚽ *ASISTENCIA - ACADEMIA DE FÚTBOL*\n`;
+    texto += `📅 *Fecha:* ${fecha}\n`;
+    texto += `👥 *Grupo:* ${grupo}\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+
+    if (presentes.length > 0) {
+        texto += `\n✅ *PRESENTES (${presentes.length}):*\n`;
+        presentes.forEach((n, idx) => { texto += `  ${idx + 1}. ${n}\n`; });
+    }
+
+    if (tardes.length > 0) {
+        texto += `\n⏳ *TARDE (${tardes.length}):*\n`;
+        tardes.forEach((n, idx) => { texto += `  ${idx + 1}. ${n}\n`; });
+    }
+
+    if (justificados.length > 0) {
+        texto += `\n📝 *JUSTIFICADOS (${justificados.length}):*\n`;
+        justificados.forEach((n, idx) => { texto += `  ${idx + 1}. ${n}\n`; });
+    }
+
+    if (ausentes.length > 0) {
+        texto += `\n❌ *AUSENTES (${ausentes.length}):*\n`;
+        ausentes.forEach((n, idx) => { texto += `  ${idx + 1}. ${n}\n`; });
+    }
+
+    texto += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `📊 *Total:* ${presentes.length} presentes de ${total} alumnos.\n`;
+
+    compartirListaTexto(`Asistencia ${grupo} - ${fecha}`, texto);
+}
+</script>
 {% endblock %}

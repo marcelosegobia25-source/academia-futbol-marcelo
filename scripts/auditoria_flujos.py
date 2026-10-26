@@ -101,14 +101,14 @@ class AuditorFlujos:
     def _flujo_2_ciclo_vida_alumno(self):
         print("\n📋 2. FLUJO DEL CICLO DE VIDA DEL ALUMNO")
         # 2.1 Búsqueda o creación de alumno de prueba
-        alumno = Alumno.query.filter_by(ci="FLOW-AUDIT-01").first()
+        alumno = Alumno.query.filter_by(ci="990016").first()
         if not alumno:
             cat = Categoria.query.first()
             alumno = Alumno(
                 nombre="Lucas",
                 apellido="FlujoTest",
                 fecha_nacimiento=date(2014, 5, 10),
-                ci="FLOW-AUDIT-01",
+                ci="990016",
                 id_categoria=cat.id_categoria if cat else None,
                 tutor="Carlos FlujoTest",
                 telefono="77788899",
@@ -165,7 +165,7 @@ class AuditorFlujos:
 
     def _flujo_3_tesoreria_y_pagos(self):
         print("\n📋 3. FLUJO DE TESORERÍA, PAGOS Y ARQUEO DE CAJA")
-        alumno = Alumno.query.filter_by(ci="FLOW-AUDIT-01").first()
+        alumno = Alumno.query.filter_by(ci="990016").first()
         mes_test = "2026-10"
 
         # 3.1 Registro de pago

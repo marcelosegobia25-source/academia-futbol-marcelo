@@ -7,11 +7,11 @@ from pathlib import Path
 from flask import (
     Blueprint, render_template, current_app, send_file, flash, redirect, url_for,
 )
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 
 from app.extensions import db
 from app.models import (Alumno, Auditoria, Categoria, CuotaProgramada, Equipo, EventoAgenda,
-    MovimientoCaja, MovimientoContable, Partido, Pago, CierreCaja, Obligacion,
+    MovimientoCaja, MovimientoContable, Partido, Pago, CierreCaja, Obligacion, AplicacionPago,
     Producto, ProductoVariante, Compra, Venta, DevolucionVenta, ConteoInventario,
     PersonalDeportivo, AsistenciaEntrenamiento, SesionCaja, InscripcionGestion)
 from app.utils.resumen_categorias import construir_resumen_categorias
@@ -171,7 +171,11 @@ def general():
         CuotaProgramada.fecha_vencimiento <= hoy + timedelta(days=30),
     ).order_by(CuotaProgramada.fecha_vencimiento).all()
     inicio_mes = hoy.replace(day=1)
-    obligaciones_pendientes = [o for o in Obligacion.query.all() if o.saldo > 0]
+    obligaciones_pendientes = [
+        o for o in Obligacion.query.options(
+            selectinload(Obligacion.aplicaciones).joinedload(AplicacionPago.pago)
+        ).all() if o.saldo > 0
+    ]
     movimientos_mes = MovimientoContable.query.filter(
         MovimientoContable.fecha >= inicio_mes, MovimientoContable.fecha <= hoy,
         MovimientoContable.anulado_en.is_(None),

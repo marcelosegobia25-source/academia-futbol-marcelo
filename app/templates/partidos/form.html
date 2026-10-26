@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% block titulo %}{{ 'Editar' if partido else 'Programar' }} partido{% endblock %}
 {% block contenido %}
-<h2 class="mb-3">{{ 'Editar partido' if partido else 'Programar partido' }}</h2>
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow">Programación Deportiva</span>
+        <h2 class="mb-0"><i class="bi bi-flag-fill text-emerald me-1"></i> {{ 'Editar Partido' if partido else 'Programar Partido' }}</h2>
+        <p class="text-muted small mb-0">Asignación de equipos, categoría, rival, fecha y sede del encuentro.</p>
+    </div>
+    <a href="{{ url_for('partidos.listar') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Volver a Partidos</a>
+</div>
 <form method="post" class="card shadow-sm p-4" style="max-width: 600px;">
     <div class="row g-3">
         <div class="col-md-6">

@@ -42,14 +42,19 @@ def login():
     ahora = time.time()
     if estado["bloqueado_hasta"] > ahora:
         minutos = max(1, int((estado["bloqueado_hasta"] - ahora + 59) // 60))
+        current_app.logger.warning(
+            "Acceso denegado: IP=%s intentó conectar durante período de penalización",
+            clave_cliente,
+        )
         flash(f"Acceso bloqueado temporalmente. Intente nuevamente en {minutos} minuto(s).", "danger")
         return render_template("autenticacion/login.html", destino=destino), 429
     if request.method == "POST":
         nombre_usuario = request.form.get("nombre_usuario", "admin").strip().lower()
         contrasena = request.form.get("contrasena", "")
         usuario = Usuario.query.filter(db.func.lower(Usuario.nombre_usuario) == nombre_usuario).first()
-        if not re.fullmatch(r"\d{5}", contrasena):
-            flash("La contraseña debe contener exactamente 5 números.", "danger")
+        es_valida = bool(re.fullmatch(r"\d{5}", contrasena) or (8 <= len(contrasena) <= 128))
+        if not es_valida:
+            flash("La contraseña debe contener exactamente 5 números o al menos 8 caracteres.", "danger")
         elif usuario and usuario.activo and usuario.verificar_contrasena(contrasena):
             intentos.pop(clave_cliente, None)
             session.clear()
@@ -69,9 +74,22 @@ def login():
             estado["fallos"] += 1
             if estado["fallos"] >= 5:
                 estado = {"fallos": 0, "bloqueado_hasta": ahora + 300}
+                current_app.logger.warning(
+                    "Fuerza bruta detectada: bloqueo de 5 minutos activado para IP=%s (usuario=%s)",
+                    clave_cliente, nombre_usuario,
+                )
+                db.session.add(Auditoria(
+                    modulo="Seguridad", accion="Bloqueo fuerza bruta",
+                    entidad="Usuario", detalle=f"IP={clave_cliente}; usuario={nombre_usuario}",
+                ))
+                db.session.commit()
                 flash("Demasiados intentos incorrectos. Acceso bloqueado durante 5 minutos.", "danger")
             else:
                 restantes = 5 - estado["fallos"]
+                current_app.logger.info(
+                    "Intento fallido de inicio de sesión: IP=%s usuario=%s intentos_restantes=%s",
+                    clave_cliente, nombre_usuario, restantes,
+                )
                 flash(f"Contraseña incorrecta. Quedan {restantes} intento(s).", "danger")
             intentos[clave_cliente] = estado
     return render_template("autenticacion/login.html", destino=destino)

@@ -22,6 +22,7 @@
         </div>
     </div>
     <div class="d-flex flex-wrap gap-2 align-content-start">
+        <button type="button" class="btn btn-outline-info" onclick="compartirFixtureCampeonato()"><i class="bi bi-share"></i> Compartir Fixture</button>
         <a href="{{ url_for('campeonatos.exportar_fixture_excel', id_campeonato=campeonato.id_campeonato, id_categoria=filtros.get('id_categoria'), fase=filtros.get('fase')) }}" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Fixture Excel</a>
         <a href="{{ url_for('campeonatos.exportar_fixture_pdf', id_campeonato=campeonato.id_campeonato, id_categoria=filtros.get('id_categoria'), fase=filtros.get('fase')) }}" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf"></i> Fixture PDF</a>
         {% if campeonato.estado not in ['Finalizado', 'Cancelado'] %}
@@ -155,12 +156,13 @@
 
 <div class="tab-pane fade" id="posiciones">
 <div class="d-flex flex-wrap justify-content-end gap-2 mb-3">
+    <button type="button" class="btn btn-outline-info" onclick="compartirTablaPosiciones()"><i class="bi bi-share"></i> Compartir Posiciones</button>
     <a href="{{ url_for('campeonatos.exportar_posiciones_excel', id_campeonato=campeonato.id_campeonato, id_categoria=filtros.get('id_categoria')) }}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Posiciones Excel</a>
     <a href="{{ url_for('campeonatos.exportar_posiciones_pdf', id_campeonato=campeonato.id_campeonato, id_categoria=filtros.get('id_categoria')) }}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf"></i> Posiciones PDF</a>
 </div>
 {% for cat, filas in posiciones_por_categoria.items() %}
     <div class="card shadow-sm mb-3">
-        <div class="card-header bg-white"><strong>Tabla de posiciones — {{ cat.nombre_mostrado }}</strong></div>
+        <div class="card-header"><strong>Tabla de posiciones — {{ cat.nombre_mostrado }}</strong></div>
         <div class="table-responsive">
             <table class="table table-sm align-middle mb-0">
                 <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead>
@@ -176,7 +178,7 @@
             </table>
         </div>
         {% if campeonato.estado not in ['Finalizado', 'Cancelado'] %}
-        <div class="card-footer bg-white">
+        <div class="card-footer">
             <form method="post" action="{{ url_for('campeonatos.generar_eliminatorias', id_campeonato=campeonato.id_campeonato) }}" onsubmit="return confirm('¿Crear las llaves con los equipos mejor clasificados?');">
                 <input type="hidden" name="id_categoria" value="{{ cat.id_categoria }}">
                 <button class="btn btn-sm btn-dark"><i class="bi bi-diagram-3"></i> Crear eliminatorias de {{ cat.nombre_mostrado }}</button>
@@ -210,7 +212,7 @@
     {% for categoria, participantes in participantes_por_categoria.items() %}
         <div class="col-md-6 col-xl-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header bg-white d-flex justify-content-between"><strong>{{ categoria.nombre_mostrado }}</strong><span class="badge text-bg-dark">{{ participantes|length }}</span></div>
+                <div class="card-header d-flex justify-content-between"><strong>{{ categoria.nombre_mostrado }}</strong><span class="badge text-bg-dark">{{ participantes|length }}</span></div>
                 <div class="card-body">
                 {% for equipo in participantes %}
                     <div class="participant-row"><span>{{ equipo.nombre }}</span><span class="badge {{ 'text-bg-secondary' if equipo.es_rival else 'text-bg-success' }}">{{ 'Rival' if equipo.es_rival else 'Academia' }}</span></div>
@@ -246,4 +248,89 @@
     </div>
 </section>
 {% endif %}
+
+<script>
+function compartirFixtureCampeonato() {
+    const campeonato = "{{ campeonato.nombre }}";
+    const filas = document.querySelectorAll('#fixture table tbody tr');
+    const partidos = [];
+
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll('td');
+        if (celdas.length < 8) return;
+
+        const jornada = celdas[0].textContent.trim();
+        const fechaHora = celdas[1].innerText.replace(/\n+/g, ' ').trim();
+        const fase = celdas[2].textContent.trim();
+        const categoria = celdas[3].textContent.trim();
+        const local = celdas[4].textContent.trim();
+        const visitante = celdas[5].textContent.trim();
+        const resultado = celdas[6].innerText.replace(/\n+/g, ' ').trim();
+        const cancha = celdas[7].textContent.replace('Copiar link', '').trim();
+
+        if (local && visitante) {
+            let linea = `⚽ `;
+            if (jornada && jornada !== '—') linea += `[${jornada}] `;
+            linea += `${fechaHora} · ${local} vs ${visitante}`;
+            if (resultado && resultado !== 'Pendiente') linea += ` (${resultado})`;
+            if (cancha && cancha !== '—') linea += ` 📍 ${cancha}`;
+            partidos.push(linea);
+        }
+    });
+
+    if (partidos.length === 0) {
+        alert('No hay partidos en el fixture para compartir.');
+        return;
+    }
+
+    let texto = `🏆 *FIXTURE DE PARTIDOS*\n`;
+    texto += `🏟️ *Campeonato:* ${campeonato}\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    partidos.forEach(p => { texto += `${p}\n`; });
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `📊 *Total:* ${partidos.length} partidos programados.\n`;
+
+    compartirListaTexto(`Fixture - ${campeonato}`, texto);
+}
+
+function compartirTablaPosiciones() {
+    const campeonato = "{{ campeonato.nombre }}";
+    const tarjetas = document.querySelectorAll('#posiciones .card');
+    let texto = `🏆 *TABLA DE POSICIONES*\n`;
+    texto += `🏟️ *Campeonato:* ${campeonato}\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+
+    let totalTablas = 0;
+    tarjetas.forEach(tarjeta => {
+        const header = tarjeta.querySelector('.card-header');
+        const tituloCat = header ? header.textContent.trim().replace('Tabla de posiciones — ', '') : '';
+        const filas = tarjeta.querySelectorAll('tbody tr');
+        if (filas.length === 0 || filas[0].querySelector('td[colspan]')) return;
+
+        totalTablas++;
+        texto += `\n⚽ *Categoría:* ${tituloCat}\n`;
+        texto += `──────────────────────\n`;
+
+        filas.forEach((fila) => {
+            const cols = fila.querySelectorAll('td');
+            if (cols.length >= 10) {
+                const pos = cols[0].textContent.trim();
+                const equipo = cols[1].textContent.trim();
+                const pj = cols[2].textContent.trim();
+                const dg = cols[8].textContent.trim();
+                const pts = cols[9].textContent.trim();
+                texto += `${pos}. ${equipo} (${pj} PJ, DG: ${dg}, ${pts} pts)\n`;
+            }
+        });
+    });
+
+    if (totalTablas === 0) {
+        alert('No hay tablas de posiciones con datos para compartir.');
+        return;
+    }
+
+    texto += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
+    compartirListaTexto(`Posiciones - ${campeonato}`, texto);
+}
+</script>
 {% endblock %}

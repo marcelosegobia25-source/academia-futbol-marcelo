@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 from app.extensions import db
 from app.models import Configuracion, Auditoria, Tarifa
 from app.utils.validacion import (
-    ErrorValidacion, decimal_positivo, texto_requerido, texto_opcional, entero, opcion
+    ErrorValidacion, decimal_positivo, texto_requerido, texto_opcional, entero, opcion, solo_numeros_opcional
 )
 
 bp = Blueprint("configuracion", __name__, url_prefix="/configuracion")
@@ -32,7 +32,7 @@ def mensualidad():
             config.nombre_academia = texto_requerido(
                 request.form.get("nombre_academia"), "Nombre de la academia", 150
             )
-            config.telefono = texto_opcional(request.form.get("telefono"), "Teléfono", 50)
+            config.telefono = solo_numeros_opcional(request.form.get("telefono"), "Teléfono", 50)
             config.direccion = texto_opcional(request.form.get("direccion"), "Dirección", 255)
             config.moneda = opcion(
                 request.form.get("moneda", "BOB"), ["BOB", "USD"], "Moneda"
@@ -106,7 +106,7 @@ def logo():
     ruta = os.path.join(current_app.config["BRAND_FOLDER"], config.logo)
     if not os.path.isfile(ruta):
         abort(404)
-    return send_file(ruta, max_age=0)
+    return send_file(ruta, max_age=86400, conditional=True)
 
 
 @bp.route("/contrasena", methods=["GET", "POST"])
@@ -118,10 +118,11 @@ def contrasena():
         actual = request.form.get("contrasena_actual", "")
         nueva = request.form.get("contrasena_nueva", "")
         confirmacion = request.form.get("confirmar_contrasena", "")
+        es_valida = bool(re.fullmatch(r"\d{5}", nueva) or (8 <= len(nueva) <= 128))
         if not usuario or not usuario.verificar_contrasena(actual):
             flash("La contraseña actual no es correcta.", "danger")
-        elif not re.fullmatch(r"\d{5}", nueva):
-            flash("La nueva contraseña debe contener exactamente 5 números.", "danger")
+        elif not es_valida:
+            flash("La nueva contraseña debe contener exactamente 5 números o al menos 8 caracteres.", "danger")
         elif nueva != confirmacion:
             flash("La confirmación no coincide con la nueva contraseña.", "danger")
         elif nueva == actual:

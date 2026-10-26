@@ -4,37 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ingresar - {{ marca.nombre_academia }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
-<body class="bg-dark">
+<body class="login-page-body">
     <main class="container min-vh-100 d-flex align-items-center justify-content-center py-4">
-        <div class="card shadow-lg border-0" style="width: min(100%, 420px);">
+        <div class="card login-card shadow-lg" style="width: min(100%, 440px);">
             <div class="card-body p-4 p-md-5">
                 <div class="text-center mb-4">
-                    {% if marca.logo %}<img src="{{ url_for('configuracion.logo') }}" alt="Logo" width="88" class="mb-3">{% else %}<i class="bi bi-shield-check display-3 text-success"></i>{% endif %}
-                    <h1 class="h3 mb-1">{{ marca.nombre_academia }}</h1>
-                    <p class="text-muted mb-0">Ingrese la contraseña para acceder.</p>
+                    <div class="hero-crest-placeholder mx-auto mb-3">
+                        {% if marca.logo %}
+                        <img src="{{ url_for('configuracion.logo') }}" alt="Logo" class="dashboard-crest" style="width:48px;height:48px;object-fit:contain;">
+                        {% else %}
+                        <i class="bi bi-shield-check"></i>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex justify-content-center gap-2 mb-2">
+                        <span class="badge hero-badge"><i class="bi bi-trophy-fill text-warning me-1"></i> {{ marca.nombre_academia }}</span>
+                        <span class="badge hero-status-badge"><i class="bi bi-patch-check-fill text-success me-1"></i> Acceso Seguro</span>
+                    </div>
+                    <h1 class="hero-title fs-3 mb-1">Centro de Comando</h1>
+                    <p class="hero-subtitle text-muted mb-0 small">Ingrese las credenciales para acceder al sistema.</p>
                 </div>
                 {% with mensajes = get_flashed_messages(with_categories=true) %}
                     {% for categoria, mensaje in mensajes %}
-                    <div class="alert alert-{{ 'danger' if categoria == 'danger' else categoria }}">{{ mensaje }}</div>
+                    <div class="alert alert-{{ 'danger' if categoria == 'danger' else categoria }} mb-3">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ mensaje }}
+                    </div>
                     {% endfor %}
                 {% endwith %}
                 <form method="post" autocomplete="off">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="next" value="{{ destino }}">
-                    <label for="nombre_usuario" class="form-label">Usuario</label>
-                    <input id="nombre_usuario" name="nombre_usuario" class="form-control form-control-lg mb-3" value="admin" maxlength="40" required>
-                    <label for="contrasena" class="form-label">Contraseña</label>
-                    <input id="contrasena" name="contrasena" type="password"
-                           class="form-control form-control-lg text-center"
-                           inputmode="numeric" pattern="[0-9]{5}" minlength="5"
-                           maxlength="5" autocomplete="current-password" required autofocus>
-                    <div class="form-text">Debe contener exactamente 5 números.</div>
-                    <button class="btn btn-success btn-lg w-100 mt-4" type="submit">
-                        <i class="bi bi-box-arrow-in-right me-1"></i> Ingresar
+                    <div class="mb-3">
+                        <label for="nombre_usuario" class="form-label">Usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input id="nombre_usuario" name="nombre_usuario" class="form-control" value="admin" maxlength="40" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contrasena" class="form-label">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input id="contrasena" name="contrasena" type="password"
+                                   class="form-control text-center fw-bold"
+                                   pattern="[0-9]{5}|.{8,128}" minlength="5"
+                                   maxlength="128" autocomplete="current-password" required autofocus
+                                   placeholder="•••••">
+                        </div>
+                        <div class="form-text text-muted small mt-1"><i class="bi bi-shield-lock me-1"></i>La contraseña debe contener exactamente 5 números o al menos 8 caracteres para mayor seguridad.</div>
+                    </div>
+                    <button class="btn btn-hero-action btn-hero-primary w-100 py-2 mt-4" type="submit">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Ingresar al Sistema
                     </button>
                 </form>
             </div>

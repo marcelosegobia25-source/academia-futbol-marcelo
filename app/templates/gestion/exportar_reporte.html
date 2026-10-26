@@ -1,14 +1,42 @@
 {% extends 'base.html' %}
 {% block titulo %}Exportar reporte{% endblock %}
 {% block contenido %}
-<div class="mb-4"><div class="eyebrow">Descarga configurable</div><h1 class="page-title">Exportar {{ modulo|replace('-', ' ')|title }}</h1><p class="text-muted">Las columnas están seleccionadas por defecto. Desmarque únicamente las que no desea incluir.</p></div>
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow"><i class="bi bi-download text-emerald"></i> Descarga Configurable</span>
+        <h2 class="mb-0"><i class="bi bi-file-earmark-arrow-down text-emerald me-1"></i> Exportar {{ modulo|replace('-', ' ')|title }}</h2>
+        <p class="text-muted mb-0">Seleccione las columnas que requiere antes de generar el documento final.</p>
+    </div>
+    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+        <i class="bi bi-arrow-left"></i> Volver
+    </button>
+</div>
 <form id="exportar-reporte" method="get" action="{{ ruta_excel }}" class="card p-4" style="max-width:760px">
   {% for clave, valores in request.args.lists() %}{% if clave != 'columnas' %}{% for valor in valores %}<input type="hidden" name="{{ clave }}" value="{{ valor }}">{% endfor %}{% endif %}{% endfor %}
   <div class="row g-3 mb-4">{% for clave, etiqueta in columnas %}<div class="col-sm-6 col-lg-4"><label class="form-check"><input class="form-check-input" type="checkbox" name="columnas" value="{{ clave }}" checked><span class="form-check-label">{{ etiqueta }}</span></label></div>{% endfor %}</div>
   <div class="d-flex flex-wrap gap-2">
+    <button type="button" class="btn btn-outline-info" onclick="compartirReporteConfigurado()"><i class="bi bi-share"></i> Compartir Resumen</button>
     <button type="submit" class="btn btn-success" formaction="{{ ruta_excel }}"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</button>
     <button type="submit" class="btn btn-danger" formaction="{{ ruta_pdf }}"><i class="bi bi-file-earmark-pdf"></i> Descargar PDF</button>
     <button type="reset" class="btn btn-outline-secondary">Restaurar selección</button>
   </div>
 </form>
+
+<script>
+function compartirReporteConfigurado() {
+    const modulo = "{{ modulo|replace('-', ' ')|title }}";
+    const columnasSeleccionadas = Array.from(document.querySelectorAll('#exportar-reporte input[name="columnas"]:checked')).map(cb => cb.nextElementSibling.textContent.trim());
+    if (columnasSeleccionadas.length === 0) {
+        alert('Seleccione al menos una columna.');
+        return;
+    }
+    let texto = `📊 *REPORTE DE ${modulo.toUpperCase()}*\n`;
+    texto += `⚽ *Academia de Fútbol*\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `Campos del reporte:\n• ` + columnasSeleccionadas.join('\n• ') + `\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    texto += `Para descargar el archivo completo en Excel o PDF, ingresa al sistema institucional.\n`;
+    compartirListaTexto(`Reporte ${modulo}`, texto);
+}
+</script>
 {% endblock %}

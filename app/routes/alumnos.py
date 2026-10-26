@@ -9,7 +9,7 @@ from flask import (
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageOps, UnidentifiedImageError
 from dateutil.relativedelta import relativedelta
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.extensions import db
 from app.models import (
@@ -29,8 +29,9 @@ from app.utils.descargas import enviar_buffer
 from app.utils.autorizacion import tiene_permiso
 from app.utils.validacion import (
     ErrorValidacion, decimal_positivo, fecha_iso, fecha_no_futura,
-    opcion, texto_opcional, texto_requerido,
+    opcion, texto_opcional, texto_requerido, solo_numeros_opcional,
 )
+
 
 bp = Blueprint("alumnos", __name__, url_prefix="/alumnos")
 
@@ -113,7 +114,7 @@ def _datos_alumno_formulario(id_alumno=None):
         fecha_iso(request.form.get("fecha_nacimiento"), "Fecha de nacimiento"),
         "Fecha de nacimiento",
     )
-    ci = texto_opcional(request.form.get("ci"), "CI", 30)
+    ci = solo_numeros_opcional(request.form.get("ci"), "CI", 30)
     if ci:
         duplicado = Alumno.query.filter(db.func.lower(Alumno.ci) == ci.lower())
         if id_alumno:
@@ -151,7 +152,7 @@ def _datos_alumno_formulario(id_alumno=None):
         "direccion": texto_opcional(request.form.get("direccion"), "Dirección", 255),
         "tutor": texto_opcional(request.form.get("tutor"), "Tutor", 120),
         "tutor2": texto_opcional(request.form.get("tutor2"), "Tutor 2", 120),
-        "telefono": texto_opcional(request.form.get("telefono"), "Teléfono", 30),
+        "telefono": solo_numeros_opcional(request.form.get("telefono"), "Teléfono", 30),
         "estado": opcion(request.form.get("estado", "Activo"), ESTADOS_ALUMNO, "Estado"),
         "posicion": opcion(request.form.get("posicion"), POSICIONES, "Posición", opcional=True),
         "turno": opcion(request.form.get("turno"), TURNOS, "Turno", opcional=True),
@@ -254,9 +255,10 @@ def _filtrar_alumnos(args, paginar=False):
     id_interno = args.get("id_alumno", type=int)
 
     query = Alumno.query.options(
+        joinedload(Alumno.categoria),
         selectinload(Alumno.equipos),
         selectinload(Alumno.pagos),
-        selectinload(Alumno.campeonatos_habilitados),
+        selectinload(Alumno.campeonatos_habilitados).joinedload(AlumnoCampeonato.campeonato),
     )
     if id_interno:
         query = query.filter(Alumno.id_alumno == id_interno)

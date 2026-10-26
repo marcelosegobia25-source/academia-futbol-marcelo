@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 {% block titulo %}{{ 'Editar' if rival else 'Nuevo' }} rival{% endblock %}
 {% block contenido %}
-<div class="mb-3">
-    <div class="eyebrow">Campeonatos</div>
-    <h2>{{ 'Editar rival' if rival else 'Registrar rival' }}</h2>
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow"><i class="bi bi-shield-check text-emerald"></i> Rivales Competitivos</span>
+        <h2 class="mb-0"><i class="bi bi-shield-plus text-emerald me-1"></i> {{ 'Editar Rival' if rival else 'Registrar Rival' }}</h2>
+        <p class="text-muted mb-0">Catálogo de clubes y escuelas rivales para torneos y amistosos.</p>
+    </div>
+    <a href="{{ url_for('campeonatos.rivales') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a Rivales
+    </a>
 </div>
 <form method="post" class="card p-4" style="max-width: 560px;">
     <div class="mb-3">

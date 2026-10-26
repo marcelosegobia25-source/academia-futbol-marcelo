@@ -1,6 +1,7 @@
 from decimal import Decimal
 from app.extensions import db
 from app.models import Configuracion, Auditoria
+from app.utils.validacion import solo_numeros_opcional
 
 
 class ActualizarConfiguracionUseCase:
@@ -12,7 +13,7 @@ class ActualizarConfiguracionUseCase:
         if "nombre_academia" in datos:
             config.nombre_academia = datos["nombre_academia"].strip()
         if "telefono" in datos:
-            config.telefono = datos["telefono"].strip() or None
+            config.telefono = solo_numeros_opcional(datos["telefono"], "Teléfono", 50)
         if "direccion" in datos:
             config.direccion = datos["direccion"].strip() or None
         if "eslogan" in datos:

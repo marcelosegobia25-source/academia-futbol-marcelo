@@ -1,9 +1,15 @@
 {% extends "base.html" %}{% block titulo %}Personal deportivo{% endblock %}{% block contenido %}
-<h2 class="mb-3">Profesores y entrenadores</h2>
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow">Cuerpo Técnico</span>
+        <h1 class="page-title mb-1"><i class="bi bi-person-workspace text-emerald me-1"></i> Profesores y Entrenadores</h1>
+        <p class="text-muted small mb-0">Directorio y asignación del cuerpo técnico, profesores y preparadores físicos.</p>
+    </div>
+</div>
 <form method="post" class="card card-body mb-4"><div class="row g-2">
 <div class="col-md-3"><input name="nombre" class="form-control" placeholder="Nombre completo" required></div>
-<div class="col-md-2"><input name="documento" class="form-control" placeholder="Documento"></div>
-<div class="col-md-2"><input name="telefono" class="form-control" placeholder="Teléfono"></div>
+<div class="col-md-2"><input name="documento" class="form-control" placeholder="Documento (solo números)" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
+<div class="col-md-2"><input name="telefono" class="form-control" placeholder="Teléfono (solo números)" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
 <div class="col-md-2"><input name="especialidad" class="form-control" placeholder="Especialidad"></div>
 <div class="col-md-2"><select name="tipo" class="form-select"><option>Entrenador</option><option>Profesor</option><option>Preparador físico</option></select></div>
 <div class="col-md-1"><button class="btn btn-success w-100">Añadir</button></div></div></form>
