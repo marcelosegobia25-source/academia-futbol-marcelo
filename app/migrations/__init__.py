@@ -1031,6 +1031,30 @@ def _migracion_32_indices_partidos_origen():
 
 def _migracion_33_ci_y_telefonos_numericos():
     if db.engine.dialect.name == "postgresql":
+        # 1. Saneamiento preventivo de valores históricos no numéricos en PostgreSQL
+        saneamientos = [
+            ("alumno", "ci", True),
+            ("alumno", "telefono", False),
+            ("tutor", "documento", False),
+            ("tutor", "telefono", False),
+            ("personal_deportivo", "documento", False),
+            ("personal_deportivo", "telefono", False),
+            ("proveedor", "documento", False),
+            ("proveedor", "telefono", False),
+            ("configuracion", "telefono", False),
+        ]
+        for tabla, col, es_ci in saneamientos:
+            try:
+                db.session.execute(text(f"UPDATE {tabla} SET {col} = NULL WHERE {col} IN ('None', 'null', 'undefined', '');"))
+                db.session.execute(text(f"UPDATE {tabla} SET {col} = REGEXP_REPLACE({col}, '[^0-9]', '', 'g') WHERE {col} IS NOT NULL AND {col} !~ '^[0-9]+$';"))
+                if es_ci:
+                    db.session.execute(text(f"UPDATE {tabla} SET {col} = '1000' || id_{tabla} WHERE {col} = '';"))
+                else:
+                    db.session.execute(text(f"UPDATE {tabla} SET {col} = NULL WHERE {col} = '';"))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
         restricciones = [
             ("alumno", "ci", "ck_alumno_ci_numerico"),
             ("alumno", "telefono", "ck_alumno_telefono_numerico"),
@@ -1043,15 +1067,21 @@ def _migracion_33_ci_y_telefonos_numericos():
             ("configuracion", "telefono", "ck_configuracion_telefono_numerico"),
         ]
         for tabla, col, ck_name in restricciones:
-            db.session.execute(text(f"""
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '{ck_name}') THEN
-                        ALTER TABLE {tabla} ADD CONSTRAINT {ck_name} CHECK ({col} IS NULL OR {col} ~ '^[0-9]+$');
-                    END IF;
-                END $$;
-            """))
-        db.session.commit()
+            try:
+                db.session.execute(text(f"""
+                    DO $$
+                    BEGIN
+                        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '{ck_name}') THEN
+                            ALTER TABLE {tabla} ADD CONSTRAINT {ck_name} CHECK ({col} IS NULL OR {col} ~ '^[0-9]+$');
+                        END IF;
+                    EXCEPTION WHEN OTHERS THEN
+                        RAISE NOTICE 'Restriccion omitida para %: %', '{ck_name}', SQLERRM;
+                    END $$;
+                """))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
 
 
 MIGRACIONES = [

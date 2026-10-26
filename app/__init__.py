@@ -17,8 +17,10 @@ def create_app(config_class=Config):
     # Normalizar URI para compatibilidad PostgreSQL en la nube y pruebas
     uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
     if uri.startswith("postgres://"):
-        uri = uri.replace("postgres://", "postgresql://", 1)
-        app.config["SQLALCHEMY_DATABASE_URI"] = uri
+        uri = uri.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif uri.startswith("postgresql://") and not uri.startswith("postgresql+"):
+        uri = uri.replace("postgresql://", "postgresql+psycopg2://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = uri
 
     engine_opts = dict(app.config.get("SQLALCHEMY_ENGINE_OPTIONS") or {})
     if uri.startswith("sqlite"):
