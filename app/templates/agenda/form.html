@@ -24,7 +24,7 @@
         </div>
         <div class="col-md-6">
             <label class="form-label fw-bold">Tipo de actividad</label>
-            <select name="tipo" class="form-select">
+            <select name="tipo" id="selector-tipo-agenda" class="form-select">
                 <option value="Evento" {% if not evento or evento.tipo == 'Evento' %}selected{% endif %}>Evento / Reunión / Clínica</option>
                 <option value="Entrenamiento" {% if evento and evento.tipo == 'Entrenamiento' %}selected{% endif %}>Entrenamiento</option>
             </select>
@@ -32,6 +32,19 @@
         <div class="col-md-6">
             <label class="form-label">Cancha o Lugar</label>
             <input type="text" name="lugar" class="form-control" list="lugares-disponibles" value="{{ evento.lugar if evento else '' }}" placeholder="Seleccione o escriba un lugar">
+        </div>
+        <!-- Aviso si el usuario busca configurar días de la semana recurrentes -->
+        <div class="col-12 {% if not evento or evento.tipo != 'Entrenamiento' %}d-none{% endif %}" id="aviso-dias-semana">
+            <div class="alert alert-success py-2 px-3 small d-flex flex-wrap align-items-center justify-content-between gap-2 mb-0">
+                <div>
+                    <i class="bi bi-calendar-week text-emerald me-1"></i>
+                    <strong>¿Desea configurar días semanales recurrentes (ej. L-M-V)?</strong>
+                    Este formulario programa una fecha específica. Para horarios fijos por días de la semana, use:
+                </div>
+                <a href="{{ url_for('calendario.crear_entrenamiento') }}" class="btn btn-sm btn-success text-nowrap">
+                    <i class="bi bi-clock-history"></i> Configurar Días de la Semana
+                </a>
+            </div>
         </div>
         <div class="col-12">
             <label class="form-label fw-bold">Descripción o Título <span class="text-danger">*</span></label>
@@ -67,4 +80,20 @@
 <datalist id="lugares-disponibles">
     {% for lugar in lugares %}<option value="{{ lugar.nombre }}">{{ lugar.tipo }}{% if lugar.direccion %} · {{ lugar.direccion }}{% endif %}</option>{% endfor %}
 </datalist>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('selector-tipo-agenda');
+    const aviso = document.getElementById('aviso-dias-semana');
+    if (sel && aviso) {
+        sel.addEventListener('change', () => {
+            if (sel.value === 'Entrenamiento') {
+                aviso.classList.remove('d-none');
+            } else {
+                aviso.classList.add('d-none');
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

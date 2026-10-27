@@ -17,42 +17,53 @@
         <form method="post" class="card shadow-sm p-4 border-0">
             <div class="row g-3">
                 <!-- Selector de días de la semana -->
-                <div class="col-12">
-                    <label class="form-label d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="col-12" id="contenedor-dias">
+                    <label class="form-label d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                         <span class="fw-bold"><i class="bi bi-calendar-week me-1 text-emerald"></i> Días de la semana <span class="text-danger">*</span></span>
-                        <span class="text-muted small">Seleccione uno o varios días para este horario</span>
+                        <span class="text-muted small">Seleccione uno o varios días para este horario recurrente</span>
                     </label>
 
                     <!-- Atajos de selección rápida -->
-                    <div class="d-flex flex-wrap gap-1 mb-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="seleccionarDias([0, 2, 4])" title="Lunes, Miércoles y Viernes">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-3 fw-semibold" onclick="aplicarDias([0, 2, 4])" title="Lunes, Miércoles y Viernes">
                             <i class="bi bi-check-all"></i> L - M - V
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="seleccionarDias([1, 3])" title="Martes y Jueves">
+                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-3 fw-semibold" onclick="aplicarDias([1, 3])" title="Martes y Jueves">
                             <i class="bi bi-check-all"></i> M - J
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="seleccionarDias([0, 1, 2, 3, 4])" title="Todos los días laborables">
+                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-3 fw-semibold" onclick="aplicarDias([0, 1, 2, 3, 4])" title="Todos los días de lunes a viernes">
                             <i class="bi bi-calendar-range"></i> Lun a Vie
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="seleccionarDias([5, 6])" title="Sábados y Domingos">
-                            <i class="bi bi-sun"></i> Fin de semana
+                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-3 fw-semibold" onclick="aplicarDias([5, 6])" title="Sábados y Domingos">
+                            <i class="bi bi-sun"></i> Sáb y Dom
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2" onclick="seleccionarDias([])" title="Deseleccionar todo">
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3" onclick="aplicarDias([0, 1, 2, 3, 4, 5, 6])" title="Seleccionar todos los días">
+                            <i class="bi bi-calendar-check"></i> Todos
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger py-1 px-3" onclick="aplicarDias([])" title="Deseleccionar todos">
                             <i class="bi bi-x-circle"></i> Limpiar
                         </button>
                     </div>
 
-                    <!-- Botones/Chips interactivos para los 7 días -->
-                    <div class="p-3 bg-light rounded border d-flex flex-wrap gap-2 justify-content-start align-items-center">
-                        {% for i in range(7) %}
-                        {% set is_checked = (dias_seleccionados and i in dias_seleccionados) or (entrenamiento and entrenamiento.dia_semana == i) %}
-                        <div class="dia-check-container">
-                            <input type="checkbox" class="btn-check" id="dia-{{ i }}" name="dias_semana" value="{{ i }}" {% if is_checked %}checked{% endif %}>
-                            <label class="btn btn-outline-primary btn-sm px-3 py-2 fw-semibold" for="dia-{{ i }}">
-                                <i class="bi bi-check2 me-1"></i> {{ dias_semana[i] }}
-                            </label>
+                    <!-- Cuadrícula de tarjetas para los 7 días de la semana -->
+                    <div class="p-3 bg-light rounded border">
+                        <div class="row g-2">
+                            {% for i in range(7) %}
+                            {% set is_checked = (dias_seleccionados and i in dias_seleccionados) or (entrenamiento and entrenamiento.dia_semana == i) %}
+                            <div class="col-6 col-md-4 col-lg-3">
+                                <label class="dia-card w-100 {% if is_checked %}is-selected{% endif %}" id="card-dia-{{ i }}" for="dia-{{ i }}">
+                                    <input type="checkbox" id="dia-{{ i }}" name="dias_semana" value="{{ i }}" class="form-check-input m-0 dia-checkbox" {% if is_checked %}checked{% endif %}>
+                                    <i class="bi {% if is_checked %}bi-check-circle-fill{% else %}bi-circle{% endif %} dia-icon fs-6"></i>
+                                    <span class="dia-nombre fw-semibold">{{ dias_semana[i] }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
+
+                        <!-- Resumen dinámico de días seleccionados -->
+                        <div id="resumen-dias" class="mt-3 pt-2 border-top small fw-semibold">
+                            <!-- Se actualiza por JavaScript -->
+                        </div>
                     </div>
                 </div>
 
@@ -177,14 +188,139 @@
     {% endfor %}
 </datalist>
 
+<style>
+.dia-card {
+    cursor: pointer;
+    border: 2px solid var(--bs-border-color, #dee2e6);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background-color: var(--bs-body-bg, #ffffff);
+    color: var(--bs-body-color, #212529);
+    transition: all 0.18s ease-in-out;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.dia-card:hover {
+    border-color: #059669;
+    background-color: rgba(5, 150, 105, 0.08);
+}
+.dia-card.is-selected {
+    border-color: #059669 !important;
+    background-color: #059669 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+}
+.dia-card.is-selected .dia-icon {
+    color: #ffffff !important;
+}
+.dia-card.is-selected .dia-nombre {
+    color: #ffffff !important;
+}
+.dia-card .dia-icon {
+    color: #6c757d;
+    transition: color 0.18s ease-in-out;
+}
+.dia-card.is-selected .form-check-input {
+    background-color: #ffffff;
+    border-color: #ffffff;
+}
+.dia-card.is-selected .form-check-input:checked {
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23059669' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+</style>
+
 <script>
-function seleccionarDias(dias) {
+const NOMBRES_DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+function actualizarEstadoDia(i) {
+    const chk = document.getElementById('dia-' + i);
+    const card = document.getElementById('card-dia-' + i);
+    if (!chk || !card) return;
+    const icon = card.querySelector('.dia-icon');
+    if (chk.checked) {
+        card.classList.add('is-selected');
+        if (icon) {
+            icon.classList.remove('bi-circle');
+            icon.classList.add('bi-check-circle-fill');
+        }
+    } else {
+        card.classList.remove('is-selected');
+        if (icon) {
+            icon.classList.remove('bi-check-circle-fill');
+            icon.classList.add('bi-circle');
+        }
+    }
+}
+
+function actualizarResumen() {
+    const seleccionados = [];
+    for (let i = 0; i < 7; i++) {
+        const chk = document.getElementById('dia-' + i);
+        if (chk && chk.checked) {
+            seleccionados.push(NOMBRES_DIAS[i]);
+        }
+    }
+    const resumenEl = document.getElementById('resumen-dias');
+    if (!resumenEl) return;
+    if (seleccionados.length === 0) {
+        resumenEl.className = 'mt-3 pt-2 border-top text-danger small fw-semibold';
+        resumenEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Ningún día seleccionado. Por favor seleccione al menos un día para este horario.';
+    } else {
+        resumenEl.className = 'mt-3 pt-2 border-top text-success small fw-semibold';
+        resumenEl.innerHTML = `<i class="bi bi-check-circle-fill me-1 text-emerald"></i> ${seleccionados.length} día(s) configurado(s): <strong>${seleccionados.join(', ')}</strong>`;
+    }
+}
+
+function aplicarDias(dias) {
     for (let i = 0; i < 7; i++) {
         const chk = document.getElementById('dia-' + i);
         if (chk) {
             chk.checked = dias.includes(i);
+            actualizarEstadoDia(i);
         }
     }
+    actualizarResumen();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    for (let i = 0; i < 7; i++) {
+        const chk = document.getElementById('dia-' + i);
+        if (chk) {
+            chk.addEventListener('change', () => {
+                actualizarEstadoDia(i);
+                actualizarResumen();
+            });
+            actualizarEstadoDia(i);
+        }
+    }
+    actualizarResumen();
+
+    // Validar antes de enviar el formulario
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', (ev) => {
+            let algunDia = false;
+            for (let i = 0; i < 7; i++) {
+                const chk = document.getElementById('dia-' + i);
+                if (chk && chk.checked) {
+                    algunDia = true;
+                    break;
+                }
+            }
+            if (!algunDia) {
+                ev.preventDefault();
+                alert('Debe seleccionar al menos un día de la semana para el horario de entrenamiento.');
+                const container = document.getElementById('contenedor-dias');
+                if (container) {
+                    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    container.classList.add('border-danger');
+                }
+            }
+        });
+    }
+});
 </script>
 {% endblock %}

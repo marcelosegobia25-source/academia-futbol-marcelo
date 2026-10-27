@@ -423,12 +423,13 @@ def crear_entrenamiento():
             if not raw_dias and request.form.get("dia_semana") is not None:
                 raw_dias = [request.form.get("dia_semana")]
             for d_str in raw_dias:
-                try:
-                    num = int(d_str)
-                    if 0 <= num <= 6 and num not in dias_seleccionados:
-                        dias_seleccionados.append(num)
-                except (ValueError, TypeError):
-                    continue
+                for sub in str(d_str).split(","):
+                    try:
+                        num = int(sub.strip())
+                        if 0 <= num <= 6 and num not in dias_seleccionados:
+                            dias_seleccionados.append(num)
+                    except (ValueError, TypeError):
+                        continue
             if not dias_seleccionados:
                 raise ErrorValidacion("Debe seleccionar al menos un día de la semana para el horario.")
 
@@ -585,12 +586,13 @@ def editar_entrenamiento(id_entrenamiento):
                 raw_dias = [request.form.get("dia_semana")]
             dias_seleccionados = []
             for d_str in raw_dias:
-                try:
-                    num = int(d_str)
-                    if 0 <= num <= 6 and num not in dias_seleccionados:
-                        dias_seleccionados.append(num)
-                except (ValueError, TypeError):
-                    continue
+                for sub in str(d_str).split(","):
+                    try:
+                        num = int(sub.strip())
+                        if 0 <= num <= 6 and num not in dias_seleccionados:
+                            dias_seleccionados.append(num)
+                    except (ValueError, TypeError):
+                        continue
             if not dias_seleccionados:
                 raise ErrorValidacion("Debe seleccionar al menos un día de la semana.")
 
