@@ -5,56 +5,186 @@
     <div>
         <span class="eyebrow"><i class="bi bi-clock-history text-emerald"></i> Planificación Periódica</span>
         <h2 class="mb-0"><i class="bi bi-stopwatch text-emerald me-1"></i> {{ 'Editar Entrenamiento Fijo' if entrenamiento else 'Nuevo Entrenamiento Fijo' }}</h2>
-        <p class="text-muted mb-0">Horarios semanales, canchas y entrenadores responsables.</p>
+        <p class="text-muted mb-0">Configure los días semanales, horarios, canchas y cuerpo técnico responsable.</p>
     </div>
     <a href="{{ url_for('calendario.listar_entrenamientos') }}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left"></i> Volver a Entrenamientos
     </a>
 </div>
-<form method="post" class="card shadow-sm p-4" style="max-width: 600px;">
-    <div class="row g-3">
-        <div class="col-md-6">
-            <label class="form-label">Día de la semana</label>
-            <select name="dia_semana" class="form-select" required>
-                {% for i in range(7) %}<option value="{{ i }}" {% if entrenamiento and entrenamiento.dia_semana == i %}selected{% endif %}>{{ dias_semana[i] }}</option>{% endfor %}
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Hora inicio</label>
-            <input type="time" name="hora_inicio" class="form-control" required value="{{ entrenamiento.hora_inicio.strftime('%H:%M') if entrenamiento else '' }}">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Hora fin</label>
-            <input type="time" name="hora_fin" class="form-control" value="{{ entrenamiento.hora_fin.strftime('%H:%M') if entrenamiento and entrenamiento.hora_fin else '' }}">
-        </div>
-        <div class="col-md-6"><label class="form-label">Vigente desde</label><input type="date" name="fecha_inicio" class="form-control" value="{{ entrenamiento.fecha_inicio.isoformat() if entrenamiento and entrenamiento.fecha_inicio else '' }}"></div>
-        <div class="col-md-6"><label class="form-label">Vigente hasta</label><input type="date" name="fecha_fin" class="form-control" value="{{ entrenamiento.fecha_fin.isoformat() if entrenamiento and entrenamiento.fecha_fin else '' }}"></div>
-        <div class="col-md-6">
-            <label class="form-label">Categoría</label>
-            <select name="id_categoria" class="form-select">
-                <option value="">-</option>
-                {% for c in categorias %}<option value="{{ c.id_categoria }}" {% if entrenamiento and entrenamiento.id_categoria == c.id_categoria %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
-            </select>
-        </div>
-        <div class="col-md-6">
-            <label class="form-label">Equipo</label>
-            <select name="id_equipo" class="form-select">
-                <option value="">-</option>
-                {% for e in equipos %}<option value="{{ e.id_equipo }}" {% if entrenamiento and entrenamiento.id_equipo == e.id_equipo %}selected{% endif %}>{{ e.nombre }}</option>{% endfor %}
-            </select>
-        </div>
-        <div class="col-md-6"><label class="form-label">Entrenador responsable</label><select name="id_entrenador" class="form-select"><option value="">Sin asignar</option>{% for p in entrenadores %}<option value="{{ p.id_personal }}" {% if entrenamiento and entrenamiento.id_entrenador==p.id_personal %}selected{% endif %}>{{ p.nombre }}</option>{% endfor %}</select></div>
-        <div class="col-12">
-            <label class="form-label">Lugar</label>
-            <input type="text" name="lugar" class="form-control" list="lugares-disponibles" placeholder="Seleccione o escriba un lugar" value="{{ entrenamiento.lugar if entrenamiento else '' }}">
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" class="card shadow-sm p-4 border-0">
+            <div class="row g-3">
+                <!-- Selector de días de la semana -->
+                <div class="col-12">
+                    <label class="form-label d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span class="fw-bold"><i class="bi bi-calendar-week me-1 text-emerald"></i> Días de la semana <span class="text-danger">*</span></span>
+                        <span class="text-muted small">Seleccione uno o varios días para este horario</span>
+                    </label>
+
+                    <!-- Atajos de selección rápida -->
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="seleccionarDias([0, 2, 4])" title="Lunes, Miércoles y Viernes">
+                            <i class="bi bi-check-all"></i> L - M - V
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="seleccionarDias([1, 3])" title="Martes y Jueves">
+                            <i class="bi bi-check-all"></i> M - J
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="seleccionarDias([0, 1, 2, 3, 4])" title="Todos los días laborables">
+                            <i class="bi bi-calendar-range"></i> Lun a Vie
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="seleccionarDias([5, 6])" title="Sábados y Domingos">
+                            <i class="bi bi-sun"></i> Fin de semana
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2" onclick="seleccionarDias([])" title="Deseleccionar todo">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </button>
+                    </div>
+
+                    <!-- Botones/Chips interactivos para los 7 días -->
+                    <div class="p-3 bg-light rounded border d-flex flex-wrap gap-2 justify-content-start align-items-center">
+                        {% for i in range(7) %}
+                        {% set is_checked = (dias_seleccionados and i in dias_seleccionados) or (entrenamiento and entrenamiento.dia_semana == i) %}
+                        <div class="dia-check-container">
+                            <input type="checkbox" class="btn-check" id="dia-{{ i }}" name="dias_semana" value="{{ i }}" {% if is_checked %}checked{% endif %}>
+                            <label class="btn btn-outline-primary btn-sm px-3 py-2 fw-semibold" for="dia-{{ i }}">
+                                <i class="bi bi-check2 me-1"></i> {{ dias_semana[i] }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Horario de inicio y fin -->
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Hora de inicio <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                        <input type="time" name="hora_inicio" class="form-control" required value="{{ entrenamiento.hora_inicio.strftime('%H:%M') if entrenamiento else '' }}">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Hora de fin <span class="text-muted small">(opcional)</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                        <input type="time" name="hora_fin" class="form-control" value="{{ entrenamiento.hora_fin.strftime('%H:%M') if entrenamiento and entrenamiento.hora_fin else '' }}">
+                    </div>
+                </div>
+
+                <!-- Período de vigencia -->
+                <div class="col-md-6">
+                    <label class="form-label">Vigente desde <span class="text-muted small">(opcional)</span></label>
+                    <input type="date" name="fecha_inicio" class="form-control" value="{{ entrenamiento.fecha_inicio.isoformat() if entrenamiento and entrenamiento.fecha_inicio else '' }}">
+                    <div class="form-text">Si se deja vacío, aplica inmediatamente.</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Vigente hasta <span class="text-muted small">(opcional)</span></label>
+                    <input type="date" name="fecha_fin" class="form-control" value="{{ entrenamiento.fecha_fin.isoformat() if entrenamiento and entrenamiento.fecha_fin else '' }}">
+                    <div class="form-text">Límite de fin de temporada o ciclo.</div>
+                </div>
+
+                <!-- Categoría y Equipo -->
+                <div class="col-md-6">
+                    <label class="form-label">Categoría</label>
+                    <select name="id_categoria" class="form-select">
+                        <option value="">General / Todas las categorías</option>
+                        {% for c in categorias %}
+                        <option value="{{ c.id_categoria }}" {% if entrenamiento and entrenamiento.id_categoria == c.id_categoria %}selected{% endif %}>
+                            {{ c.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Equipo asignado</label>
+                    <select name="id_equipo" class="form-select">
+                        <option value="">Plantel completo / Sin equipo específico</option>
+                        {% for e in equipos %}
+                        <option value="{{ e.id_equipo }}" {% if entrenamiento and entrenamiento.id_equipo == e.id_equipo %}selected{% endif %}>
+                            {{ e.nombre }}{% if e.categoria %} ({{ e.categoria.nombre }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Entrenador y Cancha -->
+                <div class="col-md-6">
+                    <label class="form-label">Profesor / Entrenador</label>
+                    <select name="id_entrenador" class="form-select">
+                        <option value="">Sin entrenador asignado</option>
+                        {% for p in entrenadores %}
+                        <option value="{{ p.id_personal }}" {% if entrenamiento and entrenamiento.id_entrenador == p.id_personal %}selected{% endif %}>
+                            {{ p.nombre }} ({{ p.especialidad or p.tipo }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Cancha o Lugar</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                        <input type="text" name="lugar" class="form-control" list="lugares-disponibles" placeholder="Seleccione o escriba un lugar" value="{{ entrenamiento.lugar if entrenamiento else '' }}">
+                    </div>
+                </div>
+
+                <!-- Estado del horario (Activo / En pausa) -->
+                <div class="col-12 mt-3">
+                    <div class="form-check form-switch p-3 bg-light rounded border">
+                        <input class="form-check-input ms-0 me-3" type="checkbox" name="activo" id="check-activo" value="1" {% if not entrenamiento or entrenamiento.activo %}checked{% endif %}>
+                        <label class="form-check-label fw-bold" for="check-activo">
+                            Horario activo y visible en el Calendario y Agenda
+                        </label>
+                        <div class="text-muted small ms-5">Si desactiva este horario, se conservará el registro histórico pero no se proyectará en futuras actividades.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="bi bi-check-lg"></i> {{ 'Actualizar Entrenamiento' if entrenamiento else 'Guardar Entrenamiento(s)' }}
+                </button>
+                <a href="{{ url_for('calendario.listar_entrenamientos') }}" class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Panel lateral con información de ayuda -->
+    <div class="col-lg-4 mt-3 mt-lg-0">
+        <div class="card shadow-sm border-0 p-3 bg-light">
+            <h5 class="h6 fw-bold mb-2"><i class="bi bi-info-circle text-primary me-1"></i> Sincronización automática</h5>
+            <p class="small text-muted mb-2">
+                Al guardar entrenamientos fijos con sus días de la semana:
+            </p>
+            <ul class="small text-muted ps-3 mb-3">
+                <li>Se reflejan inmediatamente en el <strong>Calendario</strong> mensual interactivo.</li>
+                <li>Aparecen en la <strong>Agenda</strong> general de actividades deportivas.</li>
+                <li>Habilitan la toma de <strong>Asistencia</strong> para cada fecha correspondiente.</li>
+                <li>Si selecciona varios días (ej. L-M-V), se crea automáticamente la planificación recurrente para cada uno.</li>
+            </ul>
+            <div class="alert alert-info py-2 px-3 small mb-0">
+                <i class="bi bi-shield-check"></i> El sistema valida automáticamente conflictos de canchas y entrenadores antes de guardar.
+            </div>
         </div>
     </div>
-    <div class="mt-3 d-flex gap-2">
-        <button type="submit" class="btn btn-success">Guardar</button>
-        <a href="{{ url_for('calendario.listar_entrenamientos') }}" class="btn btn-outline-secondary">Cancelar</a>
-    </div>
-</form>
+</div>
+
 <datalist id="lugares-disponibles">
-    {% for lugar in lugares %}<option value="{{ lugar.nombre }}">{{ lugar.tipo }}{% if lugar.direccion %} · {{ lugar.direccion }}{% endif %}</option>{% endfor %}
+    {% for lugar in lugares %}
+    <option value="{{ lugar.nombre }}">{{ lugar.tipo }}{% if lugar.direccion %} · {{ lugar.direccion }}{% endif %}</option>
+    {% endfor %}
 </datalist>
+
+<script>
+function seleccionarDias(dias) {
+    for (let i = 0; i < 7; i++) {
+        const chk = document.getElementById('dia-' + i);
+        if (chk) {
+            chk.checked = dias.includes(i);
+        }
+    }
+}
+</script>
 {% endblock %}

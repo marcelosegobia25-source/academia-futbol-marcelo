@@ -31,6 +31,14 @@ class EventoAgenda(db.Model):
     partido = db.relationship("Partido")
     lugar_catalogo = db.relationship("Lugar")
 
+    @property
+    def id_entrenamiento(self):
+        return None
+
+    @property
+    def hora_fin(self):
+        return None
+
 
 class Entrenamiento(db.Model):
     """Entrenamientos fijos (recurrentes semanalmente) que se muestran en el calendario."""
@@ -97,12 +105,12 @@ class SesionEntrenamiento(db.Model):
     __tablename__ = "sesion_entrenamiento"
     __table_args__ = (db.UniqueConstraint("id_entrenamiento", "fecha", name="uq_sesion_entrenamiento_fecha"),)
     id_sesion_entrenamiento = db.Column(db.Integer, primary_key=True)
-    id_entrenamiento = db.Column(db.Integer, db.ForeignKey("entrenamiento.id_entrenamiento", ondelete="RESTRICT"), nullable=False)
+    id_entrenamiento = db.Column(db.Integer, db.ForeignKey("entrenamiento.id_entrenamiento", ondelete="CASCADE"), nullable=False)
     fecha = db.Column(db.Date, nullable=False)
     estado = db.Column(db.String(12), nullable=False, default="Programada")
     observacion = db.Column(db.String(255), nullable=True)
     creado_en = db.Column(db.DateTime, nullable=False, default=ahora_utc)
-    entrenamiento = db.relationship("Entrenamiento", backref=db.backref("sesiones", order_by="desc(SesionEntrenamiento.fecha)"))
+    entrenamiento = db.relationship("Entrenamiento", backref=db.backref("sesiones", cascade="all, delete-orphan", passive_deletes=True, order_by="desc(SesionEntrenamiento.fecha)"))
 
 
 class AsistenciaEntrenamiento(db.Model):

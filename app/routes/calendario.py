@@ -1,13 +1,14 @@
 import calendar as cal_module
 from datetime import date, time, timedelta
-from flask import Blueprint, abort, render_template, request, redirect, url_for, flash, send_file
+from flask import Blueprint, abort, render_template, request, redirect, url_for, flash, send_file, g
 
 from app.extensions import db
 from app.models import (EventoAgenda, Campeonato, Entrenamiento, Categoria, Equipo, Lugar, Auditoria,
-                        PersonalDeportivo, SesionEntrenamiento, AsistenciaEntrenamiento, Alumno)
+                        PersonalDeportivo, SesionEntrenamiento, AsistenciaEntrenamiento, Alumno, ConflictoAutorizado)
 from app.utils.validacion import (
     ErrorValidacion, entero, hora_hm, texto_opcional, fecha_iso, solo_numeros_opcional,
 )
+from app.utils.tiempo import hoy_bolivia
 from app.utils.calendario_pdf import generar_calendario_pdf
 from app.utils.descargas import enviar_buffer
 from app.utils.excel import exportar_tabla_excel
@@ -203,7 +204,7 @@ def _items_exportacion(inicio, fin, id_categoria=None, id_equipo=None):
 
 @bp.route("/")
 def ver():
-    hoy = date.today()
+    hoy = hoy_bolivia()
     anio = request.args.get("anio", type=int, default=hoy.year)
     mes = request.args.get("mes", type=int, default=hoy.month)
     if not 1 <= mes <= 12 or not 2000 <= anio <= 2100:
@@ -261,6 +262,7 @@ def ver():
             ),
             "categoria": ev.categoria.nombre if ev.categoria else None,
             "equipo": ev.equipo.nombre if ev.equipo else None,
+            "id_evento": ev.id_evento,
         })
     for c in campeonatos:
         ini = max(c.fecha_inicio, inicio_mes)
@@ -293,6 +295,7 @@ def ver():
                     "maps_url": e.lugar_catalogo.google_maps_url if e.lugar_catalogo else None,
                     "categoria": e.categoria.nombre if e.categoria else None,
                     "equipo": e.equipo.nombre if e.equipo else None,
+                    "id_entrenamiento": e.id_entrenamiento,
                 })
 
     for items in dias.values():
@@ -402,22 +405,33 @@ def exportar_semanal_pdf():
 
 @bp.route("/entrenamientos")
 def listar_entrenamientos():
-    entrenamientos = Entrenamiento.query.order_by(Entrenamiento.dia_semana).all()
+    entrenamientos = Entrenamiento.query.order_by(Entrenamiento.dia_semana, Entrenamiento.hora_inicio).all()
     return render_template("calendario/entrenamientos.html", entrenamientos=entrenamientos, dias_semana=DIAS_SEMANA)
 
 
 @bp.route("/entrenamientos/nuevo", methods=["GET", "POST"])
 def crear_entrenamiento():
     categorias = Categoria.query.order_by(Categoria.nombre).all()
-    equipos = Equipo.query.filter_by(es_rival=False).order_by(Equipo.nombre).all()
+    equipos = Equipo.query.filter_by(es_rival=False, activo=True).order_by(Equipo.nombre).all()
     lugares = Lugar.query.filter_by(activo=True).order_by(Lugar.nombre).all()
     entrenadores = PersonalDeportivo.query.filter_by(activo=True).order_by(PersonalDeportivo.nombre).all()
 
     if request.method == "POST":
+        dias_seleccionados = []
         try:
-            dia_semana = entero(
-                request.form.get("dia_semana"), "Día de la semana", 0, 6, requerido=True
-            )
+            raw_dias = request.form.getlist("dias_semana")
+            if not raw_dias and request.form.get("dia_semana") is not None:
+                raw_dias = [request.form.get("dia_semana")]
+            for d_str in raw_dias:
+                try:
+                    num = int(d_str)
+                    if 0 <= num <= 6 and num not in dias_seleccionados:
+                        dias_seleccionados.append(num)
+                except (ValueError, TypeError):
+                    continue
+            if not dias_seleccionados:
+                raise ErrorValidacion("Debe seleccionar al menos un día de la semana para el horario.")
+
             hora_inicio = hora_hm(request.form.get("hora_inicio"), "Hora de inicio", True)
             hora_fin = hora_hm(request.form.get("hora_fin"), "Hora de fin")
             if hora_fin and hora_fin <= hora_inicio:
@@ -444,70 +458,116 @@ def crear_entrenamiento():
             lugar_catalogo = Lugar.query.filter(
                 db.func.lower(Lugar.nombre) == nombre_lugar.lower()
             ).first() if nombre_lugar else None
-            if nombre_lugar:
-                conflictos = Entrenamiento.query.filter_by(
-                    dia_semana=dia_semana, activo=True
-                )
-                if lugar_catalogo:
-                    conflictos = conflictos.filter_by(id_lugar=lugar_catalogo.id_lugar)
-                else:
-                    conflictos = conflictos.filter(
-                        db.func.lower(Entrenamiento.lugar) == nombre_lugar.lower()
+            activo = request.form.get("activo") in ("1", "true", "on") if "activo" in request.form else True
+
+            # Validar conflictos para cada uno de los días seleccionados
+            for dia in dias_seleccionados:
+                if nombre_lugar:
+                    conflictos = Entrenamiento.query.filter_by(
+                        dia_semana=dia, activo=True
                     )
-                for otro in conflictos.all():
-                    otro_fin = otro.hora_fin or otro.hora_inicio
-                    fin_actual = hora_fin or hora_inicio
-                    if hora_inicio < otro_fin and fin_actual > otro.hora_inicio:
-                        raise ErrorValidacion("Existe otro entrenamiento en ese lugar y horario.")
-            if id_entrenador:
-                for otro in Entrenamiento.query.filter_by(dia_semana=dia_semana, id_entrenador=id_entrenador, activo=True).all():
-                    if hora_inicio < (otro.hora_fin or otro.hora_inicio) and (hora_fin or hora_inicio) > otro.hora_inicio:
-                        raise ErrorValidacion("El entrenador ya tiene otro entrenamiento en ese horario.")
-            entrenamiento = Entrenamiento(
-            dia_semana=dia_semana,
-            hora_inicio=hora_inicio,
-            hora_fin=hora_fin,
-            lugar=nombre_lugar,
-            id_lugar=lugar_catalogo.id_lugar if lugar_catalogo else None,
-            fecha_inicio=fecha_inicio, fecha_fin=fecha_fin,
-            id_categoria=id_categoria, id_equipo=id_equipo,
-            id_entrenador=id_entrenador,
-            )
+                    if lugar_catalogo:
+                        conflictos = conflictos.filter_by(id_lugar=lugar_catalogo.id_lugar)
+                    else:
+                        conflictos = conflictos.filter(
+                            db.func.lower(Entrenamiento.lugar) == nombre_lugar.lower()
+                        )
+                    for otro in conflictos.all():
+                        otro_fin = otro.hora_fin or otro.hora_inicio
+                        fin_actual = hora_fin or hora_inicio
+                        if hora_inicio < otro_fin and fin_actual > otro.hora_inicio:
+                            raise ErrorValidacion(f"Existe otro entrenamiento en ese lugar el día {DIAS_SEMANA[dia]} en ese horario.")
+                if id_entrenador:
+                    for otro in Entrenamiento.query.filter_by(dia_semana=dia, id_entrenador=id_entrenador, activo=True).all():
+                        if hora_inicio < (otro.hora_fin or otro.hora_inicio) and (hora_fin or hora_inicio) > otro.hora_inicio:
+                            raise ErrorValidacion(f"El entrenador ya tiene otro entrenamiento el día {DIAS_SEMANA[dia]} en ese horario.")
+
+            creados = []
+            for dia in dias_seleccionados:
+                entrenamiento = Entrenamiento(
+                    dia_semana=dia,
+                    hora_inicio=hora_inicio,
+                    hora_fin=hora_fin,
+                    lugar=nombre_lugar,
+                    id_lugar=lugar_catalogo.id_lugar if lugar_catalogo else None,
+                    fecha_inicio=fecha_inicio,
+                    fecha_fin=fecha_fin,
+                    id_categoria=id_categoria,
+                    id_equipo=id_equipo,
+                    id_entrenador=id_entrenador,
+                    activo=activo,
+                )
+                db.session.add(entrenamiento)
+                creados.append(entrenamiento)
+            db.session.flush()
+
+            usuario_id = getattr(getattr(g, "usuario_actual", None), "id_usuario", None)
+            for e in creados:
+                cat_nom = e.categoria.nombre if e.categoria else "General"
+                eq_nom = e.equipo.nombre if e.equipo else "Todos"
+                entrenador_nom = e.entrenador.nombre if e.entrenador else "Sin asignar"
+                detalle = (
+                    f"Día {DIAS_SEMANA[e.dia_semana]} {e.hora_inicio.strftime('%H:%M')}"
+                    f"{' - ' + e.hora_fin.strftime('%H:%M') if e.hora_fin else ''} | "
+                    f"Cat: {cat_nom} | Eq: {eq_nom} | Lugar: {nombre_lugar or 'Sin definir'} | "
+                    f"Entrenador: {entrenador_nom} | Activo: {'Sí' if e.activo else 'No'}"
+                )
+                db.session.add(Auditoria(
+                    modulo="Calendario", accion="Crear entrenamiento",
+                    entidad="Entrenamiento", id_entidad=e.id_entrenamiento,
+                    detalle=detalle, id_usuario=usuario_id,
+                ))
+            db.session.commit()
+            dias_txt = ", ".join(DIAS_SEMANA[d] for d in dias_seleccionados)
+            flash(f"Entrenamiento(s) fijos agregados correctamente para: {dias_txt}.", "success")
+            return redirect(url_for("calendario.listar_entrenamientos"))
         except ErrorValidacion as error:
             flash(str(error), "danger")
             return render_template(
                 "calendario/entrenamiento_form.html",
                 categorias=categorias, equipos=equipos, lugares=lugares, entrenadores=entrenadores,
-                dias_semana=DIAS_SEMANA,
+                dias_semana=DIAS_SEMANA, dias_seleccionados=dias_seleccionados,
             )
-        db.session.add(entrenamiento)
-        db.session.flush()
-        db.session.add(Auditoria(
-            modulo="Calendario", accion="Crear entrenamiento",
-            entidad="Entrenamiento", id_entidad=entrenamiento.id_entrenamiento,
-            detalle=f"día={entrenamiento.dia_semana}; {entrenamiento.hora_inicio}",
-        ))
-        db.session.commit()
-        flash("Entrenamiento fijo agregado al calendario.", "success")
-        return redirect(url_for("calendario.listar_entrenamientos"))
 
     return render_template(
         "calendario/entrenamiento_form.html", categorias=categorias,
         equipos=equipos, lugares=lugares, entrenadores=entrenadores, dias_semana=DIAS_SEMANA,
+        dias_seleccionados=[],
     )
 
 
 @bp.route("/entrenamientos/<int:id_entrenamiento>/eliminar", methods=["POST"])
 def eliminar_entrenamiento(id_entrenamiento):
     e = Entrenamiento.query.get_or_404(id_entrenamiento)
-    db.session.add(Auditoria(
-        modulo="Calendario", accion="Eliminar entrenamiento",
-        entidad="Entrenamiento", id_entidad=e.id_entrenamiento,
-        detalle=f"día={e.dia_semana}; {e.hora_inicio}",
-    ))
-    db.session.delete(e)
-    db.session.commit()
-    flash("Entrenamiento eliminado.", "success")
+    try:
+        # Limpiar sesiones y asistencias asociadas de forma explícita para evitar violaciones de clave foránea
+        sesiones = SesionEntrenamiento.query.filter_by(id_entrenamiento=e.id_entrenamiento).all()
+        for s in sesiones:
+            AsistenciaEntrenamiento.query.filter_by(id_sesion_entrenamiento=s.id_sesion_entrenamiento).delete()
+            db.session.delete(s)
+
+        ConflictoAutorizado.query.filter_by(tipo_entidad="Entrenamiento", id_entidad=e.id_entrenamiento).delete()
+
+        cat_nom = e.categoria.nombre if e.categoria else "General"
+        eq_nom = e.equipo.nombre if e.equipo else "Todos"
+        entrenador_nom = e.entrenador.nombre if e.entrenador else "Sin asignar"
+        usuario_id = getattr(getattr(g, "usuario_actual", None), "id_usuario", None)
+        detalle = (
+            f"Día {DIAS_SEMANA[e.dia_semana]} {e.hora_inicio.strftime('%H:%M')}"
+            f"{' - ' + e.hora_fin.strftime('%H:%M') if e.hora_fin else ''} | "
+            f"Cat: {cat_nom} | Eq: {eq_nom} | Lugar: {e.lugar or 'Sin definir'} | Entrenador: {entrenador_nom}"
+        )
+        db.session.add(Auditoria(
+            modulo="Calendario", accion="Eliminar entrenamiento",
+            entidad="Entrenamiento", id_entidad=e.id_entrenamiento,
+            detalle=detalle, id_usuario=usuario_id,
+        ))
+        db.session.delete(e)
+        db.session.commit()
+        flash("Entrenamiento fijo y registros asociados eliminados correctamente.", "success")
+    except Exception as err:
+        db.session.rollback()
+        flash(f"Error al eliminar el entrenamiento: {str(err)}", "danger")
     return redirect(url_for("calendario.listar_entrenamientos"))
 
 
@@ -520,9 +580,20 @@ def editar_entrenamiento(id_entrenamiento):
     entrenadores = PersonalDeportivo.query.filter_by(activo=True).order_by(PersonalDeportivo.nombre).all()
     if request.method == "POST":
         try:
-            dia_semana = entero(
-                request.form.get("dia_semana"), "Día", 0, 6, requerido=True
-            )
+            raw_dias = request.form.getlist("dias_semana")
+            if not raw_dias and request.form.get("dia_semana") is not None:
+                raw_dias = [request.form.get("dia_semana")]
+            dias_seleccionados = []
+            for d_str in raw_dias:
+                try:
+                    num = int(d_str)
+                    if 0 <= num <= 6 and num not in dias_seleccionados:
+                        dias_seleccionados.append(num)
+                except (ValueError, TypeError):
+                    continue
+            if not dias_seleccionados:
+                raise ErrorValidacion("Debe seleccionar al menos un día de la semana.")
+
             hora_inicio = hora_hm(request.form.get("hora_inicio"), "Hora de inicio", True)
             hora_fin = hora_hm(request.form.get("hora_fin"), "Hora de fin")
             if hora_fin and hora_fin <= hora_inicio:
@@ -545,26 +616,30 @@ def editar_entrenamiento(id_entrenamiento):
             lugar = Lugar.query.filter(
                 db.func.lower(Lugar.nombre) == nombre_lugar.lower()
             ).first() if nombre_lugar else None
+            activo = request.form.get("activo") in ("1", "true", "on") if "activo" in request.form else True
+
+            primer_dia = dias_seleccionados[0]
             conflictos = Entrenamiento.query.filter(
                 Entrenamiento.id_entrenamiento != id_entrenamiento,
-                Entrenamiento.dia_semana == dia_semana,
+                Entrenamiento.dia_semana == primer_dia,
                 Entrenamiento.activo.is_(True),
             )
             if lugar:
                 conflictos = conflictos.filter_by(id_lugar=lugar.id_lugar)
             for otro in conflictos.all():
                 if hora_inicio < (otro.hora_fin or otro.hora_inicio) and (hora_fin or hora_inicio) > otro.hora_inicio:
-                    raise ErrorValidacion("Existe otro entrenamiento en ese lugar y horario.")
+                    raise ErrorValidacion(f"Existe otro entrenamiento en ese lugar el día {DIAS_SEMANA[primer_dia]}.")
             if id_entrenador:
                 ocupados = Entrenamiento.query.filter(
                     Entrenamiento.id_entrenamiento != id_entrenamiento,
-                    Entrenamiento.dia_semana == dia_semana,
+                    Entrenamiento.dia_semana == primer_dia,
                     Entrenamiento.id_entrenador == id_entrenador,
                     Entrenamiento.activo.is_(True),
                 ).all()
                 if any(hora_inicio < (o.hora_fin or o.hora_inicio) and (hora_fin or hora_inicio) > o.hora_inicio for o in ocupados):
-                    raise ErrorValidacion("El entrenador ya tiene otro entrenamiento en ese horario.")
-            entrenamiento.dia_semana = dia_semana
+                    raise ErrorValidacion(f"El entrenador ya tiene otro entrenamiento el día {DIAS_SEMANA[primer_dia]}.")
+
+            entrenamiento.dia_semana = primer_dia
             entrenamiento.hora_inicio = hora_inicio
             entrenamiento.hora_fin = hora_fin
             entrenamiento.fecha_inicio = fecha_inicio
@@ -574,19 +649,45 @@ def editar_entrenamiento(id_entrenamiento):
             entrenamiento.id_entrenador = id_entrenador
             entrenamiento.lugar = nombre_lugar
             entrenamiento.id_lugar = lugar.id_lugar if lugar else None
-        except ErrorValidacion as error:
-            flash(str(error), "danger")
-        else:
+            entrenamiento.activo = activo
+
+            # Si se seleccionaron más días, crear los horarios correspondientes
+            for otro_dia in dias_seleccionados[1:]:
+                otro_e = Entrenamiento(
+                    dia_semana=otro_dia,
+                    hora_inicio=hora_inicio,
+                    hora_fin=hora_fin,
+                    fecha_inicio=fecha_inicio,
+                    fecha_fin=fecha_fin,
+                    id_categoria=id_categoria,
+                    id_equipo=id_equipo,
+                    id_entrenador=id_entrenador,
+                    lugar=nombre_lugar,
+                    id_lugar=lugar.id_lugar if lugar else None,
+                    activo=activo,
+                )
+                db.session.add(otro_e)
+
+            usuario_id = getattr(getattr(g, "usuario_actual", None), "id_usuario", None)
+            cat_nom = entrenamiento.categoria.nombre if entrenamiento.categoria else "General"
+            detalle = (
+                f"Actualizado día {DIAS_SEMANA[primer_dia]} {hora_inicio.strftime('%H:%M')}"
+                f"{' - ' + hora_fin.strftime('%H:%M') if hora_fin else ''} | "
+                f"Cat: {cat_nom} | Cancha: {nombre_lugar or 'Sin definir'} | Activo: {'Sí' if activo else 'No'}"
+            )
             db.session.add(Auditoria(
                 modulo="Calendario", accion="Editar entrenamiento",
                 entidad="Entrenamiento", id_entidad=id_entrenamiento,
-                detalle=f"día={dia_semana}; {hora_inicio}",
+                detalle=detalle, id_usuario=usuario_id,
             ))
             db.session.commit()
-            flash("Entrenamiento actualizado.", "success")
+            flash("Entrenamiento actualizado correctamente.", "success")
             return redirect(url_for("calendario.listar_entrenamientos"))
+        except ErrorValidacion as error:
+            flash(str(error), "danger")
+
     return render_template(
         "calendario/entrenamiento_form.html", entrenamiento=entrenamiento,
         categorias=categorias, equipos=equipos, lugares=lugares, entrenadores=entrenadores,
-        dias_semana=DIAS_SEMANA,
+        dias_semana=DIAS_SEMANA, dias_seleccionados=[entrenamiento.dia_semana] if entrenamiento else [],
     )

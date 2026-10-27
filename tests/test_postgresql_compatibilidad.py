@@ -9,11 +9,11 @@ from scripts.exportar_para_postgresql import exportar_sql, escapar_valor_pg
 
 def test_normalizar_postgres_url_convierte_prefijo(monkeypatch):
     url_legacy = "postgres://usuario:clave@db.render.com:5432/academia"
-    esperado = "postgresql://usuario:clave@db.render.com:5432/academia"
+    esperado = "postgresql+psycopg2://usuario:clave@db.render.com:5432/academia"
     assert normalizar_postgres_url(url_legacy) == esperado
 
     url_estandar = "postgresql://usuario:clave@localhost:5432/academia"
-    assert normalizar_postgres_url(url_estandar) == url_estandar
+    assert normalizar_postgres_url(url_estandar) == "postgresql+psycopg2://usuario:clave@localhost:5432/academia"
 
 
 def test_obtener_database_uri_con_variable(monkeypatch):

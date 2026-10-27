@@ -5,32 +5,98 @@
     <div>
         <span class="eyebrow">Programación Semanal</span>
         <h2 class="mb-0"><i class="bi bi-clock-history text-emerald me-1"></i> Entrenamientos Fijos</h2>
-        <p class="text-muted small mb-0">Horarios semanales recurrentes organizados por categoría, equipo y lugar.</p>
+        <p class="text-muted small mb-0">Horarios semanales recurrentes sincronizados con el Calendario y la Agenda general.</p>
     </div>
-    <a href="{{ url_for('calendario.crear_entrenamiento') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo entrenamiento</a>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('calendario.ver') }}" class="btn btn-outline-primary"><i class="bi bi-calendar3"></i> Ver Calendario</a>
+        <a href="{{ url_for('agenda.listar') }}" class="btn btn-outline-secondary"><i class="bi bi-journal-text"></i> Ver Agenda</a>
+        <a href="{{ url_for('calendario.crear_entrenamiento') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo entrenamiento</a>
+    </div>
 </div>
-<div class="card shadow-sm">
+
+<div class="card shadow-sm border-0">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-light"><tr><th>Día</th><th>Horario</th><th>Categoría</th><th>Equipo</th><th>Lugar</th><th></th></tr></thead>
+            <thead class="table-light">
+                <tr>
+                    <th>Día</th>
+                    <th>Horario</th>
+                    <th>Categoría</th>
+                    <th>Equipo</th>
+                    <th>Cancha / Lugar</th>
+                    <th>Entrenador</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
             <tbody>
                 {% for e in entrenamientos %}
                 <tr>
-                    <td>{{ dias_semana[e.dia_semana] }}</td>
-                    <td>{{ e.hora_inicio.strftime('%H:%M') }}{% if e.hora_fin %} - {{ e.hora_fin.strftime('%H:%M') }}{% endif %}</td>
-                    <td>{{ e.categoria.nombre if e.categoria else '—' }}</td>
-                    <td>{{ e.equipo.nombre if e.equipo else '—' }}</td>
-                    <td>{{ e.lugar or '—' }}</td>
-                    <td class="text-end">
-                        <a href="{{ url_for('calendario.editar_entrenamiento', id_entrenamiento=e.id_entrenamiento) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                        <a href="{{ url_for('calendario.asistencia', id_entrenamiento=e.id_entrenamiento) }}" class="btn btn-sm btn-outline-success" title="Asistencia"><i class="bi bi-check2-square"></i></a>
-                        <form method="post" action="{{ url_for('calendario.eliminar_entrenamiento', id_entrenamiento=e.id_entrenamiento) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este entrenamiento fijo?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                    <td>
+                        <span class="badge bg-primary-subtle text-primary border px-2 py-1 fs-7">
+                            <i class="bi bi-calendar-event me-1"></i>{{ dias_semana[e.dia_semana] }}
+                        </span>
+                    </td>
+                    <td>
+                        <strong>{{ e.hora_inicio.strftime('%H:%M') }}</strong>
+                        {% if e.hora_fin %}
+                        <span class="text-muted"> - {{ e.hora_fin.strftime('%H:%M') }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if e.categoria %}
+                        <span class="badge text-bg-light border">{{ e.categoria.nombre }}</span>
+                        {% else %}
+                        <span class="text-muted small">General</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if e.equipo %}
+                        <span class="badge bg-info-subtle text-dark border">{{ e.equipo.nombre }}</span>
+                        {% else %}
+                        <span class="text-muted small">Todos</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if e.lugar %}
+                        <span><i class="bi bi-geo-alt text-muted me-1"></i>{{ e.lugar }}</span>
+                        {% if e.lugar_catalogo and e.lugar_catalogo.google_maps_url %}
+                        <a href="{{ e.lugar_catalogo.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-link p-0 ms-1 text-success" title="Ver en Maps"><i class="bi bi-map"></i></a>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if e.entrenador %}
+                        <span><i class="bi bi-person text-muted me-1"></i>{{ e.entrenador.nombre }}</span>
+                        {% else %}
+                        <span class="text-muted small">Sin asignar</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if e.activo %}
+                        <span class="badge bg-success-subtle text-success border"><i class="bi bi-check-circle me-1"></i>Activo</span>
+                        {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary border"><i class="bi bi-pause-circle me-1"></i>En pausa</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <a href="{{ url_for('calendario.editar_entrenamiento', id_entrenamiento=e.id_entrenamiento) }}" class="btn btn-sm btn-outline-primary" title="Editar horario y días"><i class="bi bi-pencil"></i></a>
+                        <a href="{{ url_for('calendario.asistencia', id_entrenamiento=e.id_entrenamiento) }}" class="btn btn-sm btn-outline-success" title="Gestionar asistencia"><i class="bi bi-check2-square"></i></a>
+                        <form method="post" action="{{ url_for('calendario.eliminar_entrenamiento', id_entrenamiento=e.id_entrenamiento) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este entrenamiento fijo y sus sesiones asociadas?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
                         </form>
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="6" class="text-center text-muted py-4">No hay entrenamientos fijos configurados.</td></tr>
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-5">
+                        <i class="bi bi-clock-history fs-1 d-block mb-2 text-muted"></i>
+                        <p class="mb-2">No hay entrenamientos fijos configurados todavía.</p>
+                        <a href="{{ url_for('calendario.crear_entrenamiento') }}" class="btn btn-sm btn-success"><i class="bi bi-plus-lg"></i> Agregar primer entrenamiento</a>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
