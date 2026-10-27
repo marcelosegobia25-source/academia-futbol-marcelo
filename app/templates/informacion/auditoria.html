@@ -24,5 +24,115 @@
 {% if resultado.alertas or resultado.sin_pk or resultado.fks_invalidas %}<div class="card mb-4"><div class="card-header"><strong>Hallazgos</strong></div><div class="card-body"><ul class="mb-0">{% for alerta in resultado.alertas %}<li>{{ alerta }}</li>{% endfor %}{% for tabla in resultado.sin_pk %}<li>Tabla sin llave primaria: {{ tabla }}</li>{% endfor %}{% for fk in resultado.fks_invalidas %}<li>Referencia inválida en {{ fk.table }}, fila {{ fk.rowid }}</li>{% endfor %}</ul></div></div>{% endif %}
 <div class="card"><div class="card-header"><strong>Registros por tabla</strong></div><div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Tabla</th><th>Registros</th></tr></thead><tbody>{% for tabla, cantidad in resultado.estadisticas.items() %}<tr><td>{{ tabla }}</td><td>{{ cantidad }}</td></tr>{% endfor %}</tbody></table></div></div>
 {% if resultado.indices_recomendados %}<div class="alert alert-info mt-4"><strong>Optimización pendiente:</strong> {{ resultado.indices_recomendados|length }} columnas foráneas pueden beneficiarse de índices.</div>{% endif %}
-<div class="card mt-4"><div class="card-header"><strong>Últimas operaciones auditadas (Hora de Bolivia)</strong></div><div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Fecha / Hora (BO)</th><th>Usuario</th><th>Módulo</th><th>Acción</th><th>Anterior</th><th>Nuevo</th><th>Detalle</th></tr></thead><tbody>{% for a in registros %}<tr><td>{{ a.creado_en | fecha_hora_bo }}</td><td>{{a.usuario.nombre_usuario if a.usuario else 'Sistema/legado'}}</td><td>{{a.modulo}}</td><td>{{a.accion}}</td><td>{{a.valor_anterior or '—'}}</td><td>{{a.valor_nuevo or '—'}}</td><td>{{a.detalle or '—'}}</td></tr>{% else %}<tr><td colspan="7" class="text-center">Sin operaciones</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="card mt-4">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <strong><i class="bi bi-journal-text me-1"></i> Bitácora de operaciones auditadas</strong>
+            <span class="small text-muted ms-2">(Últimos 200 eventos en Hora de Bolivia)</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <input type="search" id="filtro-auditoria" class="form-control form-control-sm" placeholder="Buscar alumno, recibo, módulo, acción..." style="width: 280px;">
+            <button type="button" class="btn btn-sm btn-outline-danger" id="btn-solo-anulaciones" title="Filtrar solo anulaciones">
+                <i class="bi bi-x-circle me-1"></i> Anulaciones
+            </button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle mb-0" id="tabla-auditoria">
+            <thead class="table-light">
+                <tr>
+                    <th style="min-width: 140px;">Fecha / Hora</th>
+                    <th>Usuario</th>
+                    <th>Módulo / Entidad</th>
+                    <th>Acción</th>
+                    <th>Estado Anterior</th>
+                    <th>Estado Nuevo</th>
+                    <th style="min-width: 220px;">Detalle de la Operación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in registros %}
+                <tr class="fila-auditoria {% if 'anular' in (a.accion or '')|lower or 'eliminar' in (a.accion or '')|lower %}table-warning-subtle{% endif %}">
+                    <td class="text-nowrap small text-muted">
+                        <i class="bi bi-clock me-1"></i>{{ a.creado_en | fecha_hora_bo }}
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary-subtle text-dark border">
+                            <i class="bi bi-person me-1"></i>{{ a.usuario.nombre_usuario if a.usuario else 'Sistema/Admin' }}
+                        </span>
+                    </td>
+                    <td>
+                        <strong>{{ a.modulo }}</strong>
+                        {% if a.entidad %}
+                        <div class="small text-muted">{{ a.entidad }}{% if a.id_entidad %} #{{ "%06d"|format(a.id_entidad) if a.entidad == 'Pago' else a.id_entidad }}{% endif %}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% set acc_lower = (a.accion or '')|lower %}
+                        {% if 'anular' in acc_lower or 'eliminar' in acc_lower %}
+                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>{{ a.accion }}</span>
+                        {% elif 'crear' in acc_lower or 'registrar' in acc_lower or 'iniciar' in acc_lower %}
+                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>{{ a.accion }}</span>
+                        {% elif 'editar' in acc_lower or 'cambiar' in acc_lower or 'actualizar' in acc_lower %}
+                        <span class="badge bg-primary"><i class="bi bi-pencil-square me-1"></i>{{ a.accion }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ a.accion }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="small">{{ a.valor_anterior or '—' }}</td>
+                    <td class="small">
+                        {% if a.valor_nuevo and 'ANULADO' in a.valor_nuevo %}
+                        <span class="text-danger fw-semibold">{{ a.valor_nuevo }}</span>
+                        {% else %}
+                        {{ a.valor_nuevo or '—' }}
+                        {% endif %}
+                    </td>
+                    <td class="small">{{ a.detalle or '—' }}</td>
+                </tr>
+                {% else %}
+                <tr id="sin-operaciones"><td colspan="7" class="text-center py-4 text-muted">Sin operaciones auditadas registradas.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputFiltro = document.getElementById('filtro-auditoria');
+    const btnAnulaciones = document.getElementById('btn-solo-anulaciones');
+    const filas = document.querySelectorAll('.fila-auditoria');
+    let filtroAnulacionActivo = false;
+
+    function aplicarFiltro() {
+        const texto = (inputFiltro ? inputFiltro.value : '').toLowerCase().trim();
+        filas.forEach(fila => {
+            const contenido = fila.textContent.toLowerCase();
+            const coincideTexto = !texto || contenido.includes(texto);
+            const coincideAnulacion = !filtroAnulacionActivo || contenido.includes('anular') || contenido.includes('anulado');
+            fila.style.display = (coincideTexto && coincideAnulacion) ? '' : 'none';
+        });
+    }
+
+    if (inputFiltro) {
+        inputFiltro.addEventListener('input', aplicarFiltro);
+    }
+
+    if (btnAnulaciones) {
+        btnAnulaciones.addEventListener('click', function() {
+            filtroAnulacionActivo = !filtroAnulacionActivo;
+            if (filtroAnulacionActivo) {
+                btnAnulaciones.classList.remove('btn-outline-danger');
+                btnAnulaciones.classList.add('btn-danger');
+                btnAnulaciones.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Mostrando Anulaciones';
+            } else {
+                btnAnulaciones.classList.remove('btn-danger');
+                btnAnulaciones.classList.add('btn-outline-danger');
+                btnAnulaciones.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anulaciones';
+            }
+            aplicarFiltro();
+        });
+    }
+});
+</script>
 {% endblock %}

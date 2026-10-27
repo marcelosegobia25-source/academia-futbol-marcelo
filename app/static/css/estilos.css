@@ -2648,3 +2648,112 @@ a:hover {
     color: #f59e0b;
 }
 
+/* ==========================================================================
+   TEMA OSCURO - ROLES, PERMISOS Y SEGURIDAD
+   ========================================================================== */
+.permiso-categoria-box {
+    background: #0b1322 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px;
+    padding: 1.15rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.permiso-categoria-box:hover {
+    border-color: rgba(16, 185, 129, 0.3) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.permiso-categoria-title {
+    color: #ffffff !important;
+    font-weight: 750;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+}
+
+.permiso-item-label {
+    color: #f1f5f9 !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.permiso-item-desc {
+    color: #94a3b8 !important;
+    font-size: 0.74rem;
+    line-height: 1.35;
+}
+
+/* Nav Pills Dark */
+.nav-pills .nav-link {
+    color: #cbd5e1 !important;
+    background: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.55rem 1.1rem;
+    transition: all 0.2s ease;
+}
+
+.nav-pills .nav-link:hover {
+    color: #ffffff !important;
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.nav-pills .nav-link.active {
+    background: #10b981 !important;
+    color: #ffffff !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* Acordeón de permisos en Roles */
+.accordion-permisos .accordion-item {
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+}
+
+.accordion-permisos .accordion-button {
+    background: #0b111e !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.accordion-permisos .accordion-button:not(.collapsed) {
+    background: #0f1c2e !important;
+    color: #34d399 !important;
+}
+
+.accordion-permisos .accordion-button::after {
+    filter: invert(1);
+}
+
+.accordion-permisos .accordion-body {
+    background: #090e18 !important;
+    padding: 0.75rem 1rem;
+    color: #cbd5e1 !important;
+}
+
+/* Tablas y filas en dark mode */
+.table-warning-subtle {
+    background-color: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+}
+
+.form-check-input {
+    background-color: #0b1322;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: #10b981;
+    border-color: #10b981;
+}
+

@@ -27,19 +27,26 @@ class AnularPagoUseCase:
         mov = MovimientoContable.query.filter_by(
             origen_tipo="Pago", origen_id=pago.id_pago, anulado_en=None
         ).first()
+        numero_recibo = f"{pago.id_pago:06d}"
         if mov:
             mov.anulado_en = ahora_utc()
-            mov.motivo_anulacion = f"Pago #{pago.id_pago} anulado: {motivo}"
+            mov.motivo_anulacion = f"Pago #{numero_recibo} anulado: {motivo}"
+
+        alumno_nombre = pago.alumno.nombre_completo if pago.alumno else f"Alumno #{pago.id_alumno}"
+        alumno_codigo = pago.alumno.codigo_interno if pago.alumno else ""
+        monto_pago = float(pago.monto)
+        mes_pagado = pago.mes_pagado
+        modo_pago = pago.modo_pago
 
         auditoria = Auditoria(
             modulo="Pagos",
-            accion="Anular pago",
+            accion="Anular",
             entidad="Pago",
             id_entidad=pago.id_pago,
-            detalle=f"Se anuló el pago #{pago.id_pago} de {pago.alumno.nombre_completo}. Motivo: {motivo}",
             id_usuario=id_usuario,
-            valor_anterior=f"Bs. {pago.monto}",
-            valor_nuevo="Anulado",
+            valor_anterior=f"Recibo #{numero_recibo} | {alumno_nombre} ({alumno_codigo}) | Mes: {mes_pagado} | Bs. {monto_pago:.2f} ({modo_pago})",
+            valor_nuevo=f"ANULADO | Motivo: {motivo}",
+            detalle=f"Se anuló el Recibo #{numero_recibo} de {alumno_nombre} (Mes: {mes_pagado}, Bs. {monto_pago:.2f}, {modo_pago}). Motivo: {motivo}",
         )
         db.session.add(auditoria)
         db.session.commit()

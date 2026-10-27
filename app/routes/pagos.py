@@ -381,10 +381,15 @@ def crear(id_alumno):
                 numero_operacion=numero_operacion,
                 origen_tipo="Pago", origen_id=pago.id_pago,
             ))
+        alumno_codigo = alumno.codigo_interno or ""
+        numero_recibo = f"{pago.id_pago:06d}"
         db.session.add(Auditoria(
             modulo="Pagos", accion="Registrar", entidad="Pago",
             id_entidad=pago.id_pago,
-            detalle=f"{alumno.codigo_interno} {mes_pagado} {modo_pago} {monto}",
+            id_usuario=session.get("id_usuario"),
+            valor_anterior=None,
+            valor_nuevo=f"Recibo #{numero_recibo} | {alumno.nombre_completo} ({alumno_codigo}) | Mes: {mes_pagado} | Bs. {monto:.2f} ({modo_pago})",
+            detalle=f"Registro de pago #{numero_recibo} para {alumno.nombre_completo} (Mes: {mes_pagado}, Bs. {monto:.2f}, {modo_pago})",
         ))
         anulacion_previa = (
             AnulacionPago.query.join(Pago, AnulacionPago.id_pago == Pago.id_pago)
@@ -448,23 +453,36 @@ def eliminar(id_pago):
         flash(str(error), "danger")
         return redirect(url_for("alumnos.detalle", id_alumno=pago.id_alumno))
     id_alumno = pago.id_alumno
+    alumno_nombre = pago.alumno.nombre_completo if pago.alumno else f"Alumno #{pago.id_alumno}"
+    alumno_codigo = pago.alumno.codigo_interno if pago.alumno else ""
+    monto_pago = float(pago.monto)
+    mes_pagado = pago.mes_pagado
+    modo_pago = pago.modo_pago
+    numero_recibo = f"{pago.id_pago:06d}"
+
     pago.eliminado_en = ahora_utc()
     movimiento = MovimientoContable.query.filter_by(
         origen_tipo="Pago", origen_id=pago.id_pago
     ).first()
     if movimiento:
         movimiento.anulado_en = pago.eliminado_en
-        movimiento.motivo_anulacion = motivo
+        movimiento.motivo_anulacion = f"Pago #{numero_recibo} anulado: {motivo}"
     db.session.add(AnulacionPago(
         id_pago=pago.id_pago, motivo=motivo, creado_en=pago.eliminado_en
     ))
     db.session.add(Auditoria(
-        modulo="Pagos", accion="Anular", entidad="Pago", id_entidad=pago.id_pago,
-        detalle=motivo,
+        modulo="Pagos",
+        accion="Anular",
+        entidad="Pago",
+        id_entidad=pago.id_pago,
+        id_usuario=session.get("id_usuario"),
+        valor_anterior=f"Recibo #{numero_recibo} | {alumno_nombre} ({alumno_codigo}) | Mes: {mes_pagado} | Bs. {monto_pago:.2f} ({modo_pago})",
+        valor_nuevo=f"ANULADO | Motivo: {motivo}",
+        detalle=f"Se anuló el Recibo #{numero_recibo} de {alumno_nombre} (Mes: {mes_pagado}, Bs. {monto_pago:.2f}, {modo_pago}). Motivo: {motivo}",
     ))
     db.session.commit()
-    flash("Pago anulado formalmente. El mes queda disponible para registrar la corrección.", "success")
-    return redirect(url_for("alumnos.detalle", id_alumno=id_alumno))
+    flash(f"Pago #{numero_recibo} de {alumno_nombre} anulado formalmente. El mes {mes_pagado} queda disponible para corrección.", "success")
+    return redirect(request.referrer or url_for("alumnos.detalle", id_alumno=id_alumno))
 
 
 @bp.route("/alumno/<int:id_alumno>/fecha-base", methods=["POST"])

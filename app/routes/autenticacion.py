@@ -95,7 +95,7 @@ def login():
     return render_template("autenticacion/login.html", destino=destino)
 
 
-@bp.route("/salir", methods=["POST"])
+@bp.route("/salir", methods=["GET", "POST"])
 def logout():
     if session.get("id_usuario"):
         db.session.add(Auditoria(modulo="Acceso", accion="Cerrar sesión", entidad="Usuario", id_entidad=session["id_usuario"], id_usuario=session["id_usuario"]))

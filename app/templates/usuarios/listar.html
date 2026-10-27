@@ -1,12 +1,378 @@
-{% extends 'base.html' %}{% block titulo %}Usuarios{% endblock %}{% block contenido %}
+{% extends 'base.html' %}
+{% block titulo %}Usuarios, Roles y Permisos{% endblock %}
+{% block contenido %}
 <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <span class="eyebrow">Seguridad & Accesos</span>
-        <h1 class="page-title mb-1">Usuarios y Permisos</h1>
-        <p class="text-muted small mb-0">Administración de credenciales, roles, asignaciones y control de accesos al sistema.</p>
+        <span class="eyebrow"><i class="bi bi-shield-lock-fill text-emerald me-1"></i> Control de Acceso & Seguridad</span>
+        <h1 class="page-title mb-1">Usuarios, Roles y Permisos</h1>
+        <p class="text-muted small mb-0">Crea roles a medida con permisos granulares específicos y gestiona las credenciales de todo el personal.</p>
     </div>
 </div>
-<form method="post" action="{{ url_for('usuarios.nuevo') }}" class="card p-3 mb-4"><div class="row g-2 align-items-end"><div class="col-md-3"><label>Usuario</label><input name="nombre_usuario" class="form-control" required></div><div class="col-md-4"><label>Nombre completo</label><input name="nombre_completo" class="form-control" required></div><div class="col-md-3"><label>Rol</label><select name="id_rol" class="form-select">{% for r in roles %}<option value="{{r.id_rol}}">{{r.nombre}}</option>{% endfor %}</select></div><div class="col-md-2"><button class="btn btn-success w-100">Crear</button></div></div><small class="text-muted mt-2">La contraseña temporal será 00000.</small></form>
-<div class="card table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Usuario</th><th>Nombre</th><th>Rol/estado</th><th>Último acceso (BO)</th><th></th></tr></thead><tbody>{% for u in usuarios %}<tr><td><strong>{{u.nombre_usuario}}</strong></td><td>{{u.nombre_completo}}</td><td><form id="u{{u.id_usuario}}" method="post" action="{{url_for('usuarios.actualizar',id_usuario=u.id_usuario)}}"></form><select form="u{{u.id_usuario}}" name="id_rol" class="form-select form-select-sm">{% for r in roles %}<option value="{{r.id_rol}}" {{'selected' if r.id_rol==u.id_rol}}>{{r.nombre}}</option>{% endfor %}</select><select form="u{{u.id_usuario}}" name="activo" class="form-select form-select-sm mt-1"><option value="1" {{'selected' if u.activo}}>Activo</option><option value="0" {{'selected' if not u.activo}}>Inactivo</option></select></td><td>{{ u.ultimo_acceso | fecha_hora_bo if u.ultimo_acceso else 'Nunca' }}</td><td><button form="u{{u.id_usuario}}" class="btn btn-sm btn-primary">Guardar</button><form method="post" action="{{url_for('usuarios.restablecer',id_usuario=u.id_usuario)}}" class="d-inline"><button class="btn btn-sm btn-outline-warning">Clave 00000</button></form></td></tr>{% endfor %}</tbody></table></div>
-<h2 class="page-title mt-5 mb-3">Permisos por rol</h2><div class="row g-3">{% for r in roles %}<div class="col-lg-6"><form method="post" action="{{url_for('usuarios.permisos_rol',id_rol=r.id_rol)}}" class="card p-3 h-100"><h5>{{r.nombre}}</h5><div class="row g-2 flex-grow-1">{% for p in permisos %}<div class="col-md-6"><label class="form-check"><input class="form-check-input" type="checkbox" name="id_permiso" value="{{p.id_permiso}}" {{'checked' if p in r.permisos}} {{'disabled' if r.nombre=='Administrador'}}> <span class="form-check-label">{{p.nombre}}</span></label></div>{% endfor %}</div>{% if r.nombre!='Administrador' %}<button class="btn btn-outline-primary mt-3">Guardar permisos</button>{% else %}<small class="text-muted mt-3">El Administrador conserva todos los permisos.</small>{% endif %}</form></div>{% endfor %}</div>
+
+<ul class="nav nav-pills mb-4 gap-2" id="tabsSeguridad" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active d-flex align-items-center gap-2" id="tab-usuarios-btn" data-bs-toggle="pill" data-bs-target="#tab-usuarios" type="button" role="tab">
+            <i class="bi bi-people-fill"></i> Usuarios del Sistema
+            <span class="badge bg-secondary text-white border border-secondary">{{ usuarios|length }}</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link d-flex align-items-center gap-2" id="tab-roles-btn" data-bs-toggle="pill" data-bs-target="#tab-roles" type="button" role="tab">
+            <i class="bi bi-person-badge-fill"></i> Roles y Permisos
+            <span class="badge bg-secondary text-white border border-secondary">{{ roles|length }}</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link d-flex align-items-center gap-2" id="tab-nuevo-rol-btn" data-bs-toggle="pill" data-bs-target="#tab-nuevo-rol" type="button" role="tab">
+            <i class="bi bi-plus-circle-fill text-emerald"></i> Crear Nuevo Rol
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="contenidoSeguridad">
+
+    <!-- PESTAÑA 1: USUARIOS DEL SISTEMA -->
+    <div class="tab-pane fade show active" id="tab-usuarios" role="tabpanel">
+        
+        <!-- Formulario para nuevo usuario -->
+        <div class="card mb-4">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <strong><i class="bi bi-person-plus-fill me-1 text-emerald"></i> Registrar Nuevo Usuario</strong>
+                <span class="small text-muted">Contraseña temporal por defecto: <code>00000</code></span>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('usuarios.nuevo') }}">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-secondary">Nombre de usuario (Login)</label>
+                            <input name="nombre_usuario" class="form-control form-control-sm" placeholder="ej: jgomez, secretaria1" required pattern="[a-zA-Z0-9_.-]{3,40}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">Nombre completo</label>
+                            <input name="nombre_completo" class="form-control form-control-sm" placeholder="ej: Juan Gómez Morales" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-secondary">Rol asignado</label>
+                            <select name="id_rol" class="form-select form-select-sm" required>
+                                {% for r in roles %}
+                                <option value="{{ r.id_rol }}">{{ r.nombre }} {% if r.nombre == 'Administrador' %}(Acceso total){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-sm btn-success w-100">
+                                <i class="bi bi-check-lg me-1"></i> Crear usuario
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Listado de usuarios existentes -->
+        <div class="card overflow-hidden">
+            <div class="card-header">
+                <strong><i class="bi bi-list-check me-1"></i> Usuarios Registrados</strong>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="small">
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre Completo</th>
+                            <th style="min-width: 170px;">Rol Asignado</th>
+                            <th>Estado</th>
+                            <th>Último Acceso (BO)</th>
+                            <th class="text-end" style="min-width: 180px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-emerald fw-bold border border-secondary" style="width: 34px; height: 34px; font-size: 0.85rem; background: rgba(16, 185, 129, 0.12);">
+                                        {{ u.nombre_usuario[:2]|upper }}
+                                    </div>
+                                    <div>
+                                        <strong class="text-white">{{ u.nombre_usuario }}</strong>
+                                        {% if u.debe_cambiar_clave %}
+                                        <span class="badge bg-warning text-dark d-block" style="font-size: 0.65rem;">Clave inicial</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-light">{{ u.nombre_completo }}</td>
+                            <td>
+                                <form id="form-user-{{ u.id_usuario }}" method="post" action="{{ url_for('usuarios.actualizar', id_usuario=u.id_usuario) }}"></form>
+                                <select form="form-user-{{ u.id_usuario }}" name="id_rol" class="form-select form-select-sm">
+                                    {% for r in roles %}
+                                    <option value="{{ r.id_rol }}" {{ 'selected' if r.id_rol == u.id_rol }}>{{ r.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select form="form-user-{{ u.id_usuario }}" name="activo" class="form-select form-select-sm {{ 'text-success' if u.activo else 'text-danger' }}">
+                                    <option value="1" {{ 'selected' if u.activo }}>Activo</option>
+                                    <option value="0" {{ 'selected' if not u.activo }}>Inactivo</option>
+                                </select>
+                            </td>
+                            <td class="small text-muted">
+                                {{ u.ultimo_acceso | fecha_hora_bo if u.ultimo_acceso else 'Nunca' }}
+                            </td>
+                            <td class="text-end">
+                                <button form="form-user-{{ u.id_usuario }}" type="submit" class="btn btn-sm btn-primary" title="Guardar cambios de rol o estado">
+                                    <i class="bi bi-save me-1"></i> Guardar
+                                </button>
+                                <form method="post" action="{{ url_for('usuarios.restablecer', id_usuario=u.id_usuario) }}" class="d-inline" onsubmit="return confirm('¿Restablecer la clave de {{ u.nombre_usuario }} a 00000?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning" title="Restablecer contraseña a 00000">
+                                        <i class="bi bi-key"></i> Clave 00000
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 2: ROLES Y PERMISOS GRANULARES -->
+    <div class="tab-pane fade" id="tab-roles" role="tabpanel">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div>
+                <h5 class="mb-0 text-white">Roles Configurados</h5>
+                <small class="text-muted">Ajusta las restricciones y accesos de cada rol según el perfil del empleado.</small>
+            </div>
+            <button class="btn btn-sm btn-success" onclick="document.getElementById('tab-nuevo-rol-btn').click();">
+                <i class="bi bi-plus-circle me-1"></i> Crear Otro Rol
+            </button>
+        </div>
+
+        <div class="row g-4">
+            {% for r in roles %}
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center py-2">
+                        <div class="d-flex align-items-center gap-2">
+                            {% if r.nombre == 'Administrador' %}
+                            <i class="bi bi-crown-fill text-warning fs-5"></i>
+                            {% else %}
+                            <i class="bi bi-person-badge text-emerald fs-5"></i>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0 fw-bold text-white">{{ r.nombre }}</h6>
+                                <small class="text-muted">{{ r.usuarios|length }} usuario(s) asignados</small>
+                            </div>
+                        </div>
+
+                        {% if r.nombre != 'Administrador' %}
+                        <div class="d-flex gap-1">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalEditarRol{{ r.id_rol }}" title="Editar nombre o descripción">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <form method="post" action="{{ url_for('usuarios.eliminar_rol', id_rol=r.id_rol) }}" class="d-inline" onsubmit="return confirm('¿Eliminar el rol {{ r.nombre }}?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar este rol" {% if r.usuarios|length > 0 %}disabled{% endif %}>
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="bi bi-shield-check me-1"></i>Acceso Total</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-body">
+                        {% if r.descripcion %}
+                        <p class="small text-muted mb-3 fst-italic">{{ r.descripcion }}</p>
+                        {% endif %}
+
+                        <form method="post" action="{{ url_for('usuarios.permisos_rol', id_rol=r.id_rol) }}" id="form-rol-{{ r.id_rol }}">
+                            
+                            {% if r.nombre != 'Administrador' %}
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                                <span class="small fw-semibold text-muted">Permisos activos: <strong class="text-emerald">{{ r.permisos|length }}</strong> de {{ permisos|length }}</span>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0" onclick="marcarTodos('#form-rol-{{ r.id_rol }}', true)">Todos</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0" onclick="marcarTodos('#form-rol-{{ r.id_rol }}', false)">Ninguno</button>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="accordion accordion-flush accordion-permisos" id="accPermisosRol{{ r.id_rol }}">
+                                {% for categoria, lista_permisos in categorias_permisos.items() %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed py-2 px-3 small fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ r.id_rol }}-{{ loop.index }}">
+                                            <span class="me-2">
+                                                {% if 'Alumnos' in categoria %}👥
+                                                {% elif 'Pagos' in categoria %}💵
+                                                {% elif 'Deporte' in categoria %}⚽
+                                                {% elif 'Tienda' in categoria %}🛍️
+                                                {% elif 'Finanzas' in categoria %}📈
+                                                {% else %}🛡️{% endif %}
+                                            </span>
+                                            {{ categoria }}
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{{ r.id_rol }}-{{ loop.index }}" class="accordion-collapse collapse show">
+                                        <div class="accordion-body">
+                                            <div class="row g-2">
+                                                {% for codigo, nombre, descripcion in lista_permisos %}
+                                                {% set p_obj = permisos | selectattr('codigo', 'equalto', codigo) | first %}
+                                                {% if p_obj %}
+                                                <div class="col-12">
+                                                    <label class="form-check form-check-sm mb-0 d-flex align-items-start gap-2 py-1">
+                                                        <input class="form-check-input mt-1" type="checkbox" name="id_permiso" value="{{ p_obj.id_permiso }}"
+                                                               {{ 'checked' if p_obj in r.permisos }}
+                                                               {{ 'disabled' if r.nombre == 'Administrador' }}>
+                                                        <div>
+                                                            <div class="small fw-semibold text-white">{{ nombre }}</div>
+                                                            <div class="permiso-item-desc">{{ descripcion }}</div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            {% if r.nombre != 'Administrador' %}
+                            <div class="mt-3 text-end">
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-save me-1"></i> Guardar permisos del rol
+                                </button>
+                            </div>
+                            {% else %}
+                            <div class="mt-3 alert alert-secondary py-2 small mb-0 border-0 text-light" style="background: rgba(255, 255, 255, 0.05);">
+                                <i class="bi bi-info-circle me-1 text-emerald"></i> El Administrador conserva siempre todos los privilegios del sistema.
+                            </div>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal para Editar Rol -->
+            {% if r.nombre != 'Administrador' %}
+            <div class="modal fade" id="modalEditarRol{{ r.id_rol }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form method="post" action="{{ url_for('usuarios.editar_rol', id_rol=r.id_rol) }}" class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Editar Rol: {{ r.nombre }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">Nombre del Rol</label>
+                                <input type="text" name="nombre" class="form-control" value="{{ r.nombre }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">Descripción o Responsabilidades</label>
+                                <textarea name="descripcion" class="form-control" rows="2">{{ r.descripcion or '' }}</textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Guardar cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- PESTAÑA 3: CREAR NUEVO ROL PERSONALIZADO -->
+    <div class="tab-pane fade" id="tab-nuevo-rol" role="tabpanel">
+        <div class="card col-lg-10 mx-auto">
+            <div class="card-header">
+                <h5 class="mb-0 text-white"><i class="bi bi-plus-circle-fill text-emerald me-1"></i> Crear Rol Personalizado</h5>
+                <small class="text-muted">Define un nuevo rol y selecciona los permisos exactos que tendrá asignados.</small>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" action="{{ url_for('usuarios.crear_rol') }}" id="form-nuevo-rol">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-white">Nombre del Rol <span class="text-danger">*</span></label>
+                            <input type="text" name="nombre" class="form-control" placeholder="ej: Coordinador Deportivo, Tesorero, Recepcionista" required>
+                            <div class="form-text text-muted">Debe ser descriptivo y único.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-white">Descripción / Alcance (Opcional)</label>
+                            <input type="text" name="descripcion" class="form-control" placeholder="ej: Encargado de fixture y control de asistencias matutinas">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                        <h6 class="mb-0 fw-bold text-white">Selección de Permisos por Módulo</h6>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-secondary" onclick="marcarTodos('#form-nuevo-rol', true)">Marcar todos</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="marcarTodos('#form-nuevo-rol', false)">Desmarcar todos</button>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        {% for categoria, lista_permisos in categorias_permisos.items() %}
+                        <div class="col-md-6">
+                            <div class="permiso-categoria-box h-100">
+                                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                                    <span class="fs-5">
+                                        {% if 'Alumnos' in categoria %}👥
+                                        {% elif 'Pagos' in categoria %}💵
+                                        {% elif 'Deporte' in categoria %}⚽
+                                        {% elif 'Tienda' in categoria %}🛍️
+                                        {% elif 'Finanzas' in categoria %}📈
+                                        {% else %}🛡️{% endif %}
+                                    </span>
+                                    <strong class="permiso-categoria-title">{{ categoria }}</strong>
+                                </div>
+                                <div class="d-flex flex-column gap-2">
+                                    {% for codigo, nombre, descripcion in lista_permisos %}
+                                    {% set p_obj = permisos | selectattr('codigo', 'equalto', codigo) | first %}
+                                    {% if p_obj %}
+                                    <label class="form-check form-check-sm mb-0 d-flex align-items-start gap-2 py-1">
+                                        <input class="form-check-input mt-1" type="checkbox" name="id_permiso" value="{{ p_obj.id_permiso }}">
+                                        <div>
+                                            <div class="small fw-semibold text-white">{{ nombre }}</div>
+                                            <div class="permiso-item-desc">{{ descripcion }}</div>
+                                        </div>
+                                    </label>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 text-end">
+                        <button type="button" class="btn btn-outline-secondary me-2" onclick="document.getElementById('tab-roles-btn').click();">Cancelar</button>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-check-circle me-1"></i> Guardar y Crear Rol
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function marcarTodos(contenedorSelector, estado) {
+    const contenedor = document.querySelector(contenedorSelector);
+    if (!contenedor) return;
+    contenedor.querySelectorAll('input[type="checkbox"][name="id_permiso"]:not([disabled])').forEach(chk => {
+        chk.checked = estado;
+    });
+}
+</script>
 {% endblock %}

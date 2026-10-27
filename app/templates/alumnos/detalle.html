@@ -155,7 +155,7 @@
     <div class="card overflow-hidden">
         <div class="card-header d-flex justify-content-between align-items-center"><strong>Historial completo de pagos</strong><span class="small text-muted">El más reciente primero</span></div>
         <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Mes</th><th>Fecha de pago</th><th>Vencimiento</th><th>Estado</th><th>Modo</th><th class="text-end">Recibo</th></tr></thead><tbody>
-            {% for p in alumno.pagos %}<tr class="{{ 'table-secondary' if not p.activo }}"><td><strong>{{ p.mes_pagado }}</strong>{% if not p.activo and p.anulacion %}<small class="d-block text-muted">{{ p.anulacion.motivo }}</small>{% endif %}</td><td>{{ p.fecha_pago.strftime('%d/%m/%Y') }}</td><td>{{ p.fecha_vencimiento.strftime('%d/%m/%Y') }}</td><td><span class="badge {{ 'bg-secondary' if p.estado == 'Anulado' else ('bg-success' if p.estado == 'Vigente' else ('bg-warning text-dark' if p.estado == 'Próximo a vencer' else 'bg-primary')) }}">{{ p.estado }}</span></td><td>{{ 'Cubierto por beca' if p.es_beca else p.modo_pago }}</td><td class="text-end">{% if p.activo %}<a href="{{ url_for('pagos.recibo_pdf', id_pago=p.id_pago, copia=1) }}" class="btn btn-sm btn-outline-secondary" title="Descargar copia del recibo"><i class="bi bi-files"></i></a>{% else %}<span class="small text-muted">Sin recibo válido</span>{% endif %}</td></tr>
+            {% for p in alumno.pagos %}<tr class="{{ 'table-secondary' if not p.activo }}"><td><strong>{{ p.mes_pagado }}</strong>{% if not p.activo and p.anulacion %}<small class="d-block text-muted">{{ p.anulacion.motivo }}</small>{% endif %}</td><td>{{ p.fecha_pago.strftime('%d/%m/%Y') }}</td><td>{{ p.fecha_vencimiento.strftime('%d/%m/%Y') }}</td><td><span class="badge {{ 'bg-secondary' if p.estado == 'Anulado' else ('bg-success' if p.estado == 'Vigente' else ('bg-warning text-dark' if p.estado == 'Próximo a vencer' else 'bg-primary')) }}">{{ p.estado }}</span></td><td>{{ 'Cubierto por beca' if p.es_beca else p.modo_pago }}</td><td class="text-end">{% if p.activo %}<a href="{{ url_for('pagos.recibo_pdf', id_pago=p.id_pago, copia=1) }}" class="btn btn-sm btn-outline-secondary" title="Descargar copia del recibo"><i class="bi bi-files"></i></a> <form method="post" action="{{ url_for('pagos.eliminar', id_pago=p.id_pago) }}" class="d-inline formulario-anulacion"><input type="hidden" name="motivo" value=""><button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Anular este pago"><i class="bi bi-archive"></i></button></form>{% else %}<span class="small text-muted"><i class="bi bi-x-circle text-danger me-1"></i>Anulado</span>{% endif %}</td></tr>
             {% else %}<tr><td colspan="6" class="text-center text-muted py-4">Aún no tiene pagos registrados.</td></tr>{% endfor %}
         </tbody></table></div>
     </div>
@@ -209,4 +209,18 @@
     </div>
 </section>
 {% endif %}
+<script>
+document.querySelectorAll('.formulario-anulacion').forEach(formulario => {
+    formulario.addEventListener('submit', evento => {
+        const campo = formulario.querySelector('input[name="motivo"]');
+        if (campo.value) return;
+        evento.preventDefault();
+        const motivo = window.prompt('Escriba el motivo obligatorio de la anulación del pago:');
+        if (motivo && motivo.trim()) {
+            campo.value = motivo.trim();
+            formulario.requestSubmit();
+        }
+    });
+});
+</script>
 {% endblock %}

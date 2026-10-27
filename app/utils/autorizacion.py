@@ -1,17 +1,46 @@
 from flask import abort, g, request, session
 
-PERMISOS = {
-    "ver_alumnos": "Ver alumnos", "gestionar_alumnos": "Crear y editar alumnos",
-    "ver_pagos": "Ver mensualidades y caja", "registrar_pagos": "Registrar mensualidades",
-    "anular_pagos": "Anular mensualidades", "cerrar_caja": "Cerrar caja", "reabrir_caja": "Reabrir caja",
-    "ver_finanzas": "Ver finanzas", "gestionar_finanzas": "Gestionar finanzas",
-    "gestionar_inventario": "Gestionar inventario y ventas", "ver_deportivo": "Ver actividad deportiva",
-    "gestionar_deportivo": "Gestionar actividad deportiva", "auditoria": "Ver auditoría",
-    "respaldos": "Crear respaldos", "administrar": "Administrar configuración y usuarios",
-    "anular_ventas": "Anular ventas y devoluciones",
-    "gestionar_becas": "Autorizar becas",
-    "gestionar_asistencia": "Registrar asistencia",
+# Catálogo completo de permisos clasificados por módulos y funciones operativas
+CATEGORIAS_PERMISOS = {
+    "Alumnos y Matrícula": [
+        ("ver_alumnos", "Ver alumnos", "Consultar lista de alumnos, perfiles y fichas médicas."),
+        ("gestionar_alumnos", "Crear y editar alumnos", "Inscribir nuevos alumnos y actualizar sus datos."),
+        ("eliminar_alumnos", "Retirar alumnos", "Dar de baja o retirar alumnos de la academia."),
+        ("gestionar_becas", "Autorizar becas", "Asignar, modificar y aprobar becas a alumnos."),
+    ],
+    "Pagos, Recibos y Caja": [
+        ("ver_pagos", "Ver mensualidades y caja", "Consultar historial de pagos, estado de deudas y deudores."),
+        ("registrar_pagos", "Registrar mensualidades", "Cobrar cuotas, mensualidades y emitir recibos."),
+        ("anular_pagos", "Anular mensualidades", "Anular cobros y recibos erróneos."),
+        ("cerrar_caja", "Cerrar caja", "Realizar el arqueo y cierre diario de caja chica."),
+        ("reabrir_caja", "Reabrir caja", "Reabrir un turno o jornada de caja ya cerrada."),
+    ],
+    "Deporte, Torneos y Asistencia": [
+        ("ver_deportivo", "Ver actividad deportiva", "Consultar partidos, agenda, calendario y torneos."),
+        ("gestionar_deportivo", "Gestionar partidos y torneos", "Crear fixtures, registrar resultados y podios."),
+        ("gestionar_asistencia", "Registrar asistencia", "Tomar asistencia a los entrenamientos y partidos."),
+        ("gestionar_equipos", "Gestionar categorías y equipos", "Administrar divisiones por edades y planteles."),
+        ("gestionar_lugares", "Gestionar canchas y sedes", "Administrar canchas, predios y lugares de práctica."),
+    ],
+    "Tienda e Inventario": [
+        ("gestionar_inventario", "Gestionar inventario y ventas", "Ver stock, conteos y registrar ventas de indumentaria."),
+        ("gestionar_compras", "Registrar compras a proveedores", "Registrar ingresos de mercadería e indumentaria."),
+        ("anular_ventas", "Anular ventas y devoluciones", "Anular tickets de venta y procesar devoluciones."),
+    ],
+    "Finanzas y Contabilidad": [
+        ("ver_finanzas", "Ver finanzas", "Consultar reportes económicos y balances."),
+        ("gestionar_finanzas", "Gestionar finanzas", "Registrar egresos, gastos y pagos programados."),
+    ],
+    "Seguridad y Sistema": [
+        ("auditoria", "Ver auditoría", "Consultar la bitácora de auditoría y trazabilidad."),
+        ("respaldos", "Crear respaldos", "Generar y descargar copias de seguridad de la base de datos."),
+        ("administrar", "Administrar configuración y usuarios", "Administrar datos de la academia, usuarios y roles."),
+    ],
 }
+
+# Diccionario plano de permisos (código -> nombre) para retrocompatibilidad total
+PERMISOS = {codigo: nombre for grupo in CATEGORIAS_PERMISOS.values() for codigo, nombre, _ in grupo}
+
 
 def cargar_usuario_actual():
     from app.models import Usuario, Rol
@@ -28,36 +57,58 @@ def cargar_usuario_actual():
     )
     return g.usuario_actual
 
+
 def tiene_permiso(codigo):
     u = getattr(g, "usuario_actual", None)
     return bool(u and u.activo and u.tiene_permiso(codigo))
 
+
 def permiso_para_solicitud():
     endpoint, bp = request.endpoint or "", request.blueprint or ""
     escritura = request.method not in {"GET", "HEAD", "OPTIONS"}
-    if bp in {"autenticacion", ""} or endpoint in {"index", "static"}: return None
-    # Todo usuario autenticado debe poder ver el recurso de marca y cambiar su
-    # propia clave temporal; el resto de Configuracion es solo administrativo.
-    if endpoint in {"configuracion.logo", "configuracion.contrasena"}: return None
-    if bp == "usuarios" or bp in {"configuracion", "categorias", "equipos", "lugares"}:
-        return "administrar" if escritura or bp in {"usuarios", "configuracion"} else "ver_deportivo"
-    if bp == "alumnos": return "gestionar_alumnos" if escritura else "ver_alumnos"
+    if bp in {"autenticacion", ""} or endpoint in {"index", "static"}:
+        return None
+    # Todo usuario autenticado puede ver el recurso de marca y cambiar su clave
+    if endpoint in {"configuracion.logo", "configuracion.contrasena"}:
+        return None
+    if bp == "usuarios":
+        return "administrar"
+    if bp == "configuracion":
+        return "administrar" if escritura else "ver_deportivo"
+    if bp in {"categorias", "equipos"}:
+        return "gestionar_equipos" if escritura else "ver_deportivo"
+    if bp == "lugares":
+        return "gestionar_lugares" if escritura else "ver_deportivo"
+    if bp == "alumnos":
+        if "eliminar" in endpoint or "retirar" in endpoint:
+            return "eliminar_alumnos"
+        return "gestionar_alumnos" if escritura else "ver_alumnos"
     if bp == "pagos":
-        if "reabrir" in endpoint: return "reabrir_caja"
-        if "abrir_caja" in endpoint: return "registrar_pagos"
-        if "eliminar" in endpoint: return "anular_pagos"
-        if "caja" in endpoint and escritura: return "cerrar_caja"
+        if "reabrir" in endpoint:
+            return "reabrir_caja"
+        if "abrir_caja" in endpoint:
+            return "registrar_pagos"
+        if "eliminar" in endpoint:
+            return "anular_pagos"
+        if "caja" in endpoint and escritura:
+            return "cerrar_caja"
         return "registrar_pagos" if escritura else "ver_pagos"
     if bp == "informacion":
-        if "auditoria" in endpoint: return "auditoria"
-        if "respaldo" in endpoint or "descargas" in endpoint: return "respaldos"
+        if "auditoria" in endpoint:
+            return "auditoria"
+        if "respaldo" in endpoint or "descargas" in endpoint:
+            return "respaldos"
         return "ver_finanzas"
     if bp == "gestion":
-        if any(x in endpoint for x in ("venta_anular", "venta_devolver")): return "anular_ventas"
+        if any(x in endpoint for x in ("venta_anular", "venta_devolver")):
+            return "anular_ventas"
+        if "compra" in endpoint and escritura:
+            return "gestionar_compras"
         if any(x in endpoint for x in ("inventario", "venta", "producto", "variante")):
             return "gestionar_inventario" if escritura else "ver_finanzas"
         return "gestionar_finanzas" if escritura else "ver_finanzas"
     if bp in {"partidos", "agenda", "calendario", "campeonatos"}:
-        if endpoint == "calendario.asistencia" and escritura: return "gestionar_asistencia"
+        if endpoint == "calendario.asistencia" and escritura:
+            return "gestionar_asistencia"
         return "gestionar_deportivo" if escritura else "ver_deportivo"
     return None
