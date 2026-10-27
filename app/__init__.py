@@ -154,7 +154,7 @@ def create_app(config_class=Config):
         except Exception:
             app.logger.exception("No se pudo verificar el respaldo diario")
 
-    @app.route("/health")
+    @app.route("/health", methods=["GET", "HEAD"])
     def health():
         uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
         masked_uri = uri
@@ -180,11 +180,15 @@ def create_app(config_class=Config):
             "total_usuarios": total_usuarios
         }, 200
 
+    @app.route("/ping", methods=["GET", "HEAD"])
+    def ping():
+        return "pong", 200, {"Content-Type": "text/plain"}
+
     @app.before_request
     def exigir_autenticacion():
         if not app.config.get("AUTH_REQUIRED", True):
             return None
-        if request.endpoint in {"static", "autenticacion.login", "health"}:
+        if request.endpoint in {"static", "autenticacion.login", "health", "ping"}:
             return None
         if session.get("autenticado"):
             from app.utils.autorizacion import cargar_usuario_actual, permiso_para_solicitud, tiene_permiso
