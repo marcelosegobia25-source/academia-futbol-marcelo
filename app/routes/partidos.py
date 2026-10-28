@@ -281,14 +281,16 @@ def editar(id_partido):
             return render_template("partidos/form.html", partido=partido, equipos=equipos, categorias=categorias, campeonatos=campeonatos, lugares=lugares)
         _guardar_conflictos(partido, conflictos)
         evento = EventoAgenda.query.filter_by(id_partido=partido.id_partido).first()
-        if evento:
-            evento.fecha = partido.fecha
-            evento.hora = partido.hora
-            evento.descripcion = f"Partido vs {partido.rival}"
-            evento.lugar = partido.cancha
-            evento.id_lugar = partido.id_lugar
-            evento.id_categoria = partido.id_categoria
-            evento.id_equipo = partido.id_equipo
+        if not evento:
+            evento = EventoAgenda(id_partido=partido.id_partido, tipo="Partido")
+            db.session.add(evento)
+        evento.fecha = partido.fecha
+        evento.hora = partido.hora
+        evento.descripcion = f"Partido vs {partido.rival}"
+        evento.lugar = partido.cancha
+        evento.id_lugar = partido.id_lugar
+        evento.id_categoria = partido.id_categoria
+        evento.id_equipo = partido.id_equipo
         db.session.add(Auditoria(
             modulo="Partidos", accion="Editar", entidad="Partido",
             id_entidad=partido.id_partido, detalle=f"{partido.fecha} vs {partido.rival}",

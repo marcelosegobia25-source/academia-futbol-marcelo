@@ -2,7 +2,7 @@ import os
 import shutil
 import logging
 from logging.handlers import RotatingFileHandler
-from flask import Flask, abort, g, render_template, redirect, request, session, url_for
+from flask import Flask, abort, g, make_response, render_template, redirect, request, session, url_for
 from config import Config
 from app.extensions import db, csrf
 
@@ -154,7 +154,9 @@ def create_app(config_class=Config):
         except Exception:
             app.logger.exception("No se pudo verificar el respaldo diario")
 
-    @app.route("/health", methods=["GET", "HEAD"])
+    @app.route("/health", methods=["GET", "HEAD", "OPTIONS"], strict_slashes=False)
+    @app.route("/health/", methods=["GET", "HEAD", "OPTIONS"])
+    @csrf.exempt
     def health():
         uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
         masked_uri = uri
@@ -180,15 +182,25 @@ def create_app(config_class=Config):
             "total_usuarios": total_usuarios
         }, 200
 
-    @app.route("/ping", methods=["GET", "HEAD"])
+    @app.route("/ping", methods=["GET", "HEAD", "POST", "OPTIONS"], strict_slashes=False)
+    @app.route("/ping/", methods=["GET", "HEAD", "POST", "OPTIONS"])
+    @csrf.exempt
     def ping():
-        return "pong", 200, {"Content-Type": "text/plain"}
+        resp = make_response("pong", 200)
+        resp.headers["Content-Type"] = "text/plain; charset=utf-8"
+        resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        resp.headers["Content-Length"] = "4"
+        return resp
 
     @app.before_request
     def exigir_autenticacion():
         if not app.config.get("AUTH_REQUIRED", True):
             return None
-        if request.endpoint in {"static", "autenticacion.login", "health", "ping"}:
+        path = (request.path or "").strip()
+        path_limpio = path.rstrip("/")
+        if path_limpio in {"/ping", "/health"} or path.startswith(("/ping", "/health")) or request.endpoint in {
+            "static", "autenticacion.login", "health", "ping"
+        }:
             return None
         if session.get("autenticado"):
             from app.utils.autorizacion import cargar_usuario_actual, permiso_para_solicitud, tiene_permiso

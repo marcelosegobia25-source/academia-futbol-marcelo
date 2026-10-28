@@ -445,6 +445,12 @@ def eliminar(id_pago):
     if CierreCaja.query.filter_by(fecha=pago.fecha_pago, reabierto_en=None).first():
         flash("No se puede anular un pago de una caja cerrada. Reabra primero ese cierre.", "danger")
         return redirect(url_for("pagos.caja"))
+    movimiento = MovimientoContable.query.filter_by(
+        origen_tipo="Pago", origen_id=pago.id_pago
+    ).first()
+    if movimiento and movimiento.sesion_caja and movimiento.sesion_caja.estado == "Cerrada":
+        flash("No se puede anular un pago perteneciente a una sesión de caja cerrada. Reabra primero esa sesión.", "danger")
+        return redirect(url_for("pagos.caja"))
     try:
         motivo = texto_requerido(
             request.form.get("motivo"), "Motivo de anulación", 255
@@ -461,9 +467,6 @@ def eliminar(id_pago):
     numero_recibo = f"{pago.id_pago:06d}"
 
     pago.eliminado_en = ahora_utc()
-    movimiento = MovimientoContable.query.filter_by(
-        origen_tipo="Pago", origen_id=pago.id_pago
-    ).first()
     if movimiento:
         movimiento.anulado_en = pago.eliminado_en
         movimiento.motivo_anulacion = f"Pago #{numero_recibo} anulado: {motivo}"

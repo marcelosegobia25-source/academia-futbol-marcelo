@@ -7,7 +7,7 @@ from flask import (
 )
 
 from app.extensions import db
-from app.models import Auditoria, Usuario, ahora_utc
+from app.models import Auditoria, Usuario, ahora_utc, obtener_ip_cliente
 
 
 bp = Blueprint("autenticacion", __name__, url_prefix="/acceso")
@@ -36,7 +36,7 @@ def login():
     if session.get("autenticado"):
         return redirect(url_for("informacion.general"))
     destino = _destino_local(request.values.get("next"))
-    clave_cliente = request.remote_addr or "local"
+    clave_cliente = obtener_ip_cliente(request) or "local"
     intentos = current_app.extensions.setdefault("intentos_acceso", {})
     estado = intentos.get(clave_cliente, {"fallos": 0, "bloqueado_hasta": 0})
     ahora = time.time()

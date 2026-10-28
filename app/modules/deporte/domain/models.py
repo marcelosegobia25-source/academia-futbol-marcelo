@@ -290,3 +290,63 @@ class Posicion(db.Model):
                 + self.pp * self.campeonato.puntos_derrota
             )
         return self.pg * 3 + self.pe
+
+
+class Convocatoria(db.Model):
+    """Lista oficial de jugadores convocados a un partido o evento por categoría."""
+    __tablename__ = "convocatoria"
+    id_convocatoria = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(150), nullable=False)
+    id_categoria = db.Column(db.Integer, db.ForeignKey("categoria.id_categoria", ondelete="CASCADE"), nullable=False)
+    fecha = db.Column(db.Date, nullable=False)
+    hora = db.Column(db.Time, nullable=True)
+    lugar = db.Column(db.String(150), nullable=True)
+    rival = db.Column(db.String(150), nullable=True)
+    indicaciones = db.Column(db.Text, nullable=True)
+    id_usuario = db.Column(db.Integer, db.ForeignKey("usuario.id_usuario", ondelete="SET NULL"), nullable=True)
+    creado_en = db.Column(db.DateTime, nullable=False, default=ahora_utc)
+
+    categoria = db.relationship("Categoria")
+    usuario = db.relationship("Usuario")
+    detalles = db.relationship(
+        "DetalleConvocatoria",
+        back_populates="convocatoria",
+        cascade="all, delete-orphan",
+        order_by="DetalleConvocatoria.orden, DetalleConvocatoria.id_detalle",
+    )
+
+    @property
+    def total_convocados(self):
+        return len(self.detalles)
+
+    @property
+    def titulares(self):
+        return [d for d in self.detalles if d.rol == "Titular"]
+
+    @property
+    def suplentes(self):
+        return [d for d in self.detalles if d.rol != "Titular"]
+
+
+class DetalleConvocatoria(db.Model):
+    """Detalle de jugador convocado con rol, dorsal y notas."""
+    __tablename__ = "detalle_convocatoria"
+    __table_args__ = (
+        db.UniqueConstraint("id_convocatoria", "id_alumno", name="uq_convocatoria_alumno"),
+    )
+    id_detalle = db.Column(db.Integer, primary_key=True)
+    id_convocatoria = db.Column(
+        db.Integer, db.ForeignKey("convocatoria.id_convocatoria", ondelete="CASCADE"), nullable=False
+    )
+    id_alumno = db.Column(
+        db.Integer, db.ForeignKey("alumno.id_alumno", ondelete="CASCADE"), nullable=False
+    )
+    rol = db.Column(db.String(30), nullable=False, default="Titular")
+    dorsal = db.Column(db.Integer, nullable=True)
+    posicion = db.Column(db.String(40), nullable=True)
+    nota = db.Column(db.String(200), nullable=True)
+    orden = db.Column(db.Integer, nullable=False, default=0)
+
+    convocatoria = db.relationship("Convocatoria", back_populates="detalles")
+    alumno = db.relationship("Alumno")
+

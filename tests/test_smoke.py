@@ -24,3 +24,19 @@ def test_encabezados_de_seguridad(client):
     assert respuesta.headers["X-Content-Type-Options"] == "nosniff"
     assert respuesta.headers["Cross-Origin-Opener-Policy"] == "same-origin"
     assert "camera=()" in respuesta.headers["Permissions-Policy"]
+
+
+def test_endpoints_monitoreo_ping_health_resilientes(client):
+    # Validar que /ping y /health respondan 200 sin exigir autenticación
+    # tanto con barra final como sin ella, y con múltiples verbos HTTP.
+    for ruta in ["/ping", "/ping/"]:
+        assert client.get(ruta).status_code == 200
+        assert client.head(ruta).status_code == 200
+        assert client.post(ruta).status_code == 200
+        assert client.options(ruta).status_code == 200
+
+    for ruta in ["/health", "/health/"]:
+        assert client.get(ruta).status_code == 200
+        assert client.head(ruta).status_code == 200
+        assert client.options(ruta).status_code == 200
+

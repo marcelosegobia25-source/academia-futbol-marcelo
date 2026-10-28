@@ -18,6 +18,7 @@ CATEGORIAS = {
     "calendarios": "Calendarios",
     "campeonatos": "Campeonatos",
     "respaldos": "Respaldos",
+    "convocatorias": "Alumnos/Convocatorias",
 }
 
 

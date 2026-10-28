@@ -39,6 +39,7 @@ class CambiarEstadoAlumnoUseCase:
         alumno.estado = "Activo"
         alumno.fecha_retiro = None
         alumno.fecha_ultima_reactivacion = date.today()
+        alumno.fecha_base_pago = date.today()
 
         hist = HistorialAlumno(
             id_alumno=alumno.id_alumno,

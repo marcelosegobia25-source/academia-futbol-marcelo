@@ -14,7 +14,7 @@ from app.extensions import db
 from app.models import (
     Alumno, Auditoria, CategoriaContable, Compra, CuotaProgramada, DetalleCompra, DetalleVenta, MODOS_MOVIMIENTO, MovimientoContable,
     MovimientoInventario, PagoProgramado, Producto, ProductoVariante, Proveedor, Venta,
-    ahora_utc, SesionCaja, ConteoInventario, DetalleConteoInventario,
+    ahora_utc, SesionCaja, CierreCaja, ConteoInventario, DetalleConteoInventario,
     DevolucionVenta, DetalleDevolucionVenta,
 )
 from app.utils.excel import exportar_tabla_excel
@@ -376,6 +376,10 @@ def movimiento_anular(id_movimiento):
         flash("El movimiento ya está anulado.", "warning")
     elif movimiento.origen_tipo in {"Pago", "Venta"}:
         flash("Debe anularse desde el módulo que originó el movimiento.", "danger")
+    elif movimiento.sesion_caja and movimiento.sesion_caja.estado == "Cerrada":
+        flash("No puede anular un movimiento perteneciente a una caja cerrada.", "danger")
+    elif CierreCaja.query.filter_by(fecha=movimiento.fecha, reabierto_en=None).first():
+        flash("No se puede anular un movimiento de una fecha con caja cerrada. Reabra primero ese cierre.", "danger")
     else:
         motivo = request.form.get("motivo", "").strip()
         if not motivo:

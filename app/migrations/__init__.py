@@ -1084,6 +1084,46 @@ def _migracion_33_ci_y_telefonos_numericos():
 
 
 
+def _migracion_34_ip_auditoria():
+    if "ip" not in _columnas("auditoria"):
+        db.session.execute(text("ALTER TABLE auditoria ADD COLUMN ip VARCHAR(45)"))
+    db.session.execute(text("CREATE INDEX IF NOT EXISTS ix_auditoria_ip ON auditoria(ip)"))
+    db.session.commit()
+
+
+def _migracion_35_convocatorias():
+    db.session.execute(text("""
+        CREATE TABLE IF NOT EXISTS convocatoria (
+            id_convocatoria INTEGER PRIMARY KEY,
+            titulo VARCHAR(150) NOT NULL,
+            id_categoria INTEGER NOT NULL REFERENCES categoria(id_categoria) ON DELETE CASCADE,
+            fecha DATE NOT NULL,
+            hora TIME,
+            lugar VARCHAR(150),
+            rival VARCHAR(150),
+            indicaciones TEXT,
+            id_usuario INTEGER REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+            creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+    """))
+    db.session.execute(text("""
+        CREATE TABLE IF NOT EXISTS detalle_convocatoria (
+            id_detalle INTEGER PRIMARY KEY,
+            id_convocatoria INTEGER NOT NULL REFERENCES convocatoria(id_convocatoria) ON DELETE CASCADE,
+            id_alumno INTEGER NOT NULL REFERENCES alumno(id_alumno) ON DELETE CASCADE,
+            rol VARCHAR(30) NOT NULL DEFAULT 'Titular',
+            dorsal INTEGER,
+            posicion VARCHAR(40),
+            nota VARCHAR(200),
+            orden INTEGER NOT NULL DEFAULT 0,
+            CONSTRAINT uq_convocatoria_alumno UNIQUE (id_convocatoria, id_alumno)
+        )
+    """))
+    db.session.execute(text("CREATE INDEX IF NOT EXISTS ix_convocatoria_categoria_fecha ON convocatoria(id_categoria, fecha)"))
+    db.session.execute(text("CREATE INDEX IF NOT EXISTS ix_detalle_convocatoria_alumno ON detalle_convocatoria(id_alumno)"))
+    db.session.commit()
+
+
 MIGRACIONES = [
     (1, "Índices y restricciones únicas", _migracion_1_indices_integridad),
     (2, "Relación formal de equipo rival", _migracion_2_equipo_rival),
@@ -1118,6 +1158,8 @@ MIGRACIONES = [
     (31, "Turno de entrenamiento por alumno", _migracion_31_turno_entrenamiento_alumnos),
     (32, "Índices para llaves eliminatorias de partidos", _migracion_32_indices_partidos_origen),
     (33, "Restricción numérica para CI, documentos y teléfonos", _migracion_33_ci_y_telefonos_numericos),
+    (34, "Registro de IP en bitácora de auditoría", _migracion_34_ip_auditoria),
+    (35, "Gestión de convocatorias de jugadores por categoría", _migracion_35_convocatorias),
 ]
 
 

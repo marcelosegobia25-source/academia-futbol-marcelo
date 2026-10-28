@@ -17,7 +17,7 @@ from app.models import (Alumno, Auditoria, Categoria, CuotaProgramada, Equipo, E
 from app.utils.resumen_categorias import construir_resumen_categorias
 from app.utils.backup import crear_respaldo, crear_respaldo_completo, ruta_sqlite
 from app.utils.descargas import carpeta_descargas, guardar_archivo
-from app.utils.integridad import auditar_sqlite
+from app.utils.integridad import auditar_sqlite, auditar_base_datos
 
 
 bp = Blueprint("informacion", __name__, url_prefix="/informacion")
@@ -258,11 +258,10 @@ def general():
 @bp.route("/auditoria")
 def auditoria():
     ruta = ruta_sqlite(current_app)
-    resultado = auditar_sqlite(ruta) if ruta else {
-        "correcta": False, "alertas": ["La base configurada no es SQLite."],
-        "sin_pk": [], "fks_invalidas": [], "indices_recomendados": [],
-        "tablas": [], "estadisticas": {}, "integridad": "no disponible",
-    }
+    if ruta:
+        resultado = auditar_sqlite(ruta)
+    else:
+        resultado = auditar_base_datos(db.session, "PostgreSQL (Producción)")
     registros = Auditoria.query.order_by(Auditoria.creado_en.desc(), Auditoria.id_auditoria.desc()).limit(200).all()
     return render_template("informacion/auditoria.html", resultado=resultado, registros=registros)
 

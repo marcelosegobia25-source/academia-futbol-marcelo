@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% block titulo %}Convocatoria: {{ convocatoria.titulo }}{% endblock %}
+{% block contenido %}
+<div class="d-print-none page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <a href="{{ url_for('alumnos.asistencias', tab='convocatorias') }}" class="btn btn-sm btn-outline-secondary mb-2">
+            <i class="bi bi-arrow-left me-1"></i> Volver a Convocatorias
+        </a>
+        <h2 class="mb-0"><i class="bi bi-megaphone-fill text-primary me-2"></i>{{ convocatoria.titulo }}</h2>
+        <span class="badge bg-primary fs-6 mt-1">{{ convocatoria.categoria.nombre }}</span>
+        <span class="text-muted ms-2 small">Generada el {{ convocatoria.creado_en | fecha_hora_bo }}</span>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-success" id="btn-copiar-whatsapp">
+            <i class="bi bi-whatsapp me-1"></i> Copiar para WhatsApp
+        </button>
+        <button type="button" class="btn btn-outline-dark" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i> Imprimir
+        </button>
+        <a href="{{ url_for('alumnos.convocatoria_pdf', id_convocatoria=convocatoria.id_convocatoria) }}" class="btn btn-danger">
+            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+        </a>
+        <a href="{{ url_for('alumnos.convocatoria_excel', id_convocatoria=convocatoria.id_convocatoria) }}" class="btn btn-outline-success">
+            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+        </a>
+    </div>
+</div>
+
+<!-- Toast / Alerta de Copiado -->
+<div id="toast-copiado" class="alert alert-success d-none d-print-none shadow-sm align-items-center mb-3" role="alert">
+    <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+    <div>¡Lista de convocatoria copiada al portapapeles con formato listo para WhatsApp!</div>
+</div>
+
+<!-- Hoja Oficial de Convocatoria (Diseño para Pantalla e Impresión) -->
+<div class="card border-0 shadow-sm print-sheet" id="hoja-convocatoria">
+    <div class="card-body p-4 p-md-5">
+        <!-- Encabezado Institucional -->
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-4 mb-4">
+            <div class="d-flex align-items-center gap-3">
+                {% if logo %}
+                <img src="{{ url_for('static', filename=logo) }}" alt="Escudo" style="height: 64px; object-fit: contain;">
+                {% endif %}
+                <div>
+                    <h3 class="fw-bold mb-0">{{ config.nombre_academia or 'Academia de Fútbol' }}</h3>
+                    <div class="text-muted small">NÓMINA OFICIAL DE JUGADORES CONVOCADOS</div>
+                </div>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-primary px-3 py-2 fs-5">{{ convocatoria.categoria.nombre }}</span>
+                <div class="small text-muted mt-1">{{ convocatoria.total_convocados }} Jugadores Citados</div>
+            </div>
+        </div>
+
+        <!-- Ficha de Datos del Encuentro -->
+        <div class="bg-body-tertiary rounded-3 p-3 p-md-4 mb-4 border">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <small class="text-muted text-uppercase fw-semibold d-block">Evento / Encuentro</small>
+                    <strong class="fs-5 text-primary">{{ convocatoria.titulo }}</strong>
+                    {% if convocatoria.rival %}
+                    <div class="text-danger fw-semibold"><i class="bi bi-shield-x me-1"></i>vs {{ convocatoria.rival }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-6 col-md-3">
+                    <small class="text-muted text-uppercase fw-semibold d-block">Fecha & Hora</small>
+                    <div><i class="bi bi-calendar3 me-1 text-muted"></i><strong>{{ convocatoria.fecha.strftime('%d/%m/%Y') }}</strong></div>
+                    {% if convocatoria.hora %}
+                    <div><i class="bi bi-clock me-1 text-muted"></i><strong>{{ convocatoria.hora.strftime('%H:%M') }}</strong> (Citación)</div>
+                    {% endif %}
+                </div>
+                <div class="col-6 col-md-3">
+                    <small class="text-muted text-uppercase fw-semibold d-block">Lugar / Sede</small>
+                    <div><i class="bi bi-geo-alt me-1 text-muted"></i><strong>{{ convocatoria.lugar or 'Por confirmar' }}</strong></div>
+                </div>
+                {% if convocatoria.indicaciones %}
+                <div class="col-12 border-top pt-2 mt-2">
+                    <small class="text-muted text-uppercase fw-semibold d-block"><i class="bi bi-exclamation-circle me-1"></i>Indicaciones e Indumentaria</small>
+                    <div class="fw-semibold text-dark">{{ convocatoria.indicaciones }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tabla 1: Titulares -->
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold text-success mb-0">
+                    <i class="bi bi-person-check-fill me-1"></i> Alineación Titular ({{ convocatoria.titulares|length }})
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 45px;" class="text-center">#</th>
+                            <th style="width: 70px;" class="text-center">Dorsal</th>
+                            <th>Jugador</th>
+                            <th style="width: 140px;">Posición</th>
+                            <th>Tutor / Contacto de Emergencia</th>
+                            <th style="width: 140px;">Nota</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in convocatoria.titulares %}
+                        <tr>
+                            <td class="text-center text-muted fw-bold">{{ loop.index }}</td>
+                            <td class="text-center">
+                                {% if d.dorsal %}
+                                <span class="badge bg-dark fs-6 font-monospace">{{ d.dorsal }}</span>
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ d.alumno.apellido }}, {{ d.alumno.nombre }}</strong>
+                                <small class="text-muted d-block font-monospace">{{ d.alumno.codigo_interno }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ d.posicion or d.alumno.posicion or '—' }}</span>
+                            </td>
+                            <td>
+                                <div class="small fw-semibold">{{ d.alumno.tutor or '—' }}</div>
+                                {% if d.alumno.telefono %}
+                                <div class="small font-monospace text-muted">
+                                    <i class="bi bi-telephone me-1"></i>{{ d.alumno.telefono }}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="small">{{ d.nota or '—' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-3">No se designaron titulares en esta lista.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tabla 2: Suplentes y Reservas -->
+        {% if convocatoria.suplentes %}
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold text-warning-emphasis mb-0">
+                    <i class="bi bi-people-fill me-1"></i> Suplentes & Alternativas ({{ convocatoria.suplentes|length }})
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 45px;" class="text-center">#</th>
+                            <th style="width: 70px;" class="text-center">Dorsal</th>
+                            <th>Jugador</th>
+                            <th style="width: 140px;">Posición</th>
+                            <th>Tutor / Contacto de Emergencia</th>
+                            <th style="width: 140px;">Rol / Nota</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in convocatoria.suplentes %}
+                        <tr>
+                            <td class="text-center text-muted fw-bold">{{ loop.index + convocatoria.titulares|length }}</td>
+                            <td class="text-center">
+                                {% if d.dorsal %}
+                                <span class="badge bg-secondary fs-6 font-monospace">{{ d.dorsal }}</span>
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ d.alumno.apellido }}, {{ d.alumno.nombre }}</strong>
+                                <small class="text-muted d-block font-monospace">{{ d.alumno.codigo_interno }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ d.posicion or d.alumno.posicion or '—' }}</span>
+                            </td>
+                            <td>
+                                <div class="small fw-semibold">{{ d.alumno.tutor or '—' }}</div>
+                                {% if d.alumno.telefono %}
+                                <div class="small font-monospace text-muted">
+                                    <i class="bi bi-telephone me-1"></i>{{ d.alumno.telefono }}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-warning-subtle text-dark border me-1">{{ d.rol }}</span>
+                                <small>{{ d.nota or '' }}</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Pie de Firma e Instrucciones Oficiales -->
+        <div class="row pt-4 mt-4 border-top text-center text-muted small">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <div class="border-top mx-auto pt-2" style="max-width: 260px;">
+                    <strong>Cuerpo Técnico</strong><br>
+                    Academia de Fútbol
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border-top mx-auto pt-2" style="max-width: 260px;">
+                    <strong>Coordinación Deportiva</strong><br>
+                    Control de Jugadores
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .d-print-none, header, nav, .sidebar, footer, .btn, .page-heading {
+        display: none !important;
+    }
+    body {
+        background: #fff !important;
+        color: #000 !important;
+        font-size: 11pt;
+    }
+    .print-sheet {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+    .card-body {
+        padding: 0 !important;
+    }
+    table {
+        page-break-inside: auto;
+    }
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnWhatsapp = document.getElementById('btn-copiar-whatsapp');
+    const toast = document.getElementById('toast-copiado');
+
+    if (btnWhatsapp) {
+        btnWhatsapp.addEventListener('click', function() {
+            let texto = `⚽ *CONVOCATORIA OFICIAL* ⚽\n`;
+            texto += `*{{ config.nombre_academia or 'Academia de Fútbol' }}*\n`;
+            texto += `-------------------------------------------\n`;
+            texto += `📌 *Evento:* {{ convocatoria.titulo }}\n`;
+            texto += `🏆 *Categoría:* {{ convocatoria.categoria.nombre }}\n`;
+            texto += `📅 *Fecha:* {{ convocatoria.fecha.strftime('%d/%m/%Y') }}\n`;
+            {% if convocatoria.hora %}
+            texto += `⏰ *Hora de Citación:* {{ convocatoria.hora.strftime('%H:%M') }}\n`;
+            {% endif %}
+            {% if convocatoria.lugar %}
+            texto += `📍 *Lugar:* {{ convocatoria.lugar }}\n`;
+            {% endif %}
+            {% if convocatoria.rival %}
+            texto += `⚔️ *Rival:* {{ convocatoria.rival }}\n`;
+            {% endif %}
+            {% if convocatoria.indicaciones %}
+            texto += `⚠️ *Indicaciones:* {{ convocatoria.indicaciones }}\n`;
+            {% endif %}
+            texto += `-------------------------------------------\n`;
+            texto += `📋 *JUGADORES CONVOCADOS ({{ convocatoria.total_convocados }})*\n\n`;
+
+            {% if convocatoria.titulares %}
+            texto += `*TITULARES:*\n`;
+            {% for d in convocatoria.titulares %}
+            texto += `{{ loop.index }}. {% if d.dorsal %}#{{ d.dorsal }} {% endif %}{{ d.alumno.nombre_completo }}{% if d.posicion or d.alumno.posicion %} ({{ d.posicion or d.alumno.posicion }}){% endif %}{% if d.nota %} - {{ d.nota }}{% endif %}\n`;
+            {% endfor %}
+            texto += `\n`;
+            {% endif %}
+
+            {% if convocatoria.suplentes %}
+            texto += `*SUPLENTES:*\n`;
+            {% for d in convocatoria.suplentes %}
+            texto += `{{ loop.index + convocatoria.titulares|length }}. {% if d.dorsal %}#{{ d.dorsal }} {% endif %}{{ d.alumno.nombre_completo }}{% if d.posicion or d.alumno.posicion %} ({{ d.posicion or d.alumno.posicion }}){% endif %}{% if d.nota %} - {{ d.nota }}{% endif %}\n`;
+            {% endfor %}
+            texto += `\n`;
+            {% endif %}
+
+            texto += `¡Puntualidad y compromiso! 🟢⚽`;
+
+            navigator.clipboard.writeText(texto).then(() => {
+                if (toast) {
+                    toast.classList.remove('d-none');
+                    toast.classList.add('d-flex');
+                    setTimeout(() => {
+                        toast.classList.remove('d-flex');
+                        toast.classList.add('d-none');
+                    }, 4000);
+                }
+            }).catch(err => {
+                prompt("Copie el texto para WhatsApp manualmente:", texto);
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

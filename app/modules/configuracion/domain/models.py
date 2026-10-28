@@ -101,18 +101,41 @@ class Auditoria(db.Model):
     id_usuario = db.Column(db.Integer, db.ForeignKey("usuario.id_usuario", ondelete="SET NULL"), nullable=True)
     valor_anterior = db.Column(db.Text, nullable=True)
     valor_nuevo = db.Column(db.Text, nullable=True)
+    ip = db.Column(db.String(45), nullable=True, index=True)
     creado_en = db.Column(db.DateTime, nullable=False, default=ahora_utc)
     usuario = db.relationship("Usuario")
 
 
+def obtener_ip_cliente(req=None):
+    """Extrae de manera segura la IP del cliente considerando proxies y Cloudflare."""
+    try:
+        if req is None:
+            from flask import has_request_context, request as flask_req
+            if not has_request_context():
+                return None
+            req = flask_req
+        ip = (
+            req.headers.get("CF-Connecting-IP")
+            or req.headers.get("X-Forwarded-For")
+            or req.remote_addr
+        )
+        if ip:
+            ip = ip.split(",")[0].strip()
+            return ip[:45]
+    except Exception:
+        pass
+    return None
+
+
 @event.listens_for(Auditoria, "before_insert")
 def _asignar_actor_auditoria(mapper, connection, objetivo):
-    if objetivo.id_usuario is not None:
-        return
     try:
         from flask import has_request_context, session
         if has_request_context():
-            objetivo.id_usuario = session.get("id_usuario")
+            if objetivo.id_usuario is None:
+                objetivo.id_usuario = session.get("id_usuario")
+            if not objetivo.ip:
+                objetivo.ip = obtener_ip_cliente()
     except RuntimeError:
         pass
     if objetivo.valor_anterior is None and objetivo.valor_nuevo is None and objetivo.detalle:

@@ -13,8 +13,9 @@ class CambiarContrasenaUseCase:
         if clave_actual is not None and not usuario.verificar_contrasena(clave_actual):
             return False, "La contraseña actual es incorrecta."
 
-        if not re.match(r"^\d{5}$", clave_nueva):
-            return False, "La nueva contraseña debe contener exactamente 5 números."
+        es_valida = bool(re.fullmatch(r"\d{5}", clave_nueva) or (8 <= len(clave_nueva) <= 128))
+        if not es_valida:
+            return False, "La nueva contraseña debe contener exactamente 5 números o al menos 8 caracteres."
 
         usuario.establecer_contrasena(clave_nueva)
         usuario.debe_cambiar_clave = False

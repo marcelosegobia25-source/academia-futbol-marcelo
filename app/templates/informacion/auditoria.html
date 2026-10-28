@@ -43,6 +43,7 @@
                 <tr>
                     <th style="min-width: 140px;">Fecha / Hora</th>
                     <th>Usuario</th>
+                    <th>IP</th>
                     <th>Módulo / Entidad</th>
                     <th>Acción</th>
                     <th>Estado Anterior</th>
@@ -60,6 +61,13 @@
                         <span class="badge bg-secondary-subtle text-dark border">
                             <i class="bi bi-person me-1"></i>{{ a.usuario.nombre_usuario if a.usuario else 'Sistema/Admin' }}
                         </span>
+                    </td>
+                    <td class="text-nowrap small font-monospace text-muted">
+                        {% if a.ip %}
+                        <i class="bi bi-geo-alt me-1"></i>{{ a.ip }}
+                        {% else %}
+                        <span class="text-secondary">—</span>
+                        {% endif %}
                     </td>
                     <td>
                         <strong>{{ a.modulo }}</strong>
@@ -90,7 +98,7 @@
                     <td class="small">{{ a.detalle or '—' }}</td>
                 </tr>
                 {% else %}
-                <tr id="sin-operaciones"><td colspan="7" class="text-center py-4 text-muted">Sin operaciones auditadas registradas.</td></tr>
+                <tr id="sin-operaciones"><td colspan="8" class="text-center py-4 text-muted">Sin operaciones auditadas registradas.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

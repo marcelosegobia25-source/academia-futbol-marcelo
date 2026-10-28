@@ -44,6 +44,7 @@ class ActualizarAlumnoUseCase:
             nueva_cat = int(datos["id_categoria"]) if datos["id_categoria"] else None
             cat_manual = bool(datos.get("categoria_manual", False))
             if nueva_cat != alumno.id_categoria:
+                cat_anterior = alumno.id_categoria
                 # Cerrar historial anterior
                 anterior_hist = HistorialCategoriaAlumno.query.filter_by(
                     id_alumno=alumno.id_alumno, fecha_fin=None
@@ -63,7 +64,7 @@ class ActualizarAlumnoUseCase:
                     db.session.add(nuevo_hist)
                 alumno.id_categoria = nueva_cat
                 alumno.categoria_manual = cat_manual
-                cambios.append(("id_categoria", alumno.id_categoria, nueva_cat))
+                cambios.append(("id_categoria", cat_anterior, nueva_cat))
 
         # Registrar historial de cambios en ficha
         for campo, anterior, nuevo in cambios:

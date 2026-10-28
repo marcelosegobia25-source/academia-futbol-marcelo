@@ -32,6 +32,7 @@ from app.modules.configuracion.domain.models import (
     Configuracion,
     Lugar,
     TIPOS_LUGAR,
+    obtener_ip_cliente,
 )
 
 # 3. Alumnos y Ficha Deportiva
@@ -65,6 +66,8 @@ from app.modules.deporte.domain.models import (
     Posicion,
     campeonato_categoria,
     campeonato_equipo,
+    Convocatoria,
+    DetalleConvocatoria,
 )
 
 # 5. Pagos, Tesorería, Facturación e Inventario
@@ -121,6 +124,7 @@ __all__ = [
     "Lugar",
     "Auditoria",
     "TIPOS_LUGAR",
+    "obtener_ip_cliente",
     # Alumnos
     "Alumno",
     "Tutor",
@@ -148,6 +152,8 @@ __all__ = [
     "PodioCampeonato",
     "AlumnoCampeonato",
     "Posicion",
+    "Convocatoria",
+    "DetalleConvocatoria",
     # Pagos & Finanzas
     "MODOS_PAGO",
     "ESTADOS_PAGO",

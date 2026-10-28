@@ -19,6 +19,7 @@ from app.models import (
     HistorialAlumno, Auditoria, alumno_equipo, InscripcionGestion,
     HistorialCategoriaAlumno, HistorialEquipoAlumno, BecaHistorial, Tarifa,
     Tutor, AlumnoTutor, Entrenamiento, SesionEntrenamiento, AsistenciaEntrenamiento,
+    Convocatoria, DetalleConvocatoria, Lugar,
 )
 from app.utils.reglas import categoria_automatica_por_edad
 from app.utils.pdf_tablas import generar_tabla_pdf
@@ -352,26 +353,95 @@ def listar():
 @bp.route("/asistencias")
 def asistencias():
     hoy = date.today()
+    tab = request.args.get("tab")
+    if not tab:
+        if any(request.args.get(k) for k in ("id_alumno", "estado_asistencia", "periodo", "fecha_desde", "fecha_hasta")):
+            tab = "historial"
+        else:
+            tab = "tomar"
+
+    categorias = Categoria.query.order_by(Categoria.nombre).all()
+    lugares = Lugar.query.filter_by(activo=True).order_by(Lugar.nombre).all()
+
+    # -------------------------------------------------------------------------
+    # TAB 1: Tomar Asistencia por Categoría
+    # -------------------------------------------------------------------------
+    id_categoria = request.args.get("id_categoria", type=int)
+    try:
+        fecha_tomar = fecha_iso(request.args.get("fecha") or hoy.isoformat(), "Fecha", requerida=False) or hoy
+    except ErrorValidacion:
+        fecha_tomar = hoy
+    hora_tomar = request.args.get("hora") or datetime.now().strftime("%H:%M")
+    lugar_tomar = request.args.get("lugar", "Cancha Principal")
+
+    alumnos_categoria = []
+    categoria_seleccionada = None
+    registros_existentes = {}
+    sesion_existente = None
+
+    if id_categoria:
+        categoria_seleccionada = db.session.get(Categoria, id_categoria)
+        if categoria_seleccionada:
+            alumnos_categoria = Alumno.query.filter_by(
+                id_categoria=id_categoria, estado="Activo"
+            ).order_by(Alumno.apellido, Alumno.nombre).all()
+
+            entrenamientos_cat = Entrenamiento.query.filter_by(id_categoria=id_categoria).all()
+            ids_ent = [e.id_entrenamiento for e in entrenamientos_cat]
+            if ids_ent:
+                sesion_existente = SesionEntrenamiento.query.filter(
+                    SesionEntrenamiento.id_entrenamiento.in_(ids_ent),
+                    SesionEntrenamiento.fecha == fecha_tomar,
+                ).first()
+                if sesion_existente:
+                    registros_existentes = {a.id_alumno: a for a in sesion_existente.asistencias}
+
+    # -------------------------------------------------------------------------
+    # TAB 2: Nueva Convocatoria
+    # -------------------------------------------------------------------------
+    id_categoria_conv = request.args.get("id_categoria_conv", type=int) or id_categoria
+    categoria_conv_seleccionada = None
+    alumnos_convocatoria = []
+    if id_categoria_conv:
+        categoria_conv_seleccionada = db.session.get(Categoria, id_categoria_conv)
+        if categoria_conv_seleccionada:
+            alumnos_convocatoria = Alumno.query.filter_by(
+                id_categoria=id_categoria_conv, estado="Activo"
+            ).order_by(Alumno.apellido, Alumno.nombre).all()
+
+    fecha_conv_defecto = hoy + timedelta(days=(5 - hoy.weekday()) % 7 or 7)
+    hora_conv_defecto = "08:30"
+
+    # -------------------------------------------------------------------------
+    # TAB 3: Convocatorias Guardadas
+    # -------------------------------------------------------------------------
+    convocatorias_guardadas = Convocatoria.query.order_by(
+        Convocatoria.fecha.desc(), Convocatoria.creado_en.desc()
+    ).all()
+
+    # -------------------------------------------------------------------------
+    # TAB 4: Historial y Consulta Estadística
+    # -------------------------------------------------------------------------
     periodo = request.args.get("periodo", "semana")
     if periodo not in {"semana", "ultimas3", "ultimas10", "mes", "rango", "todas"}:
         periodo = "semana"
-    id_alumno = request.args.get("id_alumno", type=int)
-    id_categoria = request.args.get("id_categoria", type=int)
-    id_equipo = request.args.get("id_equipo", type=int)
-    turno = request.args.get("turno", "")
+    id_alumno_filtro = request.args.get("id_alumno", type=int)
+    id_cat_filtro = request.args.get("id_categoria_filtro", type=int)
+    id_equipo_filtro = request.args.get("id_equipo", type=int)
+    turno_filtro = request.args.get("turno", "")
     estado_asistencia = request.args.get("estado_asistencia", "")
 
     consulta = AsistenciaEntrenamiento.query.join(AsistenciaEntrenamiento.sesion).join(
         AsistenciaEntrenamiento.alumno
     )
-    if id_alumno:
-        consulta = consulta.filter(AsistenciaEntrenamiento.id_alumno == id_alumno)
-    if id_categoria:
-        consulta = consulta.filter(Alumno.id_categoria == id_categoria)
-    if id_equipo:
-        consulta = consulta.filter(Alumno.equipos.any(Equipo.id_equipo == id_equipo))
-    if turno:
-        consulta = consulta.filter(Alumno.turno == turno)
+    if id_alumno_filtro:
+        consulta = consulta.filter(AsistenciaEntrenamiento.id_alumno == id_alumno_filtro)
+    if id_cat_filtro:
+        consulta = consulta.filter(Alumno.id_categoria == id_cat_filtro)
+    if id_equipo_filtro:
+        consulta = consulta.filter(Alumno.equipos.any(Equipo.id_equipo == id_equipo_filtro))
+    if turno_filtro:
+        consulta = consulta.filter(Alumno.turno == turno_filtro)
     if estado_asistencia in {"Presente", "Ausente", "Justificado", "Tarde"}:
         consulta = consulta.filter(AsistenciaEntrenamiento.estado == estado_asistencia)
 
@@ -411,16 +481,288 @@ def asistencias():
     }
     total = len(registros)
     porcentaje = round((resumen["Presente"] + resumen["Tarde"]) * 100 / total) if total else 0
-    alumno_seleccionado = db.session.get(Alumno, id_alumno) if id_alumno else None
+    alumno_seleccionado = db.session.get(Alumno, id_alumno_filtro) if id_alumno_filtro else None
+
     return render_template(
-        "alumnos/asistencias.html", registros=registros, resumen=resumen, total=total,
-        porcentaje=porcentaje, periodo=periodo, alumno_seleccionado=alumno_seleccionado,
+        "alumnos/asistencias.html",
+        tab=tab,
+        hoy=hoy,
+        categorias=categorias,
+        lugares=lugares,
+        # Tomar Asistencia
+        id_categoria=id_categoria,
+        categoria_seleccionada=categoria_seleccionada,
+        fecha_tomar=fecha_tomar,
+        hora_tomar=hora_tomar,
+        lugar_tomar=lugar_tomar,
+        alumnos_categoria=alumnos_categoria,
+        registros_existentes=registros_existentes,
+        sesion_existente=sesion_existente,
+        # Convocatoria
+        id_categoria_conv=id_categoria_conv,
+        categoria_conv_seleccionada=categoria_conv_seleccionada,
+        alumnos_convocatoria=alumnos_convocatoria,
+        fecha_conv_defecto=fecha_conv_defecto,
+        hora_conv_defecto=hora_conv_defecto,
+        convocatorias_guardadas=convocatorias_guardadas,
+        # Historial
+        registros=registros,
+        resumen=resumen,
+        total=total,
+        porcentaje=porcentaje,
+        periodo=periodo,
+        alumno_seleccionado=alumno_seleccionado,
         alumnos=Alumno.query.order_by(Alumno.apellido, Alumno.nombre).all(),
-        categorias=Categoria.query.order_by(Categoria.nombre).all(),
         equipos=Equipo.query.filter_by(es_rival=False).order_by(Equipo.nombre).all(),
-        turnos=TURNOS, filtros=request.args, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta,
+        turnos=TURNOS,
+        filtros=request.args,
+        fecha_desde=fecha_desde,
+        fecha_hasta=fecha_hasta,
         dias_semana=("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"),
     )
+
+
+@bp.route("/asistencias/guardar", methods=["POST"])
+def asistencias_guardar():
+    try:
+        id_categoria = int(request.form.get("id_categoria", 0))
+        categoria = Categoria.query.get_or_404(id_categoria)
+        fecha = fecha_iso(request.form.get("fecha") or date.today().isoformat(), "Fecha")
+        hora_texto = (request.form.get("hora") or "16:00").strip()
+        try:
+            hora_val = datetime.strptime(hora_texto, "%H:%M").time()
+        except ValueError:
+            hora_val = datetime.strptime("16:00", "%H:%M").time()
+        lugar = (request.form.get("lugar") or "Cancha Principal").strip()
+        observacion_general = (request.form.get("observacion_general") or "").strip()
+    except (ValueError, ErrorValidacion) as error:
+        flash(str(error), "danger")
+        return redirect(url_for("alumnos.asistencias", tab="tomar"))
+
+    alumnos = Alumno.query.filter_by(id_categoria=id_categoria, estado="Activo").order_by(Alumno.apellido, Alumno.nombre).all()
+    if not alumnos:
+        flash(f"La categoría {categoria.nombre} no tiene alumnos activos inscritos.", "warning")
+        return redirect(url_for("alumnos.asistencias", tab="tomar", id_categoria=id_categoria))
+
+    # Buscar o crear Entrenamiento para esta categoría
+    entrenamiento = Entrenamiento.query.filter_by(id_categoria=id_categoria, activo=True).first()
+    if not entrenamiento:
+        entrenamiento = Entrenamiento(
+            id_categoria=id_categoria,
+            dia_semana=fecha.weekday(),
+            hora_inicio=hora_val,
+            lugar=lugar,
+            activo=True,
+        )
+        db.session.add(entrenamiento)
+        db.session.flush()
+
+    # Buscar o crear SesionEntrenamiento para la fecha
+    sesion = SesionEntrenamiento.query.filter_by(
+        id_entrenamiento=entrenamiento.id_entrenamiento, fecha=fecha
+    ).first()
+    if not sesion:
+        sesion = SesionEntrenamiento(
+            id_entrenamiento=entrenamiento.id_entrenamiento,
+            fecha=fecha,
+            estado="Realizada",
+            observacion=f"Asistencia {categoria.nombre} {hora_texto} - {lugar}" + (f": {observacion_general}" if observacion_general else ""),
+        )
+        db.session.add(sesion)
+        db.session.flush()
+    else:
+        sesion.estado = "Realizada"
+        if observacion_general:
+            sesion.observacion = observacion_general
+
+    resumen = {"Presente": 0, "Tarde": 0, "Ausente": 0, "Justificado": 0}
+    for alumno in alumnos:
+        estado = request.form.get(f"estado_{alumno.id_alumno}", "Presente")
+        if estado not in {"Presente", "Tarde", "Ausente", "Justificado"}:
+            estado = "Presente"
+        justificacion = (request.form.get(f"justificacion_{alumno.id_alumno}") or "").strip()[:255] or None
+        reg = AsistenciaEntrenamiento.query.filter_by(
+            id_sesion_entrenamiento=sesion.id_sesion_entrenamiento, id_alumno=alumno.id_alumno
+        ).first()
+        if not reg:
+            reg = AsistenciaEntrenamiento(
+                id_sesion_entrenamiento=sesion.id_sesion_entrenamiento,
+                id_alumno=alumno.id_alumno,
+            )
+            db.session.add(reg)
+        reg.estado = estado
+        reg.justificacion = justificacion
+        resumen[estado] += 1
+
+    resumen_str = f"Presentes: {resumen['Presente']}, Tardes: {resumen['Tarde']}, Ausentes: {resumen['Ausente']}, Justificados: {resumen['Justificado']}"
+    db.session.add(Auditoria(
+        modulo="Asistencia", accion="Guardar", entidad="Categoria",
+        id_entidad=categoria.id_categoria,
+        detalle=f"Asistencia {categoria.nombre} el {fecha.strftime('%d/%m/%Y')} a las {hora_texto}. {resumen_str}",
+        valor_nuevo=resumen_str,
+    ))
+    db.session.commit()
+    flash(f"Asistencia de {categoria.nombre} registrada correctamente ({resumen['Presente']} presentes de {len(alumnos)} alumnos).", "success")
+    return redirect(url_for("alumnos.asistencias", tab="tomar", id_categoria=id_categoria, fecha=fecha.isoformat(), hora=hora_texto, lugar=lugar))
+
+
+@bp.route("/asistencias/convocatoria/guardar", methods=["POST"])
+def convocatoria_guardar():
+    try:
+        id_categoria = int(request.form.get("id_categoria", 0))
+        categoria = Categoria.query.get_or_404(id_categoria)
+        titulo = texto_requerido(request.form.get("titulo"), "Título o Motivo de Convocatoria", 150)
+        fecha = fecha_iso(request.form.get("fecha") or date.today().isoformat(), "Fecha del evento")
+        hora_str = (request.form.get("hora") or "").strip()
+        hora = None
+        if hora_str:
+            try:
+                hora = datetime.strptime(hora_str, "%H:%M").time()
+            except ValueError:
+                hora = None
+        lugar = texto_opcional(request.form.get("lugar"), "Lugar", 150)
+        rival = texto_opcional(request.form.get("rival"), "Rival", 150)
+        indicaciones = request.form.get("indicaciones", "").strip() or None
+    except (ValueError, ErrorValidacion) as error:
+        flash(str(error), "danger")
+        return redirect(url_for("alumnos.asistencias", tab="convocatoria", id_categoria_conv=request.form.get("id_categoria")))
+
+    convocados_ids = request.form.getlist("convocados")
+    if not convocados_ids:
+        flash("Debe seleccionar al menos un jugador convocado en la llamada de lista.", "warning")
+        return redirect(url_for("alumnos.asistencias", tab="convocatoria", id_categoria_conv=id_categoria))
+
+    convocatoria = Convocatoria(
+        titulo=titulo,
+        id_categoria=id_categoria,
+        fecha=fecha,
+        hora=hora,
+        lugar=lugar,
+        rival=rival,
+        indicaciones=indicaciones,
+        id_usuario=_usuario_actual_id(),
+    )
+    db.session.add(convocatoria)
+    db.session.flush()
+
+    for orden_idx, id_str in enumerate(convocados_ids, 1):
+        try:
+            id_alumno = int(id_str)
+        except ValueError:
+            continue
+        rol = request.form.get(f"rol_{id_alumno}", "Titular")
+        if rol not in {"Titular", "Suplente", "Reserva"}:
+            rol = "Titular"
+        dorsal_str = (request.form.get(f"dorsal_{id_alumno}") or "").strip()
+        dorsal = int(dorsal_str) if dorsal_str.isdigit() else None
+        posicion = (request.form.get(f"posicion_{id_alumno}") or "").strip() or None
+        nota = (request.form.get(f"nota_{id_alumno}") or "").strip() or None
+        detalle = DetalleConvocatoria(
+            id_convocatoria=convocatoria.id_convocatoria,
+            id_alumno=id_alumno,
+            rol=rol,
+            dorsal=dorsal,
+            posicion=posicion,
+            nota=nota,
+            orden=orden_idx,
+        )
+        db.session.add(detalle)
+
+    db.session.add(Auditoria(
+        modulo="Deporte", accion="Crear convocatoria", entidad="Convocatoria",
+        id_entidad=convocatoria.id_convocatoria,
+        detalle=f"Convocatoria '{titulo}' ({categoria.nombre}) con {len(convocados_ids)} jugadores convocados.",
+        valor_nuevo=f"{len(convocados_ids)} convocados",
+    ))
+    db.session.commit()
+    flash(f"Lista de convocatoria '{titulo}' generada exitosamente con {len(convocados_ids)} jugadores.", "success")
+    return redirect(url_for("alumnos.convocatoria_detalle", id_convocatoria=convocatoria.id_convocatoria))
+
+
+@bp.route("/asistencias/convocatoria/<int:id_convocatoria>")
+def convocatoria_detalle(id_convocatoria):
+    convocatoria = Convocatoria.query.get_or_404(id_convocatoria)
+    config, logo = configuracion_y_logo()
+    return render_template(
+        "alumnos/convocatoria_detalle.html",
+        convocatoria=convocatoria,
+        config=config,
+        logo=logo,
+    )
+
+
+@bp.route("/asistencias/convocatoria/<int:id_convocatoria>/pdf")
+def convocatoria_pdf(id_convocatoria):
+    convocatoria = Convocatoria.query.get_or_404(id_convocatoria)
+    config, logo = configuracion_y_logo()
+
+    titulo = f"Convocatoria: {convocatoria.titulo} - {convocatoria.categoria.nombre}"
+    encabezados = ["Nº", "Dorsal", "Jugador", "Posición", "Rol", "Tutor", "Teléfono de Contacto"]
+    filas = []
+    for idx, d in enumerate(convocatoria.detalles, 1):
+        alumno = d.alumno
+        dorsal_txt = str(d.dorsal) if d.dorsal else "—"
+        filas.append([
+            str(idx),
+            dorsal_txt,
+            alumno.nombre_completo,
+            d.posicion or alumno.posicion or "—",
+            d.rol,
+            alumno.tutor or "—",
+            alumno.telefono or "—",
+        ])
+
+    buffer = generar_tabla_pdf(
+        titulo, encabezados, filas,
+        orientacion="vertical", tamano_pagina="carta", logo_path=logo
+    )
+    nombre = f"convocatoria_{convocatoria.categoria.nombre.replace(' ', '_')}_{convocatoria.fecha.isoformat()}.pdf"
+    return enviar_buffer(buffer, "convocatorias", nombre, "application/pdf")
+
+
+@bp.route("/asistencias/convocatoria/<int:id_convocatoria>/excel")
+def convocatoria_excel(id_convocatoria):
+    convocatoria = Convocatoria.query.get_or_404(id_convocatoria)
+    _, logo = configuracion_y_logo()
+
+    titulo = f"Convocatoria - {convocatoria.titulo} ({convocatoria.categoria.nombre})"
+    encabezados = ["Nº", "Dorsal", "Jugador", "CI", "Posición", "Rol", "Tutor", "Teléfono Tutor", "Nota"]
+    filas = []
+    for idx, d in enumerate(convocatoria.detalles, 1):
+        alumno = d.alumno
+        filas.append([
+            idx,
+            d.dorsal or "",
+            alumno.nombre_completo,
+            alumno.ci or "",
+            d.posicion or alumno.posicion or "",
+            d.rol,
+            alumno.tutor or "",
+            alumno.telefono or "",
+            d.nota or "",
+        ])
+
+    buffer = exportar_tabla_excel(titulo, encabezados, filas, logo_path=logo)
+    nombre = f"convocatoria_{convocatoria.categoria.nombre.replace(' ', '_')}_{convocatoria.fecha.isoformat()}.xlsx"
+    return enviar_buffer(
+        buffer, "convocatorias", nombre,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+@bp.route("/asistencias/convocatoria/<int:id_convocatoria>/eliminar", methods=["POST"])
+def convocatoria_eliminar(id_convocatoria):
+    convocatoria = Convocatoria.query.get_or_404(id_convocatoria)
+    titulo = convocatoria.titulo
+    id_cat = convocatoria.id_categoria
+    db.session.add(Auditoria(
+        modulo="Deporte", accion="Eliminar convocatoria", entidad="Convocatoria",
+        id_entidad=convocatoria.id_convocatoria, detalle=f"Eliminada convocatoria '{titulo}'",
+    ))
+    db.session.delete(convocatoria)
+    db.session.commit()
+    flash(f"Convocatoria '{titulo}' eliminada correctamente.", "success")
+    return redirect(url_for("alumnos.asistencias", tab="convocatorias", id_categoria=id_cat))
 
 
 @bp.route("/exportar")

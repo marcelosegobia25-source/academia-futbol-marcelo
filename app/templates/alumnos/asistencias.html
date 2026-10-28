@@ -1,27 +1,622 @@
 {% extends "base.html" %}
-{% block titulo %}Asistencia de jugadores{% endblock %}
+{% block titulo %}Control de Asistencia y Convocatorias{% endblock %}
 {% block contenido %}
-<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-    <div><span class="eyebrow">Seguimiento deportivo</span><h2 class="mb-0">Asistencia de jugadores</h2><small class="text-muted">Consulte los registros guardados por jugador, fecha, equipo y turno.</small></div>
-    <a href="{{ url_for('alumnos.listar') }}" class="btn btn-outline-secondary"><i class="bi bi-people"></i> Volver a alumnos</a>
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow"><i class="bi bi-calendar2-check text-emerald"></i> Gestión Deportiva</span>
+        <h2 class="mb-0"><i class="bi bi-clipboard2-check-fill text-emerald me-1"></i> Asistencia & Convocatorias</h2>
+        <p class="text-muted mb-0">Toma directa de asistencia por categoría, control de asistencia y generación de listas de convocados.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('alumnos.listar') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-people me-1"></i> Listado de Alumnos
+        </a>
+    </div>
 </div>
 
-<form method="get" class="card attendance-query-card mb-4">
-    <div class="card-header"><strong><i class="bi bi-funnel"></i> Selección y filtros</strong><a href="{{ url_for('alumnos.asistencias') }}">Limpiar</a></div>
+<!-- Barra de Pestañas Principales -->
+<ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3" id="pills-asistencia-tab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {{ 'active fw-bold' if tab == 'tomar' }}" href="{{ url_for('alumnos.asistencias', tab='tomar', id_categoria=id_categoria) }}">
+            <i class="bi bi-check2-square me-1"></i> Tomar Asistencia
+            {% if categoria_seleccionada %}
+            <span class="badge bg-light text-dark ms-1">{{ categoria_seleccionada.nombre }}</span>
+            {% endif %}
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {{ 'active fw-bold' if tab == 'convocatoria' }}" href="{{ url_for('alumnos.asistencias', tab='convocatoria', id_categoria_conv=id_categoria_conv) }}">
+            <i class="bi bi-megaphone-fill me-1"></i> Nueva Convocatoria
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {{ 'active fw-bold' if tab == 'convocatorias' }}" href="{{ url_for('alumnos.asistencias', tab='convocatorias') }}">
+            <i class="bi bi-card-checklist me-1"></i> Convocatorias Guardadas
+            {% if convocatorias_guardadas %}
+            <span class="badge bg-secondary ms-1">{{ convocatorias_guardadas|length }}</span>
+            {% endif %}
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {{ 'active fw-bold' if tab == 'historial' }}" href="{{ url_for('alumnos.asistencias', tab='historial') }}">
+            <i class="bi bi-bar-chart-line me-1"></i> Historial y Reportes
+        </a>
+    </li>
+</ul>
+
+{% if tab == 'tomar' %}
+<!-- ======================================================================= -->
+<!-- PESTAÑA 1: TOMAR ASISTENCIA DIRECTA Y AISLADA POR CATEGORÍA             -->
+<!-- ======================================================================= -->
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-body p-4 bg-body-tertiary rounded-3">
+        <form method="get" action="{{ url_for('alumnos.asistencias') }}" class="row g-3 align-items-end" id="form-filtro-categoria">
+            <input type="hidden" name="tab" value="tomar">
+            <div class="col-md-4">
+                <label for="select-categoria" class="form-label fw-bold">
+                    <i class="bi bi-tag text-emerald me-1"></i> 1. Seleccione la Categoría <span class="text-danger">*</span>
+                </label>
+                <select class="form-select form-select-lg border-primary-subtle" name="id_categoria" id="select-categoria" onchange="this.form.submit()" required>
+                    <option value="">— Elegir categoría a registrar —</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat.id_categoria }}" {% if id_categoria == cat.id_categoria %}selected{% endif %}>
+                        {{ cat.nombre }} ({{ cat.edad_min }}-{{ cat.edad_max }} años)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="input-fecha" class="form-label fw-semibold">
+                    <i class="bi bi-calendar3 text-muted me-1"></i> 2. Fecha
+                </label>
+                <input type="date" class="form-control" name="fecha" id="input-fecha" value="{{ fecha_tomar.isoformat() }}" onchange="this.form.submit()">
+            </div>
+            <div class="col-md-2">
+                <label for="input-hora" class="form-label fw-semibold">
+                    <i class="bi bi-clock text-muted me-1"></i> 3. Hora
+                </label>
+                <input type="time" class="form-control" name="hora" id="input-hora" value="{{ hora_tomar }}">
+            </div>
+            <div class="col-md-3">
+                <label for="select-lugar" class="form-label fw-semibold">
+                    <i class="bi bi-geo-alt text-muted me-1"></i> 4. Lugar / Cancha
+                </label>
+                <input type="text" class="form-control" name="lugar" id="select-lugar" value="{{ lugar_tomar }}" list="lugares-lista" placeholder="ej: Cancha 1">
+                <datalist id="lugares-lista">
+                    {% for l in lugares %}
+                    <option value="{{ l.nombre }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if not id_categoria %}
+<div class="card p-5 text-center border-0 shadow-sm">
+    <div class="my-4">
+        <i class="bi bi-person-check-fill text-emerald display-3"></i>
+        <h4 class="mt-3 fw-bold">Paso previo: Seleccione la categoría</h4>
+        <p class="text-muted mx-auto" style="max-width: 520px;">
+            Para mantener el control 100% aislado y exacto, elija arriba la categoría que va a entrenar. 
+            La lista de llamada mostrará <strong>únicamente</strong> a los alumnos activos pertenecientes a dicha división.
+        </p>
+    </div>
+</div>
+{% else %}
+{% if not alumnos_categoria %}
+<div class="alert alert-warning d-flex align-items-center p-4 rounded-3 shadow-sm" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-2 me-3"></i>
+    <div>
+        <h5 class="alert-heading mb-1">Sin alumnos activos en esta categoría</h5>
+        <p class="mb-0">La categoría <strong>{{ categoria_seleccionada.nombre }}</strong> no tiene actualmente alumnos activos asignados. Puede inscribir o cambiar la categoría de alumnos desde el módulo Alumnos.</p>
+    </div>
+</div>
+{% else %}
+
+<form method="post" action="{{ url_for('alumnos.asistencias_guardar') }}" id="form-guardar-asistencia">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="id_categoria" value="{{ id_categoria }}">
+    <input type="hidden" name="fecha" value="{{ fecha_tomar.isoformat() }}">
+    <input type="hidden" name="hora" id="hidden-hora" value="{{ hora_tomar }}">
+    <input type="hidden" name="lugar" id="hidden-lugar" value="{{ lugar_tomar }}">
+
+    <!-- Barra de Estado y Botones Rápidos -->
+    <div class="card mb-3 border-0 shadow-sm bg-body">
+        <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3 py-3">
+            <div>
+                <span class="badge bg-primary px-3 py-2 fs-6 mb-1">
+                    <i class="bi bi-tag-fill me-1"></i> {{ categoria_seleccionada.nombre }}
+                </span>
+                <span class="text-muted ms-2 small">
+                    <i class="bi bi-calendar3 me-1"></i>{{ fecha_tomar.strftime('%d/%m/%Y') }} · <i class="bi bi-clock me-1"></i>{{ hora_tomar }}
+                    {% if sesion_existente %}
+                    <span class="badge bg-warning-subtle text-warning-emphasis border ms-2">
+                        <i class="bi bi-pencil me-1"></i>Editando registro existente
+                    </span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-outline-success" id="btn-marcar-todos-presentes">
+                    <i class="bi bi-check-all me-1"></i> Todos Presentes
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" id="btn-marcar-todos-ausentes">
+                    <i class="bi bi-x-circle me-1"></i> Todos Ausentes
+                </button>
+                <div class="vr mx-1"></div>
+                <div class="d-flex gap-2 align-items-center small font-monospace">
+                    <span class="badge bg-success-subtle text-success border px-2 py-1">
+                        P: <strong id="cnt-p">0</strong>
+                    </span>
+                    <span class="badge bg-warning-subtle text-dark border px-2 py-1">
+                        T: <strong id="cnt-t">0</strong>
+                    </span>
+                    <span class="badge bg-danger-subtle text-danger border px-2 py-1">
+                        A: <strong id="cnt-a">0</strong>
+                    </span>
+                    <span class="badge bg-info-subtle text-dark border px-2 py-1">
+                        J: <strong id="cnt-j">0</strong>
+                    </span>
+                    <span class="badge bg-secondary-subtle text-secondary border px-2 py-1">
+                        Total: <strong>{{ alumnos_categoria|length }}</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Llamada de Lista de la Categoría -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tabla-asistencia-alumnos">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;" class="text-center">#</th>
+                        <th>Jugador / Alumno</th>
+                        <th style="width: 140px;">Posición / Turno</th>
+                        <th style="min-width: 330px;" class="text-center">Estado de Asistencia</th>
+                        <th style="min-width: 200px;">Justificación / Observación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alumno in alumnos_categoria %}
+                    {% set reg = registros_existentes.get(alumno.id_alumno) %}
+                    {% set estado_actual = reg.estado if reg else 'Presente' %}
+                    <tr class="fila-alumno-asistencia" id="fila-alumno-{{ alumno.id_alumno }}">
+                        <td class="text-center fw-bold text-muted">{{ loop.index }}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-circle rounded-circle bg-emerald-subtle text-emerald fw-bold d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                                    {{ alumno.nombre[:1] }}{{ alumno.apellido[:1] }}
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('alumnos.detalle', id_alumno=alumno.id_alumno) }}" class="fw-bold text-decoration-none text-reset" target="_blank">
+                                        {{ alumno.apellido }}, {{ alumno.nombre }}
+                                    </a>
+                                    <div class="small text-muted font-monospace">
+                                        {{ alumno.codigo_interno }} {% if alumno.ci %}· CI: {{ alumno.ci }}{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ alumno.posicion or 'Sin posición' }}</span>
+                            {% if alumno.turno %}
+                            <div class="small text-muted">{{ alumno.turno }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group w-100 shadow-sm" role="group" aria-label="Estado de asistencia">
+                                <input type="radio" class="btn-check radio-estado" name="estado_{{ alumno.id_alumno }}" id="p_{{ alumno.id_alumno }}" value="Presente" {% if estado_actual == 'Presente' %}checked{% endif %} data-alumno="{{ alumno.id_alumno }}">
+                                <label class="btn btn-outline-success btn-sm py-2" for="p_{{ alumno.id_alumno }}">
+                                    <i class="bi bi-check-circle me-1"></i>Presente
+                                </label>
+
+                                <input type="radio" class="btn-check radio-estado" name="estado_{{ alumno.id_alumno }}" id="t_{{ alumno.id_alumno }}" value="Tarde" {% if estado_actual == 'Tarde' %}checked{% endif %} data-alumno="{{ alumno.id_alumno }}">
+                                <label class="btn btn-outline-warning btn-sm py-2" for="t_{{ alumno.id_alumno }}">
+                                    <i class="bi bi-clock me-1"></i>Tarde
+                                </label>
+
+                                <input type="radio" class="btn-check radio-estado" name="estado_{{ alumno.id_alumno }}" id="a_{{ alumno.id_alumno }}" value="Ausente" {% if estado_actual == 'Ausente' %}checked{% endif %} data-alumno="{{ alumno.id_alumno }}">
+                                <label class="btn btn-outline-danger btn-sm py-2" for="a_{{ alumno.id_alumno }}">
+                                    <i class="bi bi-x-circle me-1"></i>Ausente
+                                </label>
+
+                                <input type="radio" class="btn-check radio-estado" name="estado_{{ alumno.id_alumno }}" id="j_{{ alumno.id_alumno }}" value="Justificado" {% if estado_actual == 'Justificado' %}checked{% endif %} data-alumno="{{ alumno.id_alumno }}">
+                                <label class="btn btn-outline-info btn-sm py-2" for="j_{{ alumno.id_alumno }}">
+                                    <i class="bi bi-file-earmark-check me-1"></i>Justificado
+                                </label>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm" name="justificacion_{{ alumno.id_alumno }}" value="{{ reg.justificacion if reg and reg.justificacion else '' }}" placeholder="Motivo o nota (opcional)">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-body-tertiary p-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="small text-muted">
+                <i class="bi bi-shield-lock me-1"></i> La información se sincroniza automáticamente con el historial del alumno y estadísticas mensuales.
+            </div>
+            <button type="submit" class="btn btn-success btn-lg px-4 shadow">
+                <i class="bi bi-floppy-fill me-2"></i> Guardar Asistencia de {{ categoria_seleccionada.nombre }}
+            </button>
+        </div>
+    </div>
+</form>
+{% endif %}
+{% endif %}
+
+{% elif tab == 'convocatoria' %}
+<!-- ======================================================================= -->
+<!-- PESTAÑA 2: NUEVA CONVOCATORIA (LLAMADA DE LISTA Y LISTA GENERADA)       -->
+<!-- ======================================================================= -->
+<div class="row g-4">
+    <div class="col-lg-12">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4 bg-body-tertiary rounded-3">
+                <form method="get" action="{{ url_for('alumnos.asistencias') }}" class="row g-3 align-items-end" id="form-filtro-convocatoria">
+                    <input type="hidden" name="tab" value="convocatoria">
+                    <div class="col-md-5">
+                        <label for="select-cat-conv" class="form-label fw-bold">
+                            <i class="bi bi-shield-shaded text-emerald me-1"></i> 1. Elija la Categoría a Convocar <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select form-select-lg border-primary-subtle" name="id_categoria_conv" id="select-cat-conv" onchange="this.form.submit()" required>
+                            <option value="">— Seleccionar categoría para convocatoria —</option>
+                            {% for cat in categorias %}
+                            <option value="{{ cat.id_categoria }}" {% if id_categoria_conv == cat.id_categoria %}selected{% endif %}>
+                                {{ cat.nombre }} ({{ cat.edad_min }}-{{ cat.edad_max }} años)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="small text-muted mb-1">
+                            La lista de llamada se restringe estrictamente a los jugadores de la categoría elegida para evitar errores de alineación.
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if not id_categoria_conv %}
+        <div class="card p-5 text-center border-0 shadow-sm">
+            <div class="my-4">
+                <i class="bi bi-megaphone text-primary display-3"></i>
+                <h4 class="mt-3 fw-bold">Seleccione la categoría para armar la Convocatoria</h4>
+                <p class="text-muted mx-auto" style="max-width: 520px;">
+                    Podrá elegir los jugadores convocados (titulares y suplentes), asignar números de camiseta y generar una lista lista para imprimir o compartir por WhatsApp con los padres de familia.
+                </p>
+            </div>
+        </div>
+        {% elif not alumnos_convocatoria %}
+        <div class="alert alert-warning p-4 rounded-3 shadow-sm">
+            <h5>No hay alumnos activos en {{ categoria_conv_seleccionada.nombre }}</h5>
+            <p class="mb-0">Inscriba alumnos o asígnelos a esta categoría para poder convocarlos.</p>
+        </div>
+        {% else %}
+
+        <form method="post" action="{{ url_for('alumnos.convocatoria_guardar') }}" id="form-guardar-convocatoria">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="id_categoria" value="{{ id_categoria_conv }}">
+
+            <!-- Datos del Encuentro / Evento -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-body py-3">
+                    <strong class="fs-5 text-primary"><i class="bi bi-info-circle me-1"></i> 2. Detalles del Evento / Citación</strong>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Título / Motivo de Convocatoria <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg" name="titulo" placeholder="ej: Partido vs Club Bolívar (Fecha 4)" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Fecha del Encuentro <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="fecha" value="{{ fecha_conv_defecto.isoformat() }}" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Hora de Citación</label>
+                            <input type="time" class="form-control" name="hora" value="{{ hora_conv_defecto }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Lugar / Cancha</label>
+                            <input type="text" class="form-control" name="lugar" list="lugares-conv" placeholder="ej: Cancha 1 - Sede Principal">
+                            <datalist id="lugares-conv">
+                                {% for l in lugares %}
+                                <option value="{{ l.nombre }}">
+                                {% endfor %}
+                            </datalist>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Equipo Rival (opcional)</label>
+                            <input type="text" class="form-control" name="rival" placeholder="ej: Escuela San Antonio">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Indicaciones para Padres / Jugadores</label>
+                            <input type="text" class="form-control" name="indicaciones" placeholder="ej: Traer uniforme azul, canilleras y carnet">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Llamada de Lista de Jugadores a Convocar -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-body d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+                    <div>
+                        <strong class="fs-5"><i class="bi bi-person-lines-fill me-1"></i> 3. Llamada de Lista · Jugadores de {{ categoria_conv_seleccionada.nombre }}</strong>
+                        <span class="text-muted ms-2 small">({{ alumnos_convocatoria|length }} disponibles)</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-conv-todos">
+                            <i class="bi bi-check-square me-1"></i> Seleccionar Todos
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-conv-ninguno">
+                            <i class="bi bi-square me-1"></i> Desmarcar Todos
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success" id="btn-conv-11">
+                            <i class="bi bi-11-circle me-1"></i> Marcar 11 Titulares
+                        </button>
+                        <span class="badge bg-primary fs-6 ms-2 align-self-center">
+                            Convocados: <strong id="cnt-convocados">0</strong>
+                        </span>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="tabla-convocatoria-alumnos">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 45px;" class="text-center">
+                                    <input type="checkbox" class="form-check-input" id="check-master-conv">
+                                </th>
+                                <th>Jugador</th>
+                                <th style="width: 140px;">Rol</th>
+                                <th style="width: 100px;">Nº Camiseta</th>
+                                <th style="width: 150px;">Posición</th>
+                                <th>Tutor de Contacto</th>
+                                <th style="width: 160px;">Nota</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alumno in alumnos_convocatoria %}
+                            <tr class="fila-convocatoria" id="fila-conv-{{ alumno.id_alumno }}">
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input check-convocado" name="convocados" value="{{ alumno.id_alumno }}" id="chk_{{ alumno.id_alumno }}">
+                                </td>
+                                <td>
+                                    <label class="d-flex align-items-center gap-2 mb-0 cursor-pointer" for="chk_{{ alumno.id_alumno }}">
+                                        <div class="avatar-circle rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                            {{ alumno.nombre[:1] }}{{ alumno.apellido[:1] }}
+                                        </div>
+                                        <div>
+                                            <strong class="d-block">{{ alumno.apellido }}, {{ alumno.nombre }}</strong>
+                                            <small class="text-muted font-monospace">{{ alumno.codigo_interno }}</small>
+                                        </div>
+                                    </label>
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm select-rol" name="rol_{{ alumno.id_alumno }}">
+                                        <option value="Titular" selected>Titular</option>
+                                        <option value="Suplente">Suplente</option>
+                                        <option value="Reserva">Reserva</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm text-center" name="dorsal_{{ alumno.id_alumno }}" placeholder="Dorsal" min="1" max="99">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" name="posicion_{{ alumno.id_alumno }}" value="{{ alumno.posicion or '' }}" placeholder="Posición">
+                                </td>
+                                <td>
+                                    <small class="d-block text-truncate" style="max-width: 180px;">{{ alumno.tutor or '—' }}</small>
+                                    <small class="text-muted font-monospace"><i class="bi bi-telephone me-1"></i>{{ alumno.telefono or '—' }}</small>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" name="nota_{{ alumno.id_alumno }}" placeholder="ej: Capitán">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer bg-body-tertiary p-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="small text-muted">
+                        <i class="bi bi-info-circle me-1"></i> Al generar la lista, podrá imprimirla, descargarla en PDF/Excel o <strong>copiarla con formato listo para WhatsApp</strong>.
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg px-4 shadow">
+                        <i class="bi bi-megaphone-fill me-2"></i> Generar Lista de Convocatoria
+                    </button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+{% elif tab == 'convocatorias' %}
+<!-- ======================================================================= -->
+<!-- PESTAÑA 3: CONVOCATORIAS GUARDADAS                                      -->
+<!-- ======================================================================= -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-body py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <strong class="fs-5"><i class="bi bi-folder-check text-emerald me-1"></i> Listas de Convocatorias Guardadas</strong>
+        <a href="{{ url_for('alumnos.asistencias', tab='convocatoria') }}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Nueva Convocatoria
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Fecha / Hora</th>
+                    <th>Título / Motivo</th>
+                    <th>Categoría</th>
+                    <th>Lugar / Rival</th>
+                    <th class="text-center">Convocados</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for conv in convocatorias_guardadas %}
+                <tr>
+                    <td class="text-nowrap">
+                        <strong><i class="bi bi-calendar3 me-1 text-muted"></i>{{ conv.fecha.strftime('%d/%m/%Y') }}</strong>
+                        {% if conv.hora %}
+                        <small class="d-block text-muted"><i class="bi bi-clock me-1"></i>{{ conv.hora.strftime('%H:%M') }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong class="d-block">{{ conv.titulo }}</strong>
+                        {% if conv.indicaciones %}
+                        <small class="text-muted text-truncate d-block" style="max-width: 250px;">{{ conv.indicaciones }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-primary-subtle text-primary border">
+                            {{ conv.categoria.nombre }}
+                        </span>
+                    </td>
+                    <td>
+                        <div><i class="bi bi-geo-alt me-1 text-muted"></i>{{ conv.lugar or '—' }}</div>
+                        {% if conv.rival %}
+                        <small class="text-danger"><i class="bi bi-shield-x me-1"></i>vs {{ conv.rival }}</small>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-success fs-6">{{ conv.total_convocados }}</span>
+                        <div class="small text-muted mt-1">{{ conv.titulares|length }} Tit. / {{ conv.suplentes|length }} Sup.</div>
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group">
+                            <a href="{{ url_for('alumnos.convocatoria_detalle', id_convocatoria=conv.id_convocatoria) }}" class="btn btn-sm btn-outline-primary" title="Ver y compartir lista">
+                                <i class="bi bi-eye"></i> Ver Lista
+                            </a>
+                            <a href="{{ url_for('alumnos.convocatoria_pdf', id_convocatoria=conv.id_convocatoria) }}" class="btn btn-sm btn-outline-danger" title="Descargar PDF">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                            </a>
+                            <form method="post" action="{{ url_for('alumnos.convocatoria_eliminar', id_convocatoria=conv.id_convocatoria) }}" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar esta lista de convocatoria?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-folder-x fs-2 d-block mb-2"></i>
+                        No hay listas de convocatorias guardadas aún.
+                        <div class="mt-2">
+                            <a href="{{ url_for('alumnos.asistencias', tab='convocatoria') }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i> Crear la primera convocatoria
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% elif tab == 'historial' %}
+<!-- ======================================================================= -->
+<!-- PESTAÑA 4: HISTORIAL Y CONSULTA ESTADÍSTICA                             -->
+<!-- ======================================================================= -->
+<form method="get" class="card attendance-query-card mb-4 border-0 shadow-sm">
+    <input type="hidden" name="tab" value="historial">
+    <div class="card-header bg-body d-flex justify-content-between align-items-center">
+        <strong><i class="bi bi-funnel me-1"></i> Filtros de consulta de asistencia</strong>
+        <a href="{{ url_for('alumnos.asistencias', tab='historial') }}" class="btn btn-sm btn-outline-secondary">Limpiar filtros</a>
+    </div>
     <div class="card-body attendance-query-grid">
-        <div class="attendance-player-field"><label>Jugador</label><select class="form-select" name="id_alumno"><option value="">Todos los jugadores</option>{% for alumno in alumnos %}<option value="{{ alumno.id_alumno }}" {% if filtros.get('id_alumno')|string == alumno.id_alumno|string %}selected{% endif %}>{{ alumno.apellido }}, {{ alumno.nombre }} · {{ alumno.codigo_interno }}</option>{% endfor %}</select></div>
-        <div><label>Período</label><select class="form-select" name="periodo" id="periodo-asistencia"><option value="semana" {% if periodo == 'semana' %}selected{% endif %}>Semana actual</option><option value="ultimas3" {% if periodo == 'ultimas3' %}selected{% endif %}>Últimas 3 asistencias</option><option value="ultimas10" {% if periodo == 'ultimas10' %}selected{% endif %}>Últimas 10 asistencias</option><option value="mes" {% if periodo == 'mes' %}selected{% endif %}>Mes actual</option><option value="rango" {% if periodo == 'rango' %}selected{% endif %}>Rango de fechas</option><option value="todas" {% if periodo == 'todas' %}selected{% endif %}>Todo el historial</option></select></div>
-        <div><label>Estado</label><select class="form-select" name="estado_asistencia"><option value="">Todos</option>{% for estado in ['Presente','Tarde','Ausente','Justificado'] %}<option value="{{ estado }}" {% if filtros.get('estado_asistencia') == estado %}selected{% endif %}>{{ estado }}</option>{% endfor %}</select></div>
-        <div><label>Categoría</label><select class="form-select" name="id_categoria"><option value="">Todas</option>{% for categoria in categorias %}<option value="{{ categoria.id_categoria }}" {% if filtros.get('id_categoria')|string == categoria.id_categoria|string %}selected{% endif %}>{{ categoria.nombre }}</option>{% endfor %}</select></div>
-        <div><label>Equipo</label><select class="form-select" name="id_equipo"><option value="">Todos</option>{% for equipo in equipos %}<option value="{{ equipo.id_equipo }}" {% if filtros.get('id_equipo')|string == equipo.id_equipo|string %}selected{% endif %}>{{ equipo.nombre }}</option>{% endfor %}</select></div>
-        <div><label>Turno</label><select class="form-select" name="turno"><option value="">Todos</option>{% for turno in turnos %}<option value="{{ turno }}" {% if filtros.get('turno') == turno %}selected{% endif %}>{{ turno }}</option>{% endfor %}</select></div>
-        <div class="range-date"><label>Desde</label><input class="form-control" type="date" name="fecha_desde" value="{{ filtros.get('fecha_desde','') }}"></div>
-        <div class="range-date"><label>Hasta</label><input class="form-control" type="date" name="fecha_hasta" value="{{ filtros.get('fecha_hasta','') }}"></div>
-        <div class="attendance-filter-action"><button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Consultar asistencia</button></div>
+        <div class="attendance-player-field">
+            <label class="form-label">Jugador</label>
+            <select class="form-select" name="id_alumno">
+                <option value="">Todos los jugadores</option>
+                {% for alumno in alumnos %}
+                <option value="{{ alumno.id_alumno }}" {% if filtros.get('id_alumno')|string == alumno.id_alumno|string %}selected{% endif %}>
+                    {{ alumno.apellido }}, {{ alumno.nombre }} · {{ alumno.codigo_interno }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Período</label>
+            <select class="form-select" name="periodo" id="periodo-asistencia">
+                <option value="semana" {% if periodo == 'semana' %}selected{% endif %}>Semana actual</option>
+                <option value="ultimas3" {% if periodo == 'ultimas3' %}selected{% endif %}>Últimas 3 asistencias</option>
+                <option value="ultimas10" {% if periodo == 'ultimas10' %}selected{% endif %}>Últimas 10 asistencias</option>
+                <option value="mes" {% if periodo == 'mes' %}selected{% endif %}>Mes actual</option>
+                <option value="rango" {% if periodo == 'rango' %}selected{% endif %}>Rango de fechas</option>
+                <option value="todas" {% if periodo == 'todas' %}selected{% endif %}>Todo el historial</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Estado</label>
+            <select class="form-select" name="estado_asistencia">
+                <option value="">Todos</option>
+                {% for est in ['Presente','Tarde','Ausente','Justificado'] %}
+                <option value="{{ est }}" {% if filtros.get('estado_asistencia') == est %}selected{% endif %}>{{ est }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Categoría</label>
+            <select class="form-select" name="id_categoria_filtro">
+                <option value="">Todas</option>
+                {% for cat in categorias %}
+                <option value="{{ cat.id_categoria }}" {% if filtros.get('id_categoria_filtro')|string == cat.id_categoria|string %}selected{% endif %}>{{ cat.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Equipo</label>
+            <select class="form-select" name="id_equipo">
+                <option value="">Todos</option>
+                {% for eq in equipos %}
+                <option value="{{ eq.id_equipo }}" {% if filtros.get('id_equipo')|string == eq.id_equipo|string %}selected{% endif %}>{{ eq.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Turno</label>
+            <select class="form-select" name="turno">
+                <option value="">Todos</option>
+                {% for t in turnos %}
+                <option value="{{ t }}" {% if filtros.get('turno') == t %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="range-date">
+            <label class="form-label">Desde</label>
+            <input class="form-control" type="date" name="fecha_desde" value="{{ filtros.get('fecha_desde','') }}">
+        </div>
+        <div class="range-date">
+            <label class="form-label">Hasta</label>
+            <input class="form-control" type="date" name="fecha_hasta" value="{{ filtros.get('fecha_hasta','') }}">
+        </div>
+        <div class="attendance-filter-action">
+            <button class="btn btn-primary w-100" type="submit"><i class="bi bi-search"></i> Consultar</button>
+        </div>
     </div>
 </form>
 
-{% if alumno_seleccionado %}<div class="attendance-selected-player mb-3"><div><span>Jugador seleccionado</span><strong>{{ alumno_seleccionado.nombre_completo }}</strong><small>{{ alumno_seleccionado.categoria.nombre if alumno_seleccionado.categoria else 'Sin categoría' }} · {{ alumno_seleccionado.turno or 'Sin turno asignado' }}</small></div><a href="{{ url_for('alumnos.detalle', id_alumno=alumno_seleccionado.id_alumno) }}">Abrir perfil <i class="bi bi-arrow-right"></i></a></div>{% endif %}
+{% if alumno_seleccionado %}
+<div class="attendance-selected-player mb-3 border shadow-sm">
+    <div>
+        <span>Jugador seleccionado</span>
+        <strong>{{ alumno_seleccionado.nombre_completo }}</strong>
+        <small>{{ alumno_seleccionado.categoria.nombre if alumno_seleccionado.categoria else 'Sin categoría' }} · {{ alumno_seleccionado.turno or 'Sin turno asignado' }}</small>
+    </div>
+    <a href="{{ url_for('alumnos.detalle', id_alumno=alumno_seleccionado.id_alumno) }}">Abrir perfil <i class="bi bi-arrow-right"></i></a>
+</div>
+{% endif %}
 
 <div class="attendance-stat-grid mb-4">
     <div class="attendance-stat attendance-present"><i class="bi bi-check-circle-fill"></i><span><strong>{{ resumen.Presente }}</strong>Presentes</span></div>
@@ -31,18 +626,205 @@
     <div class="attendance-stat attendance-total"><i class="bi bi-percent"></i><span><strong>{{ porcentaje }}%</strong>Asistencia · {{ total }} registros</span></div>
 </div>
 
-<div class="card overflow-hidden">
-    <div class="card-header d-flex justify-content-between"><strong>Resultados</strong><span class="text-muted small">{% if fecha_desde %}{{ fecha_desde.strftime('%d/%m/%Y') }}{% endif %}{% if fecha_desde and fecha_hasta %} – {% endif %}{% if fecha_hasta %}{{ fecha_hasta.strftime('%d/%m/%Y') }}{% endif %}</span></div>
-    <div class="table-responsive"><table class="table table-hover align-middle mb-0 attendance-results-table"><thead><tr><th>Fecha</th><th>Jugador</th><th>Categoría / equipo</th><th>Entrenamiento</th><th>Turno</th><th>Estado</th><th>Justificación</th></tr></thead><tbody>
-        {% for registro in registros %}{% set entrenamiento = registro.sesion.entrenamiento %}<tr>
-            <td><strong>{{ registro.sesion.fecha.strftime('%d/%m/%Y') }}</strong><small>{{ dias_semana[registro.sesion.fecha.weekday()] }}</small></td>
-            <td><a href="{{ url_for('alumnos.detalle', id_alumno=registro.alumno.id_alumno) }}"><strong>{{ registro.alumno.nombre_completo }}</strong><small>{{ registro.alumno.codigo_interno }}</small></a></td>
-            <td>{{ registro.alumno.categoria.nombre if registro.alumno.categoria else '—' }}<small>{{ registro.alumno.equipos|map(attribute='nombre')|join(', ') or 'Sin equipo' }}</small></td>
-            <td>{{ entrenamiento.hora_inicio.strftime('%H:%M') }}{% if entrenamiento.hora_fin %} – {{ entrenamiento.hora_fin.strftime('%H:%M') }}{% endif %}<small>{{ entrenamiento.lugar or 'Lugar no definido' }}</small></td>
-            <td>{{ registro.alumno.turno or entrenamiento.turno }}</td>
-            <td><span class="badge {{ 'bg-success' if registro.estado == 'Presente' else ('bg-warning text-dark' if registro.estado == 'Tarde' else ('bg-danger' if registro.estado == 'Ausente' else 'bg-info text-dark')) }}">{{ registro.estado }}</span></td>
-            <td>{{ registro.justificacion or '—' }}</td>
-        </tr>{% else %}<tr><td colspan="7" class="text-center text-muted py-5"><i class="bi bi-calendar2-x fs-2 d-block mb-2"></i>No hay asistencias que coincidan con los filtros seleccionados.</td></tr>{% endfor %}
-    </tbody></table></div>
+<div class="card overflow-hidden border-0 shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>Resultados</strong>
+        <span class="text-muted small">
+            {% if fecha_desde %}{{ fecha_desde.strftime('%d/%m/%Y') }}{% endif %}
+            {% if fecha_desde and fecha_hasta %} – {% endif %}
+            {% if fecha_hasta %}{{ fecha_hasta.strftime('%d/%m/%Y') }}{% endif %}
+        </span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 attendance-results-table">
+            <thead class="table-light">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Jugador</th>
+                    <th>Categoría / equipo</th>
+                    <th>Entrenamiento</th>
+                    <th>Turno</th>
+                    <th>Estado</th>
+                    <th>Justificación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for registro in registros %}
+                {% set entrenamiento = registro.sesion.entrenamiento %}
+                <tr>
+                    <td>
+                        <strong>{{ registro.sesion.fecha.strftime('%d/%m/%Y') }}</strong>
+                        <small class="d-block text-muted">{{ dias_semana[registro.sesion.fecha.weekday()] }}</small>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('alumnos.detalle', id_alumno=registro.alumno.id_alumno) }}">
+                            <strong>{{ registro.alumno.nombre_completo }}</strong>
+                            <small class="d-block text-muted">{{ registro.alumno.codigo_interno }}</small>
+                        </a>
+                    </td>
+                    <td>
+                        {{ registro.alumno.categoria.nombre if registro.alumno.categoria else '—' }}
+                        <small class="d-block text-muted">{{ registro.alumno.equipos|map(attribute='nombre')|join(', ') or 'Sin equipo' }}</small>
+                    </td>
+                    <td>
+                        {{ entrenamiento.hora_inicio.strftime('%H:%M') }}{% if entrenamiento.hora_fin %} – {{ entrenamiento.hora_fin.strftime('%H:%M') }}{% endif %}
+                        <small class="d-block text-muted">{{ entrenamiento.lugar or 'Lugar no definido' }}</small>
+                    </td>
+                    <td>{{ registro.alumno.turno or entrenamiento.turno }}</td>
+                    <td>
+                        <span class="badge {{ 'bg-success' if registro.estado == 'Presente' else ('bg-warning text-dark' if registro.estado == 'Tarde' else ('bg-danger' if registro.estado == 'Ausente' else 'bg-info text-dark')) }}">
+                            {{ registro.estado }}
+                        </span>
+                    </td>
+                    <td>{{ registro.justificacion or '—' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-5">
+                        <i class="bi bi-calendar2-x fs-2 d-block mb-2"></i>
+                        No hay asistencias que coincidan con los filtros seleccionados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // -------------------------------------------------------------------------
+    // Lógica para Tab 1: Tomar Asistencia
+    // -------------------------------------------------------------------------
+    const radios = document.querySelectorAll('.radio-estado');
+    const cntP = document.getElementById('cnt-p');
+    const cntT = document.getElementById('cnt-t');
+    const cntA = document.getElementById('cnt-a');
+    const cntJ = document.getElementById('cnt-j');
+
+    function actualizarContadoresAsistencia() {
+        if (!cntP) return;
+        let p = 0, t = 0, a = 0, j = 0;
+        document.querySelectorAll('.radio-estado:checked').forEach(r => {
+            if (r.value === 'Presente') p++;
+            else if (r.value === 'Tarde') t++;
+            else if (r.value === 'Ausente') a++;
+            else if (r.value === 'Justificado') j++;
+        });
+        cntP.textContent = p;
+        cntT.textContent = t;
+        cntA.textContent = a;
+        cntJ.textContent = j;
+    }
+
+    radios.forEach(radio => {
+        radio.addEventListener('change', actualizarContadoresAsistencia);
+    });
+    actualizarContadoresAsistencia();
+
+    const btnTodosP = document.getElementById('btn-marcar-todos-presentes');
+    if (btnTodosP) {
+        btnTodosP.addEventListener('click', function() {
+            document.querySelectorAll('.radio-estado[value="Presente"]').forEach(r => {
+                r.checked = true;
+            });
+            actualizarContadoresAsistencia();
+        });
+    }
+
+    const btnTodosA = document.getElementById('btn-marcar-todos-ausentes');
+    if (btnTodosA) {
+        btnTodosA.addEventListener('click', function() {
+            document.querySelectorAll('.radio-estado[value="Ausente"]').forEach(r => {
+                r.checked = true;
+            });
+            actualizarContadoresAsistencia();
+        });
+    }
+
+    // Sincronizar inputs de hora y lugar si cambian en el form de filtro
+    const inputHora = document.getElementById('input-hora');
+    const hiddenHora = document.getElementById('hidden-hora');
+    if (inputHora && hiddenHora) {
+        inputHora.addEventListener('input', () => hiddenHora.value = inputHora.value);
+    }
+    const selectLugar = document.getElementById('select-lugar');
+    const hiddenLugar = document.getElementById('hidden-lugar');
+    if (selectLugar && hiddenLugar) {
+        selectLugar.addEventListener('input', () => hiddenLugar.value = selectLugar.value);
+    }
+
+    // -------------------------------------------------------------------------
+    // Lógica para Tab 2: Convocatoria de Alumnos
+    // -------------------------------------------------------------------------
+    const checksConv = document.querySelectorAll('.check-convocado');
+    const cntConv = document.getElementById('cnt-convocados');
+    const checkMaster = document.getElementById('check-master-conv');
+
+    function actualizarContadorConvocados() {
+        if (!cntConv) return;
+        let count = 0;
+        checksConv.forEach(chk => {
+            const row = chk.closest('tr');
+            if (chk.checked) {
+                count++;
+                if (row) row.classList.add('table-primary-subtle');
+            } else {
+                if (row) row.classList.remove('table-primary-subtle');
+            }
+        });
+        cntConv.textContent = count;
+        if (checkMaster) {
+            checkMaster.checked = (count === checksConv.length && count > 0);
+        }
+    }
+
+    checksConv.forEach(chk => {
+        chk.addEventListener('change', actualizarContadorConvocados);
+    });
+
+    if (checkMaster) {
+        checkMaster.addEventListener('change', function() {
+            checksConv.forEach(chk => chk.checked = checkMaster.checked);
+            actualizarContadorConvocados();
+        });
+    }
+
+    const btnConvTodos = document.getElementById('btn-conv-todos');
+    if (btnConvTodos) {
+        btnConvTodos.addEventListener('click', function() {
+            checksConv.forEach(chk => chk.checked = true);
+            actualizarContadorConvocados();
+        });
+    }
+
+    const btnConvNinguno = document.getElementById('btn-conv-ninguno');
+    if (btnConvNinguno) {
+        btnConvNinguno.addEventListener('click', function() {
+            checksConv.forEach(chk => chk.checked = false);
+            actualizarContadorConvocados();
+        });
+    }
+
+    const btnConv11 = document.getElementById('btn-conv-11');
+    if (btnConv11) {
+        btnConv11.addEventListener('click', function() {
+            checksConv.forEach((chk, idx) => {
+                chk.checked = (idx < 11);
+                const row = chk.closest('tr');
+                if (row) {
+                    const selectRol = row.querySelector('.select-rol');
+                    if (selectRol) {
+                        selectRol.value = (idx < 11) ? 'Titular' : 'Suplente';
+                    }
+                }
+            });
+            actualizarContadorConvocados();
+        });
+    }
+
+    actualizarContadorConvocados();
+});
+</script>
 {% endblock %}
