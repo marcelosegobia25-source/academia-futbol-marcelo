@@ -23,10 +23,10 @@ COMPROBACIONES_LOGICAS = [
     ("Compras activas sin egreso", "SELECT COUNT(*) FROM compra c LEFT JOIN movimiento_contable m ON m.origen_tipo='Compra' AND m.origen_id=c.id_compra WHERE c.anulado_en IS NULL AND m.id_movimiento IS NULL"),
     ("Movimientos de caja sin movimiento financiero", "SELECT COUNT(*) FROM movimiento_caja mc LEFT JOIN movimiento_contable m ON m.id_movimiento=mc.id_movimiento_contable WHERE m.id_movimiento IS NULL"),
     ("Movimientos financieros vinculados a caja sin asiento de caja", "SELECT COUNT(*) FROM movimiento_contable m LEFT JOIN movimiento_caja mc ON mc.id_movimiento_contable=m.id_movimiento WHERE m.id_sesion_caja IS NOT NULL AND mc.id_movimiento_caja IS NULL"),
-    ("Posibles partidos duplicados", "SELECT COUNT(*) FROM (SELECT fecha,hora,id_equipo,COALESCE(id_equipo_rival,-1),lower(trim(rival)),COALESCE(id_campeonato,-1),COALESCE(id_categoria,-1),COALESCE(id_lugar,-1),COUNT(*) n FROM partido GROUP BY fecha,hora,id_equipo,COALESCE(id_equipo_rival,-1),lower(trim(rival)),COALESCE(id_campeonato,-1),COALESCE(id_categoria,-1),COALESCE(id_lugar,-1) HAVING n>1) AS subconsulta_duplicados"),
+    ("Posibles partidos duplicados", "SELECT COUNT(*) FROM (SELECT fecha,hora,id_equipo,COALESCE(id_equipo_rival,-1),lower(trim(rival)),COALESCE(id_campeonato,-1),COALESCE(id_categoria,-1),COALESCE(id_lugar,-1) FROM partido GROUP BY fecha,hora,id_equipo,COALESCE(id_equipo_rival,-1),lower(trim(rival)),COALESCE(id_campeonato,-1),COALESCE(id_categoria,-1),COALESCE(id_lugar,-1) HAVING COUNT(*)>1) AS subconsulta_duplicados"),
     ("Partidos sin proyección en Agenda", "SELECT COUNT(*) FROM partido p LEFT JOIN evento_agenda e ON e.id_partido=p.id_partido WHERE e.id_evento IS NULL"),
     ("Eventos de partido huérfanos", "SELECT COUNT(*) FROM evento_agenda e LEFT JOIN partido p ON p.id_partido=e.id_partido WHERE e.tipo='Partido' AND p.id_partido IS NULL"),
-    ("Proyecciones de partido desincronizadas", "SELECT COUNT(*) FROM evento_agenda e JOIN partido p ON p.id_partido=e.id_partido WHERE e.fecha<>p.fecha OR COALESCE(e.hora,'')<>COALESCE(p.hora,'') OR COALESCE(e.id_lugar,-1)<>COALESCE(p.id_lugar,-1) OR COALESCE(e.id_equipo,-1)<>COALESCE(p.id_equipo,-1)"),
+    ("Proyecciones de partido desincronizadas", "SELECT COUNT(*) FROM evento_agenda e JOIN partido p ON p.id_partido=e.id_partido WHERE e.fecha<>p.fecha OR COALESCE(CAST(e.hora AS VARCHAR),'')<>COALESCE(CAST(p.hora AS VARCHAR),'') OR COALESCE(e.id_lugar,-1)<>COALESCE(p.id_lugar,-1) OR COALESCE(e.id_equipo,-1)<>COALESCE(p.id_equipo,-1)"),
 ]
 
 
@@ -42,6 +42,7 @@ def auditar_base_datos(session, nombre_motor="PostgreSQL"):
         try:
             cantidad = session.execute(text(consulta)).scalar() or 0
         except Exception:
+            session.rollback()
             continue
         if cantidad:
             resultado["alertas"].append(f"{etiqueta}: {cantidad}")
