@@ -35,7 +35,7 @@ git push origin main
    - **Branch:** `main`.
    - **Runtime:** `Python 3`.
    - **Build Command:** `pip install -r requirements.txt`.
-   - **Start Command:** `gunicorn run:app --workers 2 --threads 4 --timeout 120`.
+   - **Start Command:** `gunicorn run:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120`.
    - **Instance Type:** `Free` (Gratis).
 
 ---
