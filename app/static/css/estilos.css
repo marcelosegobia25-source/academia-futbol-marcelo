@@ -948,6 +948,16 @@ a:hover {
     color: #ffffff !important;
 }
 
+.btn-light {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #e2e8f0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+.btn-light:hover {
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
 /* ==========================================================================
    TARJETAS Y SUPERFICIES (CARDS OBSIDIAN)
    ========================================================================== */
@@ -2755,5 +2765,95 @@ a:hover {
 .form-check-input:checked {
     background-color: #10b981;
     border-color: #10b981;
+}
+
+/* ==========================================================================
+   SELECTOR DE ASISTENCIA (SEGMENTED CONTROL DE ALTO CONTRASTE DARK)
+   ========================================================================== */
+.asistencia-selector {
+    display: flex;
+    width: 100%;
+    background: #090e18;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 4px;
+}
+
+.btn-asistencia {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    font-size: 0.825rem;
+    font-weight: 600;
+    border-radius: 7px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s ease-in-out;
+    user-select: none;
+    text-align: center;
+    color: #94a3b8;
+    background: transparent;
+}
+
+/* Hover no seleccionado */
+.btn-asistencia-p:hover {
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.btn-asistencia-t:hover {
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.btn-asistencia-a:hover {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-asistencia-j:hover {
+    color: #38bdf8;
+    background: rgba(14, 165, 233, 0.12);
+    border-color: rgba(14, 165, 233, 0.3);
+}
+
+/* ESTADO MARCADO / ACTIVO (CHECKED) */
+.btn-check:checked + .btn-asistencia-p {
+    background: #10b981 !important;
+    color: #ffffff !important;
+    border-color: #059669 !important;
+    font-weight: 750 !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4) !important;
+}
+
+.btn-check:checked + .btn-asistencia-t {
+    background: #f59e0b !important;
+    color: #0b1120 !important;
+    border-color: #d97706 !important;
+    font-weight: 750 !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4) !important;
+}
+
+.btn-check:checked + .btn-asistencia-a {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border-color: #dc2626 !important;
+    font-weight: 750 !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4) !important;
+}
+
+.btn-check:checked + .btn-asistencia-j {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border-color: #0369a1 !important;
+    font-weight: 750 !important;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4) !important;
 }
 

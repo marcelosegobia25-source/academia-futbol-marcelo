@@ -124,40 +124,37 @@
     <div class="card mb-3 shadow-sm">
         <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3 py-3">
             <div>
-                <span class="badge bg-primary px-3 py-2 fs-6 mb-1">
-                    <i class="bi bi-tag-fill me-1"></i> {{ categoria_seleccionada.nombre }}
+                <span class="badge px-3 py-2 fs-6 mb-1" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">
+                    <i class="bi bi-tag-fill me-1"></i> Categoría {{ categoria_seleccionada.nombre }}
                 </span>
                 <span class="text-muted ms-2 small">
                     <i class="bi bi-calendar3 me-1"></i>{{ fecha_tomar.strftime('%d/%m/%Y') }} · <i class="bi bi-clock me-1"></i>{{ hora_tomar }}
                     {% if sesion_existente %}
-                    <span class="badge bg-warning-subtle text-warning-emphasis border ms-2">
-                        <i class="bi bi-pencil me-1"></i>Editando registro existente
+                    <span class="badge ms-2" style="background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">
+                        <i class="bi bi-pencil-fill me-1"></i>Editando registro existente
                     </span>
                     {% endif %}
                 </span>
             </div>
-            <div class="d-flex flex-wrap align-items-center gap-2">
-                <button type="button" class="btn btn-sm btn-outline-success" id="btn-marcar-todos-presentes">
-                    <i class="bi bi-check-all me-1"></i> Todos Presentes
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-danger" id="btn-marcar-todos-ausentes">
-                    <i class="bi bi-x-circle me-1"></i> Todos Ausentes
-                </button>
-                <div class="vr mx-1"></div>
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <div class="d-none d-md-flex align-items-center gap-1 text-muted small">
+                    <i class="bi bi-info-circle text-emerald"></i>
+                    <span>Por defecto todos vienen <strong>Presentes</strong>. Marque solo excepciones.</span>
+                </div>
                 <div class="d-flex gap-2 align-items-center small font-monospace">
-                    <span class="badge bg-success-subtle text-success border px-2 py-1">
+                    <span class="badge px-2 py-1" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">
                         P: <strong id="cnt-p">0</strong>
                     </span>
-                    <span class="badge bg-warning-subtle text-dark border px-2 py-1">
+                    <span class="badge px-2 py-1" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">
                         T: <strong id="cnt-t">0</strong>
                     </span>
-                    <span class="badge bg-danger-subtle text-danger border px-2 py-1">
+                    <span class="badge px-2 py-1" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4);">
                         A: <strong id="cnt-a">0</strong>
                     </span>
-                    <span class="badge bg-info-subtle text-dark border px-2 py-1">
+                    <span class="badge px-2 py-1" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4);">
                         J: <strong id="cnt-j">0</strong>
                     </span>
-                    <span class="badge bg-secondary-subtle text-secondary border px-2 py-1">
+                    <span class="badge px-2 py-1" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3);">
                         Total: <strong>{{ alumnos_categoria|length }}</strong>
                     </span>
                 </div>
@@ -165,6 +162,7 @@
         </div>
     </div>
 
+    <!-- Tabla de Llamada de Lista de la Categoría -->
     <div class="card shadow-sm mb-4">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" id="tabla-asistencia-alumnos">
@@ -173,7 +171,7 @@
                         <th style="width: 50px;" class="text-center">#</th>
                         <th>Jugador / Alumno</th>
                         <th style="width: 140px;">Posición / Turno</th>
-                        <th style="min-width: 330px;" class="text-center">Estado de Asistencia</th>
+                        <th style="min-width: 360px;" class="text-center">Estado de Asistencia</th>
                         <th style="min-width: 200px;">Justificación / Observación</th>
                     </tr>
                 </thead>
@@ -199,31 +197,31 @@
                             </div>
                         </td>
                         <td>
-                            <span class="badge bg-light text-dark border">{{ alumno.posicion or 'Sin posición' }}</span>
+                            <span class="badge bg-secondary-subtle text-secondary border">{{ alumno.posicion or 'Sin posición' }}</span>
                             {% if alumno.turno %}
                             <div class="small text-muted">{{ alumno.turno }}</div>
                             {% endif %}
                         </td>
                         <td>
-                            <div class="btn-group w-100 shadow-sm" role="group" aria-label="Estado de asistencia">
+                            <div class="asistencia-selector" role="group" aria-label="Estado de asistencia">
                                 <input type="radio" class="btn-check radio-estado" name="estado_{{ alumno.id_alumno }}" id="p_{{ alumno.id_alumno }}" value="Presente" {% if estado_actual == 'Presente' %}checked{% endif %} data-alumno="{{ alumno.id_alumno }}">
-                                <label class="btn btn-outline-success btn-sm py-2" for="p_{{ alumno.id_alumno }}">
-                                    <i class="bi bi-check-circle me-1"></i>Presente
+                                <label class="btn-asistencia btn-asistencia-p" for="p_{{ alumno.id_alumno }}" title="Marcar Presente">
+                                    <i class="bi bi-check-circle-fill"></i> <span>Presente</span>
                                 </label>
 
                                 <input type="radio" class="btn-check radio-estado" name="estado_{{ alumno.id_alumno }}" id="t_{{ alumno.id_alumno }}" value="Tarde" {% if estado_actual == 'Tarde' %}checked{% endif %} data-alumno="{{ alumno.id_alumno }}">
-                                <label class="btn btn-outline-warning btn-sm py-2" for="t_{{ alumno.id_alumno }}">
-                                    <i class="bi bi-clock me-1"></i>Tarde
+                                <label class="btn-asistencia btn-asistencia-t" for="t_{{ alumno.id_alumno }}" title="Marcar Llegada Tarde">
+                                    <i class="bi bi-clock-fill"></i> <span>Tarde</span>
                                 </label>
 
                                 <input type="radio" class="btn-check radio-estado" name="estado_{{ alumno.id_alumno }}" id="a_{{ alumno.id_alumno }}" value="Ausente" {% if estado_actual == 'Ausente' %}checked{% endif %} data-alumno="{{ alumno.id_alumno }}">
-                                <label class="btn btn-outline-danger btn-sm py-2" for="a_{{ alumno.id_alumno }}">
-                                    <i class="bi bi-x-circle me-1"></i>Ausente
+                                <label class="btn-asistencia btn-asistencia-a" for="a_{{ alumno.id_alumno }}" title="Marcar Falta / Ausente">
+                                    <i class="bi bi-x-circle-fill"></i> <span>Ausente</span>
                                 </label>
 
                                 <input type="radio" class="btn-check radio-estado" name="estado_{{ alumno.id_alumno }}" id="j_{{ alumno.id_alumno }}" value="Justificado" {% if estado_actual == 'Justificado' %}checked{% endif %} data-alumno="{{ alumno.id_alumno }}">
-                                <label class="btn btn-outline-info btn-sm py-2" for="j_{{ alumno.id_alumno }}">
-                                    <i class="bi bi-file-earmark-check me-1"></i>Justificado
+                                <label class="btn-asistencia btn-asistencia-j" for="j_{{ alumno.id_alumno }}" title="Marcar Falta Justificada">
+                                    <i class="bi bi-file-earmark-check-fill"></i> <span>Justificado</span>
                                 </label>
                             </div>
                         </td>

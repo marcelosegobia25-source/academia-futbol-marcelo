@@ -11,16 +11,16 @@
         <span class="text-muted ms-2 small">Generada el {{ convocatoria.creado_en | fecha_hora_bo }}</span>
     </div>
     <div class="d-flex flex-wrap gap-2">
-        <button type="button" class="btn btn-success" id="btn-copiar-whatsapp">
+        <button type="button" class="btn btn-success fw-semibold shadow-sm" id="btn-copiar-whatsapp">
             <i class="bi bi-whatsapp me-1"></i> Copiar para WhatsApp
         </button>
-        <button type="button" class="btn btn-outline-dark" onclick="window.print()">
+        <button type="button" class="btn btn-dark text-white border shadow-sm" style="border-color: rgba(255,255,255,0.18) !important;" onclick="window.print()">
             <i class="bi bi-printer me-1"></i> Imprimir
         </button>
-        <a href="{{ url_for('alumnos.convocatoria_pdf', id_convocatoria=convocatoria.id_convocatoria) }}" class="btn btn-danger">
+        <a href="{{ url_for('alumnos.convocatoria_pdf', id_convocatoria=convocatoria.id_convocatoria) }}" class="btn btn-danger fw-semibold shadow-sm">
             <i class="bi bi-file-earmark-pdf me-1"></i> PDF
         </a>
-        <a href="{{ url_for('alumnos.convocatoria_excel', id_convocatoria=convocatoria.id_convocatoria) }}" class="btn btn-outline-success">
+        <a href="{{ url_for('alumnos.convocatoria_excel', id_convocatoria=convocatoria.id_convocatoria) }}" class="btn btn-outline-success fw-semibold shadow-sm">
             <i class="bi bi-file-earmark-excel me-1"></i> Excel
         </a>
     </div>
