@@ -1936,30 +1936,132 @@ a:hover {
     font-weight: 700;
 }
 
+.student-profile-sheet {
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--surface-card) !important;
+}
+
+.student-profile-sheet .student-profile-hero {
+    border: none !important;
+    border-radius: 0 !important;
+    margin-bottom: 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 1.5rem 1.85rem;
+}
+
+.profile-sheet-body {
+    padding: 1.75rem 2rem 2rem !important;
+}
+
+.profile-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-section-title i {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.profile-section-title h5 {
+    margin: 0;
+    font-weight: 750;
+    color: #ffffff;
+    font-size: 1.05rem;
+}
+
+.profile-section-title small {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
 .profile-sheet-columns {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 2.25rem;
 }
+
 .profile-sheet-sport {
-    padding-left: 1.5rem;
-    border-left: 1px solid var(--border-subtle);
+    padding-left: 2rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .profile-data-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.85rem 1.25rem;
+    gap: 1.15rem 1.5rem;
 }
+
+.profile-data-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.profile-data-grid > div.wide {
+    grid-column: 1 / -1;
+}
+
 .profile-data-grid span {
-    color: var(--text-muted);
-    font-size: 0.7rem;
+    color: #94a3b8;
+    font-size: 0.72rem;
     font-weight: 750;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
 }
+
 .profile-data-grid strong {
-    font-size: 0.92rem;
-    color: #ffffff;
+    font-size: 0.95rem;
+    color: #f1f5f9;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.profile-sheet-championships {
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.championship-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.75rem;
+}
+
+.championship-list > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+}
+
+.empty-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.85rem 1.15rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    color: #94a3b8;
+    font-size: 0.875rem;
 }
 
 /* Mensualidades en Detalle Alumno */
@@ -2199,6 +2301,9 @@ a:hover {
         padding-top: 1.25rem;
         border-left: 0;
         border-top: 1px solid var(--border-subtle);
+    }
+    .profile-sheet-body {
+        padding: 1.25rem 1rem !important;
     }
 
     /* Campeonatos y Fixture */
