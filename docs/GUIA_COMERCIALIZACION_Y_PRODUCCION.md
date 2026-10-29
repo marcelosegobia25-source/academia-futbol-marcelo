@@ -110,3 +110,10 @@ Al conectar un dominio personalizado (ej. `gestiondeportiva.com`):
 * Activa **Cloudflare Free**.
 * Proporciona certificado SSL (HTTPS) automático.
 * Filtra bots maliciosos, rastreadores automáticos y ataques DDoS antes de que alcancen tu servidor.
+
+---
+
+## 5. Documento Contractual y Legal Oficial
+
+Para presentar formalmente a los clientes y firmar acuerdos de adhesión con respaldo legal y protección de datos, consulta el documento completo:
+* [PROPUESTA_COMERCIAL_Y_MARCO_LEGAL.md](file:///c:/Users/Usuario/.gemini/antigravity-ide/scratch/academia-futbol-marcelo/docs/PROPUESTA_COMERCIAL_Y_MARCO_LEGAL.md): Incluye cláusulas de delimitación de responsabilidad, protección de datos de menores, retención de 30 días, SLA del 99% y modelos de firma.
