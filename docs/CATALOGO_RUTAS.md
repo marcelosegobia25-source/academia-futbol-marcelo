@@ -58,7 +58,7 @@ Inventario generado y contrastado con `app.url_map` el 16 de agosto de 2026. `GE
 | GET, POST | `/lugares/<id>/editar` | `lugares.editar` |
 | POST | `/lugares/<id>/eliminar` | `lugares.eliminar` |
 
-## Mensualidades y caja
+## Mensualidades y Cobros
 
 | Métodos | Ruta | Endpoint |
 |---|---|---|
@@ -68,62 +68,11 @@ Inventario generado y contrastado con `app.url_map` el 16 de agosto de 2026. `GE
 | GET | `/pagos/<id>/comprobante` | `pagos.comprobante` |
 | GET | `/pagos/<id>/recibo.pdf` | `pagos.recibo_pdf` |
 | POST | `/pagos/<id>/eliminar` | `pagos.eliminar` |
-| GET, POST | `/pagos/caja` | `pagos.caja` |
-| POST | `/pagos/caja/abrir` | `pagos.abrir_caja` |
-| POST | `/pagos/caja/<id>/reabrir` | `pagos.reabrir_caja` |
 | GET | `/pagos/exportar-form` | `pagos.exportar_form` |
 | GET | `/pagos/exportar` | `pagos.exportar` |
 | GET | `/pagos/exportar.pdf` | `pagos.exportar_pdf` |
 | GET | `/pagos/resumen-6-meses.xlsx` | `pagos.resumen_seis_meses_excel` |
 | GET | `/pagos/resumen-6-meses.pdf` | `pagos.resumen_seis_meses_pdf` |
-
-## Finanzas, recurrencias y proveedores
-
-| Métodos | Ruta | Endpoint |
-|---|---|---|
-| GET | `/gestion/contabilidad` | `gestion.contabilidad` |
-| GET, POST | `/gestion/contabilidad/nuevo` | `gestion.movimiento_nuevo` |
-| POST | `/gestion/contabilidad/<id>/anular` | `gestion.movimiento_anular` |
-| GET | `/gestion/contabilidad/<id>/comprobante` | `gestion.movimiento_comprobante` |
-| GET, POST | `/gestion/contabilidad/categorias` | `gestion.categorias_contables` |
-| POST | `/gestion/contabilidad/categorias/<id>/tipo` | `gestion.categoria_contable_tipo` |
-| GET | `/gestion/contabilidad/exportar.csv` | `gestion.contabilidad_csv` |
-| GET | `/gestion/contabilidad/exportar.pdf` | `gestion.contabilidad_pdf` |
-| GET | `/gestion/contabilidad/exportar.xlsx` | `gestion.contabilidad_excel` |
-| GET | `/gestion/reportes/<modulo>` | `gestion.reporte_exportar_form` |
-| GET | `/gestion/pagos-programados` | `gestion.pagos_programados` |
-| GET, POST | `/gestion/pagos-programados/nuevo` | `gestion.pago_programado_nuevo` |
-| GET, POST | `/gestion/pagos-programados/<id>/editar` | `gestion.pago_programado_editar` |
-| POST | `/gestion/pagos-programados/<id>/estado` | `gestion.pago_programado_estado` |
-| POST | `/gestion/pagos-programados/generar` | `gestion.pagos_programados_generar` |
-| POST | `/gestion/pagos-programados/cuota/<id>/pagar` | `gestion.cuota_programada_pagar` |
-| POST | `/gestion/pagos-programados/cuota/<id>/omitir` | `gestion.cuota_programada_omitir` |
-| GET | `/gestion/pagos-programados/exportar.<formato>` | `gestion.pagos_programados_exportar` |
-| GET, POST | `/gestion/proveedores` | `gestion.proveedores` |
-| POST | `/gestion/proveedores/<id>/estado` | `gestion.proveedor_estado` |
-
-## Inventario, compras y ventas
-
-| Métodos | Ruta | Endpoint |
-|---|---|---|
-| GET | `/gestion/inventario` | `gestion.inventario` |
-| GET, POST | `/gestion/inventario/producto` | `gestion.producto_nuevo` |
-| POST | `/gestion/inventario/producto/<id>/estado` | `gestion.producto_estado` |
-| POST | `/gestion/inventario/<producto>/variante` | `gestion.variante_nueva` |
-| POST | `/gestion/inventario/<variante>/movimiento` | `gestion.inventario_movimiento` |
-| GET, POST | `/gestion/inventario/conteo` | `gestion.inventario_conteo` |
-| POST | `/gestion/inventario/conteo/<id>/aprobar` | `gestion.inventario_conteo_aprobar` |
-| GET | `/gestion/inventario/exportar.<formato>` | `gestion.inventario_exportar` |
-| GET | `/gestion/compras` | `gestion.compras` |
-| GET, POST | `/gestion/compras/nueva` | `gestion.compra_nueva` |
-| POST | `/gestion/compras/<id>/anular` | `gestion.compra_anular` |
-| GET | `/gestion/compras/exportar.<formato>` | `gestion.compras_exportar` |
-| GET | `/gestion/ventas` | `gestion.ventas` |
-| GET, POST | `/gestion/ventas/nueva` | `gestion.venta_nueva` |
-| POST | `/gestion/ventas/<id>/devolver` | `gestion.venta_devolver` |
-| POST | `/gestion/ventas/<id>/anular` | `gestion.venta_anular` |
-| GET | `/gestion/ventas/<id>/recibo.pdf` | `gestion.venta_recibo` |
-| GET | `/gestion/ventas/exportar.<formato>` | `gestion.ventas_exportar` |
 
 ## Partidos y Agenda
 

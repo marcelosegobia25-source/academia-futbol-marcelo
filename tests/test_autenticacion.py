@@ -30,7 +30,7 @@ def test_roles_restringen_finanzas_y_auditoria_identifica_actor(client, app):
         "contrasena_actual": "00000", "contrasena_nueva": "12345", "confirmar_contrasena": "12345",
     })
     assert client.get("/alumnos/").status_code == 200
-    assert client.get("/gestion/contabilidad").status_code == 403
+    assert client.get("/informacion/auditoria").status_code == 403
     assert client.get("/informacion/").status_code == 403
     assert client.get("/usuarios/").status_code == 403
 

@@ -81,7 +81,7 @@ def permiso_para_solicitud():
             return "auditoria"
         if "respaldo" in endpoint or "descargas" in endpoint:
             return "respaldos"
-        return "ver_alumnos"
+        return "administrar"
     if bp in {"partidos", "agenda", "calendario", "campeonatos"}:
         if endpoint == "calendario.asistencia" and escritura:
             return "gestionar_asistencia"

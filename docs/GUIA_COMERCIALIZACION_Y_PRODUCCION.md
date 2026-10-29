@@ -78,7 +78,7 @@ Cobrar $0.50 o $1 por cada alumno crea **fricción psicológica negativa**: el c
 1. **Cobro de Configuración / Puesta en Marcha (Setup Fee - Pago Único):**
    * **$25 a $40 USD** (180 a 300 Bs).
    * Incluye: Cargar el logo institucional, colores oficiales de la academia, importación inicial del padrón de alumnos desde Excel y capacitación inicial al encargado.
-2. **Descuento por Pago Anual (Genera Flujo de Caja Anticipado):**
+2. **Descuento por Pago Anual (Genera Ingresos y Liquidez Anticipada):**
    * Ofrecer: **"Paga 10 meses y llévate 12 meses de servicio"** (2 meses bonificados).
    * Una academia que contrate el Plan Pro te pagará **$250 USD de golpe** al inicio del año.
 3. **Justificación del Valor Mensual:**

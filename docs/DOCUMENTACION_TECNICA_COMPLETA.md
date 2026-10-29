@@ -584,13 +584,13 @@ flowchart LR
 | Rol | Alcance inicial |
 |---|---|
 | Administrador | Todos los permisos |
-| Secretaría | Alumnos, pagos operativos, deporte y asistencia |
-| Caja | Consulta de alumnos, pagos, caja, finanzas e inventario |
+| Secretaría | Alumnos, mensualidades operativas, deporte y asistencia |
+| Cobranzas | Registro de pagos, emisión de recibos y consulta de mensualidades |
 | Profesor | Consulta deportiva/alumnos y registro de asistencia |
 
 ### Permisos disponibles
 
-`ver_alumnos`, `gestionar_alumnos`, `ver_pagos`, `registrar_pagos`, `anular_pagos`, `cerrar_caja`, `reabrir_caja`, `ver_finanzas`, `gestionar_finanzas`, `gestionar_inventario`, `ver_deportivo`, `gestionar_deportivo`, `auditoria`, `respaldos`, `administrar`, `anular_ventas`, `gestionar_becas`, `gestionar_asistencia`.
+`ver_alumnos`, `gestionar_alumnos`, `eliminar_alumnos`, `gestionar_becas`, `ver_pagos`, `registrar_pagos`, `anular_pagos`, `ver_deportivo`, `gestionar_deportivo`, `gestionar_asistencia`, `gestionar_equipos`, `gestionar_lugares`, `auditoria`, `respaldos`, `administrar`.
 
 La autorización se evalúa en servidor según blueprint, endpoint y método HTTP. Ocultar un botón no reemplaza esta comprobación.
 

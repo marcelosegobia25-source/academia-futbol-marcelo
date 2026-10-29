@@ -56,33 +56,6 @@ def test_nombre_repetido_no_sobrescribe_documento_anterior(app):
         assert segundo.read_bytes() == b"dos"
 
 
-@pytest.mark.parametrize("modulo", ["compras", "inventario", "pagos-programados", "ventas"])
-@pytest.mark.parametrize("formato,mimetype", [
-    ("pdf", "application/pdf"),
-    ("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-])
-def test_reportes_de_gestion_se_descargan_aun_sin_datos(client, modulo, formato, mimetype):
-    columnas = {"compras": ["numero"], "inventario": ["codigo"], "pagos-programados": ["vencimiento"], "ventas": ["numero"]}
-    respuesta = client.get(f"/gestion/{modulo}/exportar.{formato}", query_string={"columnas": columnas[modulo]})
-
-    assert respuesta.status_code == 200
-    assert respuesta.mimetype == mimetype
-    (_comprobar_pdf if formato == "pdf" else _comprobar_excel)(respuesta.data)
-
-
-def test_exportaciones_de_contabilidad_son_archivos_validos(client):
-    columnas = [("columnas", "fecha"), ("columnas", "monto")]
-    pdf = client.get("/gestion/contabilidad/exportar.pdf", query_string=columnas)
-    excel = client.get("/gestion/contabilidad/exportar.xlsx", query_string=columnas)
-    csv = client.get("/gestion/contabilidad/exportar.csv")
-
-    assert pdf.status_code == excel.status_code == csv.status_code == 200
-    _comprobar_pdf(pdf.data)
-    _comprobar_excel(excel.data)
-    texto_csv = csv.data.decode("utf-8-sig")
-    assert texto_csv.splitlines()[0].startswith("Fecha,Tipo,")
-
-
 def test_exportaciones_de_calendario_y_asistencia_son_validas(client, app):
     mensual = client.get("/calendario/exportar-mensual.pdf?anio=2026&mes=8")
     semanal = client.get("/calendario/exportar-semanal.pdf?fecha=2026-08-17")
@@ -108,18 +81,3 @@ def test_exportaciones_de_calendario_y_asistencia_son_validas(client, app):
     _comprobar_pdf(pdf.data)
     _comprobar_excel(excel.data)
 
-
-def test_reporte_rechaza_exportacion_sin_columnas(client):
-    assert client.get("/gestion/ventas/exportar.pdf").status_code == 400
-
-
-@pytest.mark.parametrize("modulo", ["contabilidad", "pagos-programados", "compras", "inventario", "ventas"])
-def test_formulario_de_reporte_permite_descargar_sin_javascript(client, modulo):
-    respuesta = client.get(f"/gestion/reportes/{modulo}")
-
-    assert respuesta.status_code == 200
-    assert b'type="submit"' in respuesta.data
-    assert b'formaction=' in respuesta.data
-    casillas = re.findall(rb'<input[^>]+name="columnas"[^>]*>', respuesta.data)
-    assert casillas
-    assert all(b" checked" in casilla for casilla in casillas)
