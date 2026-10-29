@@ -154,3 +154,44 @@ def test_login_bloquea_intentos_repetidos(client, app):
     respuesta = client.post("/acceso/", data={"contrasena": "99999"})
     assert respuesta.status_code == 429
     assert b"bloqueado temporalmente" in respuesta.data
+
+
+def test_sesion_cookie_no_es_permanente_y_expira_al_cerrar_navegador(client, app):
+    activar_acceso(app)
+    res = client.post("/acceso/", data={"nombre_usuario": "admin", "contrasena": "00000"})
+    assert res.status_code == 302
+    with client.session_transaction() as sess:
+        assert sess.permanent is False
+        assert sess.get("autenticado") is True
+        assert sess.get("ultimo_acceso") is not None
+
+
+def test_inactividad_cierra_sesion_automaticamente(client, app):
+    import time
+    activar_acceso(app)
+    res = client.post("/acceso/", data={"nombre_usuario": "admin", "contrasena": "00000"})
+    assert res.status_code == 302
+
+    # Acceso exitoso inmediato
+    assert client.get("/alumnos/").status_code == 200
+
+    # Simular inactividad superior a 15 minutos (900s)
+    with client.session_transaction() as sess:
+        sess["ultimo_acceso"] = time.time() - 950
+
+    # Próxima solicitud detecta inactividad y expulsa
+    res_inactivo = client.get("/alumnos/", follow_redirects=False)
+    assert res_inactivo.status_code == 302
+    assert "/acceso/" in res_inactivo.location
+
+    # La sesión quedó eliminada
+    with client.session_transaction() as sess:
+        assert sess.get("autenticado") is None
+        assert sess.get("id_usuario") is None
+
+    # Se registró la auditoría de seguridad
+    with app.app_context():
+        aud = Auditoria.query.filter_by(modulo="Seguridad", accion="Cierre por inactividad").order_by(Auditoria.id_auditoria.desc()).first()
+        assert aud is not None
+        assert "tiempo de inactividad" in aud.detalle
+

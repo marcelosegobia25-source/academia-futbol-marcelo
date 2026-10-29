@@ -420,6 +420,51 @@
         })();
     </script>
 
+    {% if usuario_actual %}
+    <script>
+        (function() {
+            // Control de inactividad de sesión y cierre por ausencia (15 minutos = 900.000 ms)
+            const LIMITE_INACTIVIDAD_MS = 15 * 60 * 1000;
+            let ultimoRegistroActividad = Date.now();
+
+            function marcarActividad() {
+                ultimoRegistroActividad = Date.now();
+                try {
+                    sessionStorage.setItem('app_ultimo_acceso_ms', String(ultimoRegistroActividad));
+                } catch(e) {}
+            }
+
+            // Registrar actividad del usuario (teclado, ratón, scroll, clic o táctil)
+            ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function(evt) {
+                window.addEventListener(evt, marcarActividad, { passive: true });
+            });
+
+            // Revisión periódica en segundo plano cada 15 segundos
+            setInterval(function() {
+                if (Date.now() - ultimoRegistroActividad >= LIMITE_INACTIVIDAD_MS) {
+                    window.location.href = "{{ url_for('autenticacion.logout') }}";
+                }
+            }, 15000);
+
+            // Detección automática al salir o regresar a la pestaña/ventana (visibilitychange)
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    let tiempoGuardado = null;
+                    try {
+                        tiempoGuardado = parseInt(sessionStorage.getItem('app_ultimo_acceso_ms'), 10);
+                    } catch(e) {}
+                    const referencia = tiempoGuardado || ultimoRegistroActividad;
+                    if (Date.now() - referencia >= LIMITE_INACTIVIDAD_MS) {
+                        window.location.href = "{{ url_for('autenticacion.logout') }}";
+                    } else {
+                        marcarActividad();
+                    }
+                }
+            });
+        })();
+    </script>
+    {% endif %}
+
     <!-- Modal Universal de Compartir Listas -->
     <div class="modal fade" id="modalUniversalCompartir" tabindex="-1" aria-labelledby="modalUniversalCompartirLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">

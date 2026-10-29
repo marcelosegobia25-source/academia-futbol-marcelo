@@ -60,14 +60,15 @@ def login():
             session.clear()
             session["autenticado"] = True
             session["id_usuario"] = usuario.id_usuario
-            session.permanent = True
+            session["ultimo_acceso"] = time.time()
+            session.permanent = False
             usuario.ultimo_acceso = ahora_utc()
             db.session.add(Auditoria(modulo="Acceso", accion="Iniciar sesión", entidad="Usuario", id_entidad=usuario.id_usuario, id_usuario=usuario.id_usuario))
             db.session.commit()
             if usuario.debe_cambiar_clave:
                 flash("Por seguridad, cambie la contraseña inicial desde Configuración.", "warning")
                 return redirect(url_for("configuracion.contrasena"))
-            if destino == url_for("informacion.general") and not usuario.tiene_permiso("ver_finanzas"):
+            if destino == url_for("informacion.general") and not usuario.tiene_permiso("administrar"):
                 destino = destino_inicial(usuario)
             return redirect(destino)
         else:

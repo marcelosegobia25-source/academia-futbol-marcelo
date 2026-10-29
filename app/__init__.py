@@ -2,7 +2,7 @@ import os
 import shutil
 import logging
 from logging.handlers import RotatingFileHandler
-from flask import Flask, abort, g, make_response, render_template, redirect, request, session, url_for
+from flask import Flask, abort, flash, g, make_response, render_template, redirect, request, session, url_for
 from config import Config
 from app.extensions import db, csrf
 
@@ -32,8 +32,9 @@ def create_app(config_class=Config):
         engine_opts["connect_args"] = connect_args
         engine_opts.setdefault("pool_size", 10)
         engine_opts.setdefault("max_overflow", 20)
-        engine_opts.setdefault("pool_recycle", 300)
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_opts
+    app.config["SESSION_PERMANENT"] = False
+    app.config.setdefault("SESSION_INACTIVITY_TIMEOUT", 900)
 
     os.makedirs(os.path.join(app.instance_path), exist_ok=True)
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
@@ -201,6 +202,29 @@ def create_app(config_class=Config):
         }:
             return None
         if session.get("autenticado"):
+            import time
+            ahora = time.time()
+            ultimo_acceso = session.get("ultimo_acceso")
+            limite_inactividad = app.config.get("SESSION_INACTIVITY_TIMEOUT", 900)
+            if ultimo_acceso is not None and (ahora - ultimo_acceso > limite_inactividad):
+                id_usuario = session.get("id_usuario")
+                session.clear()
+                if id_usuario:
+                    from app.models import Auditoria
+                    from app.extensions import db
+                    try:
+                        db.session.add(Auditoria(
+                            modulo="Seguridad", accion="Cierre por inactividad",
+                            entidad="Usuario", id_entidad=id_usuario, id_usuario=id_usuario,
+                            detalle="Sesión cerrada automáticamente por exceder el tiempo de inactividad permitido."
+                        ))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
+                flash("Su sesión ha expirado por inactividad. Ingrese nuevamente.", "warning")
+                return redirect(url_for("autenticacion.login", next=request.full_path))
+
+            session["ultimo_acceso"] = ahora
             from app.utils.autorizacion import cargar_usuario_actual, permiso_para_solicitud, tiene_permiso
             usuario = cargar_usuario_actual()
             if usuario is None or not usuario.activo:
