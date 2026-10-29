@@ -14,8 +14,8 @@ from sqlalchemy.orm import joinedload
 from app.extensions import db
 from app.models import (
     Alumno, Pago, Categoria, MODOS_PAGO, ESTADOS_PAGO, BECAS, SEXOS,
-    AnulacionPago, CierreCaja, HistorialAlumno, Auditoria, MovimientoContable, ahora_utc,
-    Obligacion, AplicacionPago, SesionCaja,
+    AnulacionPago, HistorialAlumno, Auditoria, MovimientoContable, ahora_utc,
+    Obligacion, AplicacionPago,
 )
 from app.utils.backup import crear_respaldo
 from app.utils.reglas import (
