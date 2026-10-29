@@ -238,6 +238,24 @@
                     campo.value = token;
                     formulario.appendChild(campo);
                 }
+                // Prevenir doble envío accidental (idempotencia en frontend)
+                formulario.addEventListener('submit', function(e) {
+                    if (formulario.checkValidity && !formulario.checkValidity()) {
+                        return;
+                    }
+                    if (formulario.dataset.enviando === 'true') {
+                        e.preventDefault();
+                        return false;
+                    }
+                    formulario.dataset.enviando = 'true';
+                    const btn = formulario.querySelector('button[type="submit"]:not(.no-disable), input[type="submit"]:not(.no-disable)');
+                    if (btn) {
+                        setTimeout(() => {
+                            btn.disabled = true;
+                            btn.classList.add('disabled');
+                        }, 20);
+                    }
+                });
             });
         }
         protegerFormularios();
