@@ -14,10 +14,12 @@ bp = Blueprint("autenticacion", __name__, url_prefix="/acceso")
 
 
 def destino_inicial(usuario):
-    if usuario.tiene_permiso("ver_finanzas"):
+    if usuario.tiene_permiso("administrar"):
         return url_for("informacion.general")
     if usuario.tiene_permiso("ver_alumnos"):
         return url_for("alumnos.listar")
+    if usuario.tiene_permiso("ver_pagos"):
+        return url_for("pagos.listar")
     if usuario.tiene_permiso("ver_deportivo"):
         return url_for("calendario.ver")
     return url_for("configuracion.contrasena")

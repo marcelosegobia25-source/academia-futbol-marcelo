@@ -7,7 +7,9 @@
         <button type="button" class="btn btn-outline-info" onclick="compartirAlumnosListado()"><i class="bi bi-share"></i> Compartir Lista</button>
         <a href="{{ url_for('alumnos.asistencias') }}" class="btn btn-outline-primary"><i class="bi bi-calendar2-check"></i> Ver asistencias</a>
         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportarAlumnos"><i class="bi bi-download"></i> Exportar</button>
+        {% if puede('gestionar_alumnos') %}
         <a href="{{ url_for('alumnos.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo alumno</a>
+        {% endif %}
     </div>
 </div>
 

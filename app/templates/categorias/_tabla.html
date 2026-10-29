@@ -14,6 +14,7 @@
                         {% endif %}
                     </span>
                 </div>
+                {% if puede('gestionar_equipos') %}
                 <div class="dropdown">
                     <button class="btn btn-sm btn-light" data-bs-toggle="dropdown" aria-label="Acciones"><i class="bi bi-three-dots-vertical"></i></button>
                     <div class="dropdown-menu dropdown-menu-end">
@@ -23,6 +24,7 @@
                         </form>
                     </div>
                 </div>
+                {% endif %}
             </div>
 
             <div class="category-stat-row">

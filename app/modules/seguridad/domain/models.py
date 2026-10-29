@@ -59,17 +59,7 @@ class Usuario(db.Model):
             return False
         if self.rol.nombre == "Administrador":
             return True
-        codigos_asignados = {p.codigo for p in self.rol.permisos}
-        if codigo in codigos_asignados:
-            return True
-        # Fallbacks de retrocompatibilidad para permisos granulares
-        if codigo == "eliminar_alumnos" and "gestionar_alumnos" in codigos_asignados:
-            return True
-        if codigo in ("gestionar_equipos", "gestionar_lugares") and ("gestionar_deportivo" in codigos_asignados or "administrar" in codigos_asignados):
-            return True
-        if codigo == "gestionar_compras" and "gestionar_inventario" in codigos_asignados:
-            return True
-        return False
+        return codigo in {p.codigo for p in self.rol.permisos}
 
     def __repr__(self):
         return f"<Usuario {self.nombre_usuario}>"

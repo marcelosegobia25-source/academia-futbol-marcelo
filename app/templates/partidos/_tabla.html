@@ -21,10 +21,12 @@
                     </td>
                     <td>{{ p.resultado or 'Pendiente' }}</td>
                     <td class="text-end">
+                        {% if puede('gestionar_deportivo') %}
                         <a href="{{ url_for('partidos.editar', id_partido=p.id_partido) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
                         <form method="post" action="{{ url_for('partidos.eliminar', id_partido=p.id_partido) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este partido?');">
                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                         </form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% else %}

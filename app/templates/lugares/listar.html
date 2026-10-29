@@ -7,7 +7,9 @@
         <h2 class="mb-1"><i class="bi bi-geo-alt text-danger me-1"></i> Canchas y lugares</h2>
         <p class="text-muted small mb-0">Espacios disponibles para partidos, campeonatos, eventos y entrenamientos.</p>
     </div>
+    {% if puede('gestionar_lugares') %}
     <a href="{{ url_for('lugares.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo lugar</a>
+    {% endif %}
 </div>
 <div class="card">
     <div class="table-responsive">
@@ -26,10 +28,12 @@
                     </td>
                     <td><span class="badge {{ 'text-bg-success' if lugar.activo else 'text-bg-secondary' }}">{{ 'Activo' if lugar.activo else 'Inactivo' }}</span></td>
                     <td class="text-end">
+                        {% if puede('gestionar_lugares') %}
                         <a href="{{ url_for('lugares.editar', id_lugar=lugar.id_lugar) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
                         <form method="post" action="{{ url_for('lugares.eliminar', id_lugar=lugar.id_lugar) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta cancha o lugar?');">
                             <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                         </form>
+                        {% endif %}
                     </td>
                 </tr>
             {% else %}

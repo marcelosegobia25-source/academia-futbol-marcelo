@@ -57,20 +57,20 @@
                 </div>
                 <div id="moduleSearchMenu" class="dropdown-menu w-100 shadow" style="max-height:340px;overflow:auto">
                     <a class="dropdown-item" data-module href="{{ url_for('index') }}"><i class="bi bi-speedometer2 me-2"></i>Inicio / Centro de Mando</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('informacion.general') }}"><i class="bi bi-grid-1x2 me-2"></i>Información general</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('alumnos.listar') }}"><i class="bi bi-people me-2"></i>Alumnos</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('alumnos.asistencias') }}"><i class="bi bi-calendar2-check me-2"></i>Asistencia de jugadores</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('pagos.listar') }}"><i class="bi bi-cash-stack me-2"></i>Pagos y mensualidades</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('partidos.listar') }}"><i class="bi bi-flag me-2"></i>Partidos</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('agenda.listar') }}"><i class="bi bi-journal-text me-2"></i>Agenda</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('calendario.ver') }}"><i class="bi bi-calendar3 me-2"></i>Calendario</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('calendario.listar_entrenamientos') }}"><i class="bi bi-clock-history me-2"></i>Entrenamientos y asistencia</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('calendario.personal') }}"><i class="bi bi-person-workspace me-2"></i>Profesores y entrenadores</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('campeonatos.listar') }}"><i class="bi bi-trophy me-2"></i>Campeonatos</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('categorias.listar') }}"><i class="bi bi-diagram-3 me-2"></i>Categorías</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('equipos.listar') }}"><i class="bi bi-shield-check me-2"></i>Equipos</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('lugares.listar') }}"><i class="bi bi-geo-alt me-2"></i>Canchas y lugares</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('configuracion.panel') }}"><i class="bi bi-sliders me-2"></i>Configuración</a>
+                    {% if puede('administrar') %}<a class="dropdown-item" data-module href="{{ url_for('informacion.general') }}"><i class="bi bi-grid-1x2 me-2"></i>Información general</a>{% endif %}
+                    {% if puede('ver_alumnos') %}<a class="dropdown-item" data-module href="{{ url_for('alumnos.listar') }}"><i class="bi bi-people me-2"></i>Alumnos</a>{% endif %}
+                    {% if puede('gestionar_asistencia') or puede('ver_deportivo') %}<a class="dropdown-item" data-module href="{{ url_for('alumnos.asistencias') }}"><i class="bi bi-calendar2-check me-2"></i>Asistencia de jugadores</a>{% endif %}
+                    {% if puede('ver_pagos') %}<a class="dropdown-item" data-module href="{{ url_for('pagos.listar') }}"><i class="bi bi-cash-stack me-2"></i>Pagos y mensualidades</a>{% endif %}
+                    {% if puede('ver_deportivo') %}<a class="dropdown-item" data-module href="{{ url_for('partidos.listar') }}"><i class="bi bi-flag me-2"></i>Partidos</a>{% endif %}
+                    {% if puede('ver_deportivo') %}<a class="dropdown-item" data-module href="{{ url_for('agenda.listar') }}"><i class="bi bi-journal-text me-2"></i>Agenda</a>{% endif %}
+                    {% if puede('ver_deportivo') %}<a class="dropdown-item" data-module href="{{ url_for('calendario.ver') }}"><i class="bi bi-calendar3 me-2"></i>Calendario</a>{% endif %}
+                    {% if puede('ver_deportivo') %}<a class="dropdown-item" data-module href="{{ url_for('calendario.listar_entrenamientos') }}"><i class="bi bi-clock-history me-2"></i>Entrenamientos y asistencia</a>{% endif %}
+                    {% if puede('administrar') %}<a class="dropdown-item" data-module href="{{ url_for('calendario.personal') }}"><i class="bi bi-person-workspace me-2"></i>Profesores y entrenadores</a>{% endif %}
+                    {% if puede('ver_deportivo') %}<a class="dropdown-item" data-module href="{{ url_for('campeonatos.listar') }}"><i class="bi bi-trophy me-2"></i>Campeonatos</a>{% endif %}
+                    {% if puede('gestionar_equipos') or puede('ver_deportivo') or puede('administrar') %}<a class="dropdown-item" data-module href="{{ url_for('categorias.listar') }}"><i class="bi bi-diagram-3 me-2"></i>Categorías</a>{% endif %}
+                    {% if puede('gestionar_equipos') or puede('ver_deportivo') or puede('administrar') %}<a class="dropdown-item" data-module href="{{ url_for('equipos.listar') }}"><i class="bi bi-shield-check me-2"></i>Equipos</a>{% endif %}
+                    {% if puede('gestionar_lugares') or puede('ver_deportivo') or puede('administrar') %}<a class="dropdown-item" data-module href="{{ url_for('lugares.listar') }}"><i class="bi bi-geo-alt me-2"></i>Canchas y lugares</a>{% endif %}
+                    {% if puede('administrar') %}<a class="dropdown-item" data-module href="{{ url_for('configuracion.panel') }}"><i class="bi bi-sliders me-2"></i>Configuración</a>{% endif %}
                 </div>
             </div>
             <button class="sidebar-label w-100 border-0 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#menuOperaciones" aria-expanded="true">
@@ -78,7 +78,7 @@
             </button>
             <nav class="sidebar-nav collapse show" id="menuOperaciones">
                 <a class="sidebar-link {{ 'active' if request.endpoint == 'index' }}" href="{{ url_for('index') }}"><i class="bi bi-speedometer2"></i><span>Inicio</span></a>
-                {% if puede('ver_alumnos') or puede('ver_pagos') or puede('ver_deportivo') %}<a class="sidebar-link {{ 'active' if modulo == 'informacion' }}" href="{{ url_for('informacion.general') }}"><i class="bi bi-grid-1x2"></i><span>Información general</span></a>{% endif %}
+                {% if puede('administrar') %}<a class="sidebar-link {{ 'active' if modulo == 'informacion' }}" href="{{ url_for('informacion.general') }}"><i class="bi bi-grid-1x2"></i><span>Información general</span></a>{% endif %}
                 {% if puede('ver_alumnos') %}<a class="sidebar-link {{ 'active' if modulo == 'alumnos' and request.endpoint != 'alumnos.asistencias' }}" href="{{ url_for('alumnos.listar') }}"><i class="bi bi-people"></i><span>Alumnos</span></a>{% endif %}
                 {% if puede('gestionar_asistencia') or puede('ver_deportivo') %}<a class="sidebar-link {{ 'active' if request.endpoint == 'alumnos.asistencias' }}" href="{{ url_for('alumnos.asistencias') }}"><i class="bi bi-calendar2-check"></i><span>Asistencias</span></a>{% endif %}
                 {% if puede('ver_pagos') %}<a class="sidebar-link {{ 'active' if modulo == 'pagos' }}" href="{{ url_for('pagos.listar') }}"><i class="bi bi-cash-stack"></i><span>Pagos</span></a>{% endif %}
@@ -96,7 +96,7 @@
                 {% if puede('gestionar_equipos') or puede('ver_deportivo') or puede('administrar') %}<a class="sidebar-link {{ 'active' if modulo == 'categorias' }}" href="{{ url_for('categorias.listar') }}"><i class="bi bi-diagram-3"></i><span>Categorías</span></a>{% endif %}
                 {% if puede('gestionar_equipos') or puede('ver_deportivo') or puede('administrar') %}<a class="sidebar-link {{ 'active' if modulo == 'equipos' }}" href="{{ url_for('equipos.listar') }}"><i class="bi bi-shield-check"></i><span>Equipos</span></a>{% endif %}
                 {% if puede('gestionar_lugares') or puede('ver_deportivo') or puede('administrar') %}<a class="sidebar-link {{ 'active' if modulo == 'lugares' }}" href="{{ url_for('lugares.listar') }}"><i class="bi bi-geo-alt"></i><span>Canchas y lugares</span></a>{% endif %}
-                {% if puede('ver_deportivo') or puede('administrar') %}<a class="sidebar-link {{ 'active' if request.endpoint and 'personal' in request.endpoint }}" href="{{ url_for('calendario.personal') }}"><i class="bi bi-person-workspace"></i><span>Profesores</span></a>{% endif %}
+                {% if puede('administrar') %}<a class="sidebar-link {{ 'active' if request.endpoint and 'personal' in request.endpoint }}" href="{{ url_for('calendario.personal') }}"><i class="bi bi-person-workspace"></i><span>Profesores</span></a>{% endif %}
             </nav>
             <div class="sidebar-footer">
                 <div class="sidebar-user-card">

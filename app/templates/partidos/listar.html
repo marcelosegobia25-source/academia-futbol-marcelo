@@ -6,7 +6,9 @@
         <span class="eyebrow">Encuentros y Calendario</span>
         <h2 class="mb-0"><i class="bi bi-flag text-danger me-1"></i> Partidos</h2>
     </div>
+    {% if puede('gestionar_deportivo') %}
     <a href="{{ url_for('partidos.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Programar partido</a>
+    {% endif %}
 </div>
 
 <form id="form-filtros-partidos" hx-get="{{ url_for('partidos.listar') }}" hx-target="#tabla-partidos"

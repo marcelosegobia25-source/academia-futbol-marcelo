@@ -8,7 +8,9 @@
     </div>
     <div class="d-flex gap-2">
         <a href="{{ url_for('campeonatos.rivales') }}" class="btn btn-outline-secondary"><i class="bi bi-shield-plus"></i> Rivales</a>
+        {% if puede('gestionar_deportivo') %}
         <a href="{{ url_for('campeonatos.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo campeonato</a>
+        {% endif %}
     </div>
 </div>
 <div class="row g-3">

@@ -7,7 +7,9 @@
         <h2 class="mb-1"><i class="bi bi-diagram-3 text-purple me-1"></i> Categorías</h2>
         <p class="text-muted small mb-0">Los alumnos y equipos se contabilizan automáticamente según sus asignaciones.</p>
     </div>
+    {% if puede('gestionar_equipos') %}
     <a href="{{ url_for('categorias.crear') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nueva categoría</a>
+    {% endif %}
 </div>
 <div id="tabla-categorias">{% include "categorias/_tabla.html" %}</div>
 {% endblock %}

@@ -10,7 +10,9 @@
     <div class="d-flex gap-2">
         <a href="{{ url_for('calendario.ver') }}" class="btn btn-outline-primary"><i class="bi bi-calendar3"></i> Ver Calendario</a>
         <a href="{{ url_for('agenda.listar') }}" class="btn btn-outline-secondary"><i class="bi bi-journal-text"></i> Ver Agenda</a>
+        {% if puede('gestionar_deportivo') %}
         <a href="{{ url_for('calendario.crear_entrenamiento') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nuevo entrenamiento</a>
+        {% endif %}
     </div>
 </div>
 
@@ -82,11 +84,15 @@
                         {% endif %}
                     </td>
                     <td class="text-end text-nowrap">
+                        {% if puede('gestionar_deportivo') %}
                         <a href="{{ url_for('calendario.editar_entrenamiento', id_entrenamiento=e.id_entrenamiento) }}" class="btn btn-sm btn-outline-primary" title="Editar horario y días"><i class="bi bi-pencil"></i></a>
+                        {% endif %}
                         <a href="{{ url_for('calendario.asistencia', id_entrenamiento=e.id_entrenamiento) }}" class="btn btn-sm btn-outline-success" title="Gestionar asistencia"><i class="bi bi-check2-square"></i></a>
+                        {% if puede('gestionar_deportivo') %}
                         <form method="post" action="{{ url_for('calendario.eliminar_entrenamiento', id_entrenamiento=e.id_entrenamiento) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este entrenamiento fijo y sus sesiones asociadas?');">
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
                         </form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% else %}
@@ -94,7 +100,9 @@
                     <td colspan="8" class="text-center text-muted py-5">
                         <i class="bi bi-clock-history fs-1 d-block mb-2 text-muted"></i>
                         <p class="mb-2">No hay entrenamientos fijos configurados todavía.</p>
+                        {% if puede('gestionar_deportivo') %}
                         <a href="{{ url_for('calendario.crear_entrenamiento') }}" class="btn btn-sm btn-success"><i class="bi bi-plus-lg"></i> Agregar primer entrenamiento</a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

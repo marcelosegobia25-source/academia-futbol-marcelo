@@ -290,3 +290,99 @@ def test_auditoria_ausencia_total_de_caja_en_permisos_y_roles(client, app):
     assert ">caja<" not in html
     assert "rol caja" not in html
 
+
+def test_cambio_de_rol_restringe_inmediatamente_acciones_no_autorizadas(client, app):
+    """Verifica que al cambiar el rol de un usuario se revoquen de inmediato todas las acciones y vistas no autorizadas."""
+    app.config["AUTH_REQUIRED"] = True
+    try:
+        with app.app_context():
+            admin = Usuario.query.filter_by(nombre_usuario="admin").one()
+            admin.debe_cambiar_clave = False
+            db.session.commit()
+
+            cat = Categoria.query.first() or Categoria(nombre="Sub-10 Test", edad_min=8, edad_max=10)
+            db.session.add(cat)
+            db.session.flush()
+
+            alumno = Alumno(
+                nombre="Bruno", apellido="Mendez", fecha_nacimiento=date(2015, 7, 20),
+                ci="77889900", sexo="M", id_categoria=cat.id_categoria, estado="Activo"
+            )
+            db.session.add(alumno)
+            db.session.commit()
+            id_alumno = alumno.id_alumno
+
+            rol_sec = Rol.query.filter_by(nombre="Secretaría").one()
+            rol_prof = Rol.query.filter_by(nombre="Profesor").one()
+            id_rol_sec = rol_sec.id_rol
+            id_rol_prof = rol_prof.id_rol
+
+        # 1. Admin crea usuario con rol Secretaría
+        client.post("/acceso/", data={"nombre_usuario": "admin", "contrasena": "00000"})
+        res_crear = client.post("/usuarios/nuevo", data={
+            "nombre_usuario": "user_dinamico", "nombre_completo": "Usuario Dinámico", "id_rol": id_rol_sec
+        })
+        assert res_crear.status_code == 302
+
+        with app.app_context():
+            usuario_obj = Usuario.query.filter_by(nombre_usuario="user_dinamico").one()
+            id_usuario_din = usuario_obj.id_usuario
+
+        # 2. Entrar como usuario Secretaría
+        client.post("/acceso/salir")
+        client.post("/acceso/", data={"nombre_usuario": "user_dinamico", "contrasena": "00000"})
+        client.post("/configuracion/contrasena", data={
+            "contrasena_actual": "00000", "contrasena_nueva": "77777", "confirmar_contrasena": "77777"
+        })
+
+        # Como Secretaría: puede ver alumnos y pagos, y abrir formularios de creación
+        assert client.get("/alumnos/nuevo").status_code == 200
+        assert client.get(f"/alumnos/{id_alumno}/editar").status_code == 200
+        assert client.get("/pagos/").status_code == 200
+        resp_perfil_sec = client.get(f"/alumnos/{id_alumno}")
+        assert resp_perfil_sec.status_code == 200
+        assert b"Editar informaci\xc3\xb3n" in resp_perfil_sec.data
+        assert b"Registrar pago" in resp_perfil_sec.data
+
+        # 3. Admin cambia el rol del usuario a Profesor
+        with app.app_context():
+            u = db.session.get(Usuario, id_usuario_din)
+            u.rol = rol_prof
+            u.id_rol = id_rol_prof
+            db.session.commit()
+
+        # 4. Inmediatamente el usuario (con la misma sesión activa) es restringido
+        # Formularios de alumnos
+        assert client.get("/alumnos/nuevo").status_code == 403
+        assert client.post("/alumnos/nuevo", data={"nombre": "Invalido"}).status_code == 403
+        assert client.get(f"/alumnos/{id_alumno}/editar").status_code == 403
+        assert client.post(f"/alumnos/{id_alumno}/editar", data={"nombre": "Modificado"}).status_code == 403
+        assert client.post(f"/alumnos/{id_alumno}/eliminar").status_code == 403
+
+        # Módulo de pagos
+        assert client.get("/pagos/").status_code == 403
+        assert client.get(f"/pagos/alumno/{id_alumno}/nuevo").status_code == 403
+        assert client.post(f"/pagos/alumno/{id_alumno}/nuevo", data={"monto_abono": "100"}).status_code == 403
+
+        # Configuración y usuarios
+        assert client.get("/configuracion/").status_code == 403
+        assert client.get("/usuarios/").status_code == 403
+        assert client.get("/informacion/").status_code == 403
+
+        # Pero como Profesor sí puede seguir viendo alumnos y asistencias
+        assert client.get("/alumnos/").status_code == 200
+        assert client.get(f"/alumnos/{id_alumno}").status_code == 200
+
+        # Y en la interfaz visual no debe mostrar botones para acciones no autorizadas
+        html_perfil_prof = client.get(f"/alumnos/{id_alumno}").data.decode("utf-8")
+        assert "Editar información" not in html_perfil_prof
+        assert "Registrar pago" not in html_perfil_prof
+        assert "Historial completo de pagos" not in html_perfil_prof
+
+        html_lista_prof = client.get("/alumnos/").data.decode("utf-8")
+        assert "Nuevo alumno" not in html_lista_prof
+
+    finally:
+        app.config["AUTH_REQUIRED"] = False
+
+

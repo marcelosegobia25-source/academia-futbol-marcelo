@@ -23,10 +23,12 @@
                         {% if p.activo %}<a href="{{ url_for('pagos.recibo_pdf', id_pago=p.id_pago, copia=1) }}" class="btn btn-sm btn-outline-secondary" title="Copia del recibo PDF">
                             <i class="bi bi-file-earmark-pdf"></i>
                         </a>
+                        {% if puede('anular_pagos') %}
                         <form method="post" action="{{ url_for('pagos.eliminar', id_pago=p.id_pago) }}" class="d-inline formulario-anulacion">
                             <input type="hidden" name="motivo" value="">
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Archivar pago"><i class="bi bi-archive"></i></button>
                         </form>
+                        {% endif %}
                         {% else %}<span class="small text-muted">Registro histórico</span>{% endif %}
                     </td>
                 </tr>

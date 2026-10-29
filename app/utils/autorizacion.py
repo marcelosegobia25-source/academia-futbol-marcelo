@@ -1,4 +1,4 @@
-from flask import abort, g, request, session
+from flask import abort, current_app, g, request, session
 
 # Catálogo completo de permisos clasificados por módulos y funciones operativas
 CATEGORIAS_PERMISOS = {
@@ -32,58 +32,119 @@ PERMISOS = {codigo: nombre for grupo in CATEGORIAS_PERMISOS.values() for codigo,
 
 
 def cargar_usuario_actual():
+    from app.extensions import db
     from app.models import Usuario, Rol
     from sqlalchemy.orm import joinedload
     id_usuario = session.get("id_usuario")
     if not id_usuario:
         g.usuario_actual = None
         return None
-    g.usuario_actual = (
+    usuario = (
         Usuario.query
         .options(joinedload(Usuario.rol).joinedload(Rol.permisos))
         .filter(Usuario.id_usuario == id_usuario)
+        .populate_existing()
         .first()
     )
+    if usuario:
+        try:
+            db.session.refresh(usuario, ["id_rol", "rol"])
+            if usuario.rol:
+                db.session.refresh(usuario.rol, ["permisos"])
+        except Exception:
+            pass
+    g.usuario_actual = usuario
     return g.usuario_actual
 
 
-def tiene_permiso(codigo):
+def tiene_permiso(codigo_o_codigos):
+    if not current_app.config.get("AUTH_REQUIRED", True):
+        return True
     u = getattr(g, "usuario_actual", None)
-    return bool(u and u.activo and u.tiene_permiso(codigo))
+    if not u or not u.activo:
+        return False
+    if isinstance(codigo_o_codigos, (tuple, list, set)):
+        return any(u.tiene_permiso(c) for c in codigo_o_codigos)
+    return u.tiene_permiso(codigo_o_codigos)
 
 
 def permiso_para_solicitud():
-    endpoint, bp = request.endpoint or "", request.blueprint or ""
+    endpoint = request.endpoint or ""
+    bp = request.blueprint or ""
     escritura = request.method not in {"GET", "HEAD", "OPTIONS"}
-    if bp in {"autenticacion", ""} or endpoint in {"index", "static"}:
+
+    # Rutas públicas o de infraestructura general
+    if bp in {"autenticacion", ""} or endpoint in {"index", "static", "health", "ping"}:
         return None
-    # Todo usuario autenticado puede ver el recurso de marca y cambiar su clave
+
+    # Autenticados: gestión de clave personal y logo
     if endpoint in {"configuracion.logo", "configuracion.contrasena"}:
         return None
+
+    # Módulo de usuarios y roles: exclusivo administradores
     if bp == "usuarios":
         return "administrar"
+
+    # Módulo de configuración del sistema: exclusivo administradores
     if bp == "configuracion":
-        return "administrar" if escritura else "ver_deportivo"
-    if bp in {"categorias", "equipos"}:
-        return "gestionar_equipos" if escritura else "ver_deportivo"
-    if bp == "lugares":
-        return "gestionar_lugares" if escritura else "ver_deportivo"
-    if bp == "alumnos":
-        if "eliminar" in endpoint or "retirar" in endpoint:
-            return "eliminar_alumnos"
-        return "gestionar_alumnos" if escritura else "ver_alumnos"
-    if bp == "pagos":
-        if "eliminar" in endpoint:
-            return "anular_pagos"
-        return "registrar_pagos" if escritura else "ver_pagos"
+        return "administrar"
+
+    # Módulo de auditoría y respaldos
     if bp == "informacion":
         if "auditoria" in endpoint:
             return "auditoria"
         if "respaldo" in endpoint or "descargas" in endpoint:
             return "respaldos"
+        if "recaudacion" in endpoint:
+            return "ver_pagos"
         return "administrar"
-    if bp in {"partidos", "agenda", "calendario", "campeonatos"}:
-        if endpoint == "calendario.asistencia" and escritura:
+
+    # Módulo de alumnos
+    if bp == "alumnos":
+        if endpoint == "alumnos.eliminar":
+            return "eliminar_alumnos"
+        if endpoint in {"alumnos.asistencias_guardar", "alumnos.convocatoria_guardar", "alumnos.convocatoria_eliminar"}:
             return "gestionar_asistencia"
-        return "gestionar_deportivo" if escritura else "ver_deportivo"
+        if endpoint in {"alumnos.asistencias", "alumnos.convocatoria_detalle", "alumnos.convocatoria_pdf", "alumnos.convocatoria_excel"}:
+            return ("gestionar_asistencia", "ver_deportivo")
+        if endpoint in {"alumnos.crear", "alumnos.editar", "alumnos.recalcular_categoria"}:
+            return "gestionar_alumnos"
+        return "ver_alumnos"
+
+    # Módulo de pagos y cuotas
+    if bp == "pagos":
+        if endpoint == "pagos.eliminar":
+            return "anular_pagos"
+        if endpoint in {"pagos.crear", "pagos.cambiar_fecha_base"}:
+            return "registrar_pagos"
+        return "ver_pagos"
+
+    # Módulo de categorías y equipos
+    if bp in {"categorias", "equipos"}:
+        if any(acc in endpoint for acc in ("crear", "editar", "eliminar")):
+            return "gestionar_equipos"
+        return ("gestionar_equipos", "ver_deportivo", "administrar")
+
+    # Módulo de canchas y lugares
+    if bp == "lugares":
+        if any(acc in endpoint for acc in ("crear", "editar", "eliminar")):
+            return "gestionar_lugares"
+        return ("gestionar_lugares", "ver_deportivo", "administrar")
+
+    # Módulo de calendario y entrenamientos
+    if bp == "calendario":
+        if "personal" in endpoint:
+            return "administrar"
+        if "asistencia" in endpoint:
+            return "gestionar_asistencia" if escritura else ("gestionar_asistencia", "ver_deportivo")
+        if any(acc in endpoint for acc in ("crear", "editar", "eliminar")):
+            return "gestionar_deportivo"
+        return "ver_deportivo"
+
+    # Módulos deportivos: partidos, agenda, campeonatos
+    if bp in {"partidos", "agenda", "campeonatos"}:
+        if any(acc in endpoint for acc in ("crear", "editar", "eliminar", "resultado", "walkover", "convocatoria")):
+            return "gestionar_deportivo"
+        return "ver_deportivo"
+
     return None
