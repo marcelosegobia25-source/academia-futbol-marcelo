@@ -15,16 +15,10 @@ class AnularPagoUseCase:
         if not pago.activo:
             raise ValueError("El pago ya se encuentra anulado.")
 
-        from app.models import CierreCaja
-        if CierreCaja.query.filter_by(fecha=pago.fecha_pago, reabierto_en=None).first():
-            raise ValueError("No se puede anular un pago de una caja cerrada. Reabra primero ese cierre.")
-
-        # Anular movimiento contable originado por este pago
+        # Anular movimiento contable originado por este pago si existe
         mov = MovimientoContable.query.filter_by(
             origen_tipo="Pago", origen_id=pago.id_pago, anulado_en=None
         ).first()
-        if mov and mov.sesion_caja and mov.sesion_caja.estado == "Cerrada":
-            raise ValueError("No se puede anular un pago perteneciente a una sesión de caja cerrada. Reabra primero esa sesión.")
 
         pago.eliminado_en = ahora_utc()
 

@@ -31,7 +31,7 @@ from app.extensions import db
 from app.models import (
     Usuario, Categoria, Equipo, Alumno, Tutor, AlumnoTutor,
     InscripcionGestion, Obligacion, Pago, AplicacionPago,
-    Tarifa, BecaHistorial, SesionCaja, MovimientoContable,
+    Tarifa, BecaHistorial, MovimientoContable,
     Lugar, PersonalDeportivo, Entrenamiento, SesionEntrenamiento,
     AsistenciaEntrenamiento, Campeonato, Partido, Posicion, Auditoria
 )
@@ -213,18 +213,6 @@ def sembrar():
         ]
 
         # ----------------------------------------------------------------------
-        # 5. Sesión de Caja Activa
-        # ----------------------------------------------------------------------
-        sesion = SesionCaja.query.filter_by(estado="Abierta").order_by(SesionCaja.id_sesion.desc()).first()
-        if not sesion:
-            sesion = SesionCaja(
-                id_usuario=id_admin,
-                saldo_inicial=Decimal("200.00"),
-                estado="Abierta",
-                observacion="Apertura formal de caja - Turno General"
-            )
-            db.session.add(sesion)
-            db.session.flush()
 
         periodo_actual = "2026-10"
         hoy = date.today()
@@ -380,13 +368,12 @@ def sembrar():
                     )
                     db.session.add(ap)
 
-                    # Registrar movimiento contable (esto dispara la creación de movimiento_caja si id_sesion_caja está presente)
+                    # Registrar movimiento contable
                     mov_cont = MovimientoContable.query.filter_by(
                         origen_tipo="Pago", origen_id=pago_nuevo.id_pago
                     ).first()
                     if not mov_cont:
                         mov_cont = MovimientoContable(
-                            id_sesion_caja=sesion.id_sesion,
                             tipo="Ingreso",
                             categoria="Mensualidades",
                             concepto=f"Pago mensualidad {periodo_actual} - {al.nombre_completo}",
@@ -539,7 +526,7 @@ def sembrar():
             entidad="Demostración",
             id_entidad=1,
             id_usuario=id_admin,
-            detalle="Carga exitosa de 10 alumnos, tutores, pagos, caja, entrenamientos y torneo"
+            detalle="Carga exitosa de 10 alumnos, tutores, pagos, entrenamientos y torneo"
         ))
 
         db.session.commit()
@@ -551,7 +538,6 @@ def sembrar():
         print(f"   * Mensualidades pendientes para auditoria: 2")
         print(f"   * Becas activas configuradas: 1 (50% Media Beca)")
         print(f"   * Equipos configurados: {len(equipo_map)}")
-        print(f"   * Sesion de caja activa y movimientos registrados")
         print(f"   * Asistencia de entrenamiento y torneo registrados")
         print("=" * 80)
 

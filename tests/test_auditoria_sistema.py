@@ -240,12 +240,12 @@ def test_auditoria_roles_y_aislamiento_de_permisos(client, app):
 
         # Crear usuario Cobranzas
         client.post("/usuarios/nuevo", data={
-            "nombre_usuario": "cajero_test", "nombre_completo": "Cajero Auditoria", "id_rol": id_rol_cob
+            "nombre_usuario": "cobranzas_test", "nombre_completo": "Cobranzas Auditoria", "id_rol": id_rol_cob
         })
 
         # Salir de admin y entrar como Cobranzas
         client.post("/acceso/salir")
-        client.post("/acceso/", data={"nombre_usuario": "cajero_test", "contrasena": "00000"})
+        client.post("/acceso/", data={"nombre_usuario": "cobranzas_test", "contrasena": "00000"})
         client.post("/configuracion/contrasena", data={
             "contrasena_actual": "00000", "contrasena_nueva": "55555", "confirmar_contrasena": "55555"
         })
@@ -260,3 +260,33 @@ def test_auditoria_roles_y_aislamiento_de_permisos(client, app):
 
     finally:
         app.config["AUTH_REQUIRED"] = False
+
+
+def test_auditoria_ausencia_total_de_caja_en_permisos_y_roles(client, app):
+    """Garantiza que no exista ningún rol, permiso o texto de caja en la administración de usuarios."""
+    with app.app_context():
+        from app.models import Permiso, Rol
+        # 1. No debe existir ningún permiso con código o nombre relacionado a caja
+        permisos_caja = Permiso.query.filter(
+            db.or_(
+                Permiso.codigo.ilike("%caja%"),
+                Permiso.nombre.ilike("%caja%")
+            )
+        ).all()
+        assert len(permisos_caja) == 0, f"Se encontraron permisos con caja: {[p.codigo for p in permisos_caja]}"
+
+        # 2. No debe existir ningún rol llamado Caja
+        roles_caja = Rol.query.filter(Rol.nombre.ilike("%caja%")).all()
+        assert len(roles_caja) == 0, f"Se encontraron roles con caja: {[r.nombre for r in roles_caja]}"
+
+    # 3. La página de usuarios no debe contener la palabra 'caja'
+    res = client.get("/usuarios/")
+    assert res.status_code == 200
+    html = res.data.decode("utf-8").lower()
+    # Comprobar que 'caja' no figure en los nombres de roles ni permisos
+    assert "cerrar_caja" not in html
+    assert "reabrir_caja" not in html
+    assert "caja chica" not in html
+    assert ">caja<" not in html
+    assert "rol caja" not in html
+

@@ -29,7 +29,7 @@ from app import create_app
 from app.extensions import db
 from app.models import (
     Usuario, Rol, Permiso, Alumno, Categoria, Equipo, Pago, Obligacion,
-    AplicacionPago, CierreCaja, Campeonato, Partido, Posicion,
+    AplicacionPago, Campeonato, Partido, Posicion,
     Entrenamiento, SesionEntrenamiento, AsistenciaEntrenamiento,
     EventoAgenda, Configuracion, Auditoria, HistorialAlumno,
     HistorialCategoriaAlumno, HistorialEquipoAlumno
@@ -164,7 +164,7 @@ class AuditorFlujos:
         )
 
     def _flujo_3_tesoreria_y_pagos(self):
-        print("\n📋 3. FLUJO DE TESORERÍA, PAGOS Y ARQUEO DE CAJA")
+        print("\n📋 3. FLUJO DE COBRANZAS Y PAGOS DE MENSUALIDADES")
         alumno = Alumno.query.filter_by(ci="990016").first()
         mes_test = "2026-10"
 
@@ -184,37 +184,23 @@ class AuditorFlujos:
             db.session.commit()
 
         self.registrar(
-            "Tesorería", "Emisión de Cobro",
+            "Cobranzas", "Emisión de Cobro",
             pago.id_pago is not None and pago.activo,
             f"Pago #{pago.id_pago} registrado por Bs. {pago.monto} ({pago.modo_pago}) para el mes {pago.mes_pagado}"
         )
 
         # 3.2 Cobertura y Vigencia
         self.registrar(
-            "Tesorería", "Cálculo de Vigencia",
+            "Cobranzas", "Cálculo de Vigencia",
             pago.estado_cobertura in ("Vigente", "Próximo a vencer"),
             f"Estado de cobertura del pago calculado automáticamente: {pago.estado_cobertura}"
         )
 
-        # 3.3 Arqueo y Cierre de caja
-        cierre = CierreCaja.query.filter_by(fecha=date.today()).first()
-        if not cierre:
-            cierre = CierreCaja(
-                fecha=date.today(),
-                efectivo_sistema=Decimal("150.00"),
-                qr_sistema=Decimal("0.00"),
-                efectivo_contado=Decimal("150.00"),
-                qr_confirmado=Decimal("0.00"),
-                diferencia=Decimal("0.00"),
-                observacion="Arqueo verificado"
-            )
-            db.session.add(cierre)
-            db.session.commit()
-
+        # 3.3 Cobro directo sin bloqueo de caja
         self.registrar(
-            "Tesorería", "Cierre Diario de Caja",
-            cierre.id_cierre is not None and cierre.diferencia == Decimal("0.00"),
-            f"Cierre de caja para {cierre.fecha} con cuadre exacto (Diferencia: Bs. {cierre.diferencia})"
+            "Cobranzas", "Cobro Directo Sin Caja",
+            pago.id_pago is not None,
+            "El cobro opera de forma directa e inmediata sin requerir arqueo previo ni turnos de caja"
         )
 
     def _flujo_4_campeonatos_y_deporte(self):

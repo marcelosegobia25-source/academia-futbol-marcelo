@@ -19,13 +19,11 @@ Puebla la base de datos con escenarios exhaustivos y realistas:
    - Reactivados tras retiro
    - Con pago anulado y reemplazado con trazabilidad
    - Fichas completas: posiciones, piernas, turnos, medidas, tutores y parentescos.
-6. Pagos, Tarifas y Caja Chica:
+6. Pagos y Cobranzas:
    - Tarifas por categoría
    - Obligaciones, pagos en Efectivo y QR
    - Abonos parciales
    - Pago anulado formalmente con registro en AnulacionPago y reemplazo
-   - Cierre de caja pasado cuadrado
-   - Sesión de caja de hoy abierta con saldo inicial y movimientos
 7. Tienda e Inventario:
    - Proveedores registrados con NIT
    - Productos con variantes de tallas y colores
@@ -111,37 +109,28 @@ def sembrar_todos_los_escenarios():
             "Secretaría": {
                 "desc": "Atención al público, inscripciones, cobros y asistencia deportiva.",
                 "permisos": [
-                    "ver_alumnos", "gestionar_alumnos", "becas_alumnos",
-                    "ver_pagos", "registrar_pagos", "ver_inventario",
-                    "registrar_asistencia", "ver_deportivo"
+                    "ver_alumnos", "gestionar_alumnos", "gestionar_becas",
+                    "ver_pagos", "registrar_pagos", "gestionar_asistencia", "ver_deportivo"
                 ]
             },
-            "Caja": {
-                "desc": "Operación de caja chica, cobro de cuotas, anulaciones y arqueos.",
+            "Cobranzas": {
+                "desc": "Cobro de cuotas mensuales, control de deudores y emisión de recibos.",
                 "permisos": [
-                    "ver_pagos", "registrar_pagos", "anular_pagos",
-                    "cerrar_caja", "reabrir_caja", "ver_contabilidad", "ver_alumnos"
+                    "ver_alumnos", "ver_pagos", "registrar_pagos", "anular_pagos"
                 ]
             },
             "Profesor": {
                 "desc": "Planificación de entrenamientos, asistencia y control de partidos.",
                 "permisos": [
-                    "ver_alumnos", "ver_deportivo", "gestionar_partidos", "registrar_asistencia"
+                    "ver_alumnos", "ver_deportivo", "gestionar_asistencia"
                 ]
             },
             "Coordinador Deportivo": {
                 "desc": "Dirección deportiva, torneos, fixture, canchas y seguimiento de planteles.",
                 "permisos": [
                     "ver_alumnos", "gestionar_alumnos", "ver_deportivo",
-                    "gestionar_torneos", "gestionar_partidos", "gestionar_equipos",
-                    "gestionar_lugares", "registrar_asistencia", "ver_reportes"
-                ]
-            },
-            "Encargado de Tienda": {
-                "desc": "Venta de indumentaria, control de existencias e ingresos de mercadería.",
-                "permisos": [
-                    "ver_inventario", "gestionar_inventario", "gestionar_compras",
-                    "anular_ventas", "ver_pagos"
+                    "gestionar_deportivo", "gestionar_equipos",
+                    "gestionar_lugares", "gestionar_asistencia"
                 ]
             }
         }
@@ -166,11 +155,11 @@ def sembrar_todos_los_escenarios():
         usuarios_data = [
             ("admin", "Daniel Admin (Director General)", "Administrador"),
             ("secretaria_laura", "Laura Paredes (Secretaría General)", "Secretaría"),
-            ("cajero_diego", "Diego Morales (Cajero Principal)", "Caja"),
+            ("cobranzas_diego", "Diego Morales (Cobranzas)", "Cobranzas"),
             ("profe_carlos", "Prof. Carlos Méndez (DT Sub-11 y Sub-13)", "Profesor"),
             ("profe_mateo", "Prof. Mateo Rojas (DT Sub-7 y Sub-9)", "Profesor"),
             ("coordinador_raul", "Prof. Raúl Gutiérrez (Coordinador Deportivo)", "Coordinador Deportivo"),
-            ("almacen_pedro", "Pedro Salinas (Encargado Tienda)", "Encargado de Tienda"),
+            ("auxiliar_pedro", "Pedro Salinas (Auxiliar Administrativo)", "Secretaría"),
         ]
 
         usuarios_db = {}
@@ -671,7 +660,7 @@ def sembrar_todos_los_escenarios():
         p_erroneo = crear_pago_con_recibo(
             alu_anul, ob_anul, hoy - timedelta(days=3), hoy + timedelta(days=20),
             Decimal("300.00"), "Efectivo", f"REC-ERR-{alu_anul.id_alumno}",
-            anulado=True, motivo_anul="Error de digitación en caja: se cobró 300 Bs en vez de 150 Bs."
+            anulado=True, motivo_anul="Error de digitación al cobrar cuota: se cobró 300 Bs en vez de 150 Bs."
         )
         # Pago correcto de reemplazo por 150 Bs
         p_reemplazo = crear_pago_con_recibo(
@@ -970,61 +959,6 @@ def sembrar_todos_los_escenarios():
             db.session.add(CuotaProgramada(id_programado=p_prog2.id_programado, fecha_vencimiento=date(2026, 3, 15), monto=Decimal("300.00"), estado="Pagado", fecha_pago=date(2026, 3, 15)))
 
         # ----------------------------------------------------------------------
-        # SESIONES DE CAJA CHICA (PASADA CERRADA Y HOY ABIERTA)
-        # ----------------------------------------------------------------------
-        u_cajero = usuarios_db["cajero_diego"]
-        
-        # Sesión pasada cerrada
-        sesion_cerrada = SesionCaja.query.filter_by(observacion="Cierre de caja jornada sábado pasado").first()
-        if not sesion_cerrada:
-            sesion_cerrada = SesionCaja(
-                id_usuario=u_cajero.id_usuario,
-                abierta_en=datetime.combine(hoy - timedelta(days=2), dtime(8, 0)),
-                saldo_inicial=Decimal("200.00"),
-                cerrada_en=datetime.combine(hoy - timedelta(days=2), dtime(18, 0)),
-                efectivo_esperado=Decimal("1250.00"),
-                efectivo_contado=Decimal("1250.00"),
-                diferencia=Decimal("0.00"),
-                estado="Cerrada",
-                observacion="Cierre de caja jornada sábado pasado"
-            )
-            db.session.add(sesion_cerrada)
-            db.session.flush()
-
-        # Sesión actual abierta
-        sesion_abierta = SesionCaja.query.filter_by(estado="Abierta").first()
-        if not sesion_abierta:
-            sesion_abierta = SesionCaja(
-                id_usuario=u_cajero.id_usuario,
-                abierta_en=datetime.combine(hoy, dtime(8, 30)),
-                saldo_inicial=Decimal("300.00"),
-                estado="Abierta",
-                observacion="Caja del turno actual"
-            )
-            db.session.add(sesion_abierta)
-            db.session.flush()
-
-            # Movimientos contables de hoy asociados a la sesión
-            db.session.add(MovimientoContable(
-                id_sesion_caja=sesion_abierta.id_sesion,
-                tipo="Ingreso",
-                categoria="Mensualidades",
-                id_categoria_contable=cat_contables_db["Mensualidades"].id_categoria_contable,
-                concepto="Cobro de cuota mensual en efectivo",
-                monto=Decimal("150.00"),
-                fecha=hoy,
-                modo_pago="Efectivo"
-            ))
-            db.session.add(MovimientoContable(
-                id_sesion_caja=sesion_abierta.id_sesion,
-                tipo="Egreso",
-                categoria="Botiquín y Primeros Auxilios",
-                id_categoria_contable=cat_contables_db["Botiquín y Primeros Auxilios"].id_categoria_contable,
-                concepto="Compra urgente de gasas, hielo seco y alcohol",
-                monto=Decimal("45.00"),
-                fecha=hoy,
-                modo_pago="Efectivo"
-            ))
 
         # ----------------------------------------------------------------------
         # 10. DEPORTE: CAMPEONATOS, FIXTURE, POSICIONES, PODIOS Y ASISTENCIAS

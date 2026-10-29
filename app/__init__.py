@@ -311,7 +311,10 @@ def _sembrar_configuracion_por_defecto():
 
 def _sembrar_seguridad_inicial():
     from app.models import Configuracion, Permiso, Rol, Usuario
+    from app.modules.seguridad.domain.models import rol_permiso
     from app.utils.autorizacion import PERMISOS
+
+    # 1. Asegurar catálogo activo de permisos y actualizar nombres
     objetos = {}
     permisos_nuevos = set()
     for codigo, nombre in PERMISOS.items():
@@ -320,13 +323,28 @@ def _sembrar_seguridad_inicial():
             permiso = Permiso(codigo=codigo, nombre=nombre)
             db.session.add(permiso)
             permisos_nuevos.add(codigo)
+        else:
+            if permiso.nombre != nombre:
+                permiso.nombre = nombre
         objetos[codigo] = permiso
     db.session.flush()
+
+    # 2. Purgar permisos obsoletos (caja, finanzas, inventario, tienda)
+    obsoletos = Permiso.query.filter(Permiso.codigo.not_in(list(PERMISOS.keys()))).all()
+    if obsoletos:
+        ids_obsoletos = [p.id_permiso for p in obsoletos]
+        db.session.execute(db.delete(rol_permiso).where(rol_permiso.c.id_permiso.in_(ids_obsoletos)))
+        for p in obsoletos:
+            db.session.delete(p)
+        db.session.flush()
+
+    # 3. Roles oficiales del sistema
     perfiles = {
         "Administrador": set(PERMISOS),
         "Secretaría": {"ver_alumnos", "gestionar_alumnos", "ver_pagos", "registrar_pagos", "ver_deportivo", "gestionar_deportivo", "gestionar_asistencia"},
         "Cobranzas": {"ver_alumnos", "ver_pagos", "registrar_pagos"},
         "Profesor": {"ver_alumnos", "ver_deportivo", "gestionar_asistencia"},
+        "Coordinador Deportivo": {"ver_alumnos", "gestionar_alumnos", "ver_deportivo", "gestionar_deportivo", "gestionar_asistencia", "gestionar_equipos", "gestionar_lugares"},
     }
     roles = {}
     for nombre, codigos in perfiles.items():
@@ -336,12 +354,32 @@ def _sembrar_seguridad_inicial():
             rol = Rol(nombre=nombre)
             db.session.add(rol)
         if nuevo or not rol.permisos or nombre == "Administrador":
-            rol.permisos = [objetos[c] for c in codigos]
+            rol.permisos = [objetos[c] for c in codigos if c in objetos]
         elif permisos_nuevos:
             actuales = {permiso.codigo for permiso in rol.permisos}
-            rol.permisos.extend(objetos[c] for c in (codigos & permisos_nuevos) if c not in actuales)
+            rol.permisos.extend(objetos[c] for c in (codigos & permisos_nuevos) if c not in actuales and c in objetos)
         roles[nombre] = rol
     db.session.flush()
+
+    # 4. Purgar roles obsoletos si existen (Caja, Tienda) y reasignar sus usuarios
+    roles_obsoletos = Rol.query.filter(Rol.nombre.in_(["Caja", "Encargado de Tienda", "Tienda"])).all()
+    for r in roles_obsoletos:
+        for u in list(r.usuarios):
+            if "caj" in u.nombre_usuario.lower() or r.nombre == "Caja":
+                u.rol = roles["Cobranzas"]
+                if "cajer" in u.nombre_usuario.lower():
+                    u.nombre_usuario = u.nombre_usuario.replace("cajero_", "cobranzas_")
+                if "Cajer" in u.nombre_completo:
+                    u.nombre_completo = u.nombre_completo.replace("Cajero Principal", "Cobranzas").replace("Cajero", "Cobranzas")
+            else:
+                u.rol = roles["Secretaría"]
+                if "almacen" in u.nombre_usuario.lower():
+                    u.nombre_usuario = "auxiliar_pedro"
+                    u.nombre_completo = "Pedro Salinas (Auxiliar Administrativo)"
+        r.permisos.clear()
+        db.session.delete(r)
+    db.session.flush()
+
     if Usuario.query.count() == 0:
         config = Configuracion.obtener()
         admin = Usuario(

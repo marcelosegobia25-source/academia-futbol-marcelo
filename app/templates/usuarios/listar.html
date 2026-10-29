@@ -207,10 +207,8 @@
                                         <button class="accordion-button collapsed py-2 px-3 small fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ r.id_rol }}-{{ loop.index }}">
                                             <span class="me-2">
                                                 {% if 'Alumnos' in categoria %}👥
-                                                {% elif 'Pagos' in categoria %}💵
+                                                {% elif 'Cobros' in categoria or 'Pagos' in categoria %}💵
                                                 {% elif 'Deporte' in categoria %}⚽
-                                                {% elif 'Tienda' in categoria %}🛍️
-                                                {% elif 'Finanzas' in categoria %}📈
                                                 {% else %}🛡️{% endif %}
                                             </span>
                                             {{ categoria }}
@@ -326,10 +324,8 @@
                                 <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom border-secondary border-opacity-25">
                                     <span class="fs-5">
                                         {% if 'Alumnos' in categoria %}👥
-                                        {% elif 'Pagos' in categoria %}💵
+                                        {% elif 'Cobros' in categoria or 'Pagos' in categoria %}💵
                                         {% elif 'Deporte' in categoria %}⚽
-                                        {% elif 'Tienda' in categoria %}🛍️
-                                        {% elif 'Finanzas' in categoria %}📈
                                         {% else %}🛡️{% endif %}
                                     </span>
                                     <strong class="permiso-categoria-title">{{ categoria }}</strong>

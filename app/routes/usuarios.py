@@ -3,7 +3,7 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 from sqlalchemy.exc import IntegrityError
 from app.extensions import db
 from app.models import Auditoria, Permiso, Rol, Usuario
-from app.utils.autorizacion import CATEGORIAS_PERMISOS
+from app.utils.autorizacion import CATEGORIAS_PERMISOS, PERMISOS
 
 bp = Blueprint("usuarios", __name__, url_prefix="/usuarios")
 
@@ -15,7 +15,7 @@ def listar():
         usuarios=Usuario.query.order_by(Usuario.nombre_usuario).all(),
         roles=Rol.query.order_by(Rol.nombre).all(),
         categorias_permisos=CATEGORIAS_PERMISOS,
-        permisos=Permiso.query.order_by(Permiso.id_permiso).all(),
+        permisos=Permiso.query.filter(Permiso.codigo.in_(list(PERMISOS.keys()))).order_by(Permiso.id_permiso).all(),
     )
 
 
@@ -34,7 +34,7 @@ def crear_rol():
 
     ids_permisos = {int(x) for x in request.form.getlist("id_permiso") if x.isdigit()}
     permisos_seleccionados = (
-        Permiso.query.filter(Permiso.id_permiso.in_(ids_permisos)).all()
+        Permiso.query.filter(Permiso.id_permiso.in_(ids_permisos), Permiso.codigo.in_(list(PERMISOS.keys()))).all()
         if ids_permisos
         else []
     )
@@ -137,10 +137,14 @@ def permisos_rol(id_rol):
     rol = Rol.query.get_or_404(id_rol)
     anterior = ",".join(sorted(p.codigo for p in rol.permisos))
     if rol.nombre == "Administrador":
-        rol.permisos = Permiso.query.all()
+        rol.permisos = Permiso.query.filter(Permiso.codigo.in_(list(PERMISOS.keys()))).all()
     else:
         ids = {int(x) for x in request.form.getlist("id_permiso") if x.isdigit()}
-        rol.permisos = Permiso.query.filter(Permiso.id_permiso.in_(ids)).all() if ids else []
+        rol.permisos = (
+            Permiso.query.filter(Permiso.id_permiso.in_(ids), Permiso.codigo.in_(list(PERMISOS.keys()))).all()
+            if ids
+            else []
+        )
     nuevo = ",".join(sorted(p.codigo for p in rol.permisos))
 
     id_usuario = g.usuario_actual.id_usuario if getattr(g, "usuario_actual", None) else None

@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.models import (
-    Alumno, AnulacionPago, Auditoria, Campeonato, Categoria, CierreCaja, Configuracion,
+    Alumno, AnulacionPago, Auditoria, Campeonato, Categoria, Configuracion,
     Equipo, EventoAgenda, HistorialAlumno, Pago, Partido, PodioCampeonato,
     Entrenamiento, SesionEntrenamiento, AsistenciaEntrenamiento,
 )
