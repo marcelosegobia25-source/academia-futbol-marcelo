@@ -218,7 +218,7 @@ def test_anulacion_y_pago_correctivo_quedan_vinculados(client):
     assert anulacion.id_pago_reemplazo is not None
 
 
-def test_cierre_caja_concilia_metodos(client):
+def test_pago_efectivo_y_qr_registran_correctamente(client):
     alumno, _ = alumno_base()
     db.session.add_all([
         Pago(
@@ -231,16 +231,7 @@ def test_cierre_caja_concilia_metodos(client):
         ),
     ])
     db.session.commit()
-    respuesta = client.post(
-        "/pagos/caja",
-        data={
-            "fecha": date.today().isoformat(),
-            "efectivo_contado": "80", "qr_confirmado": "120",
-        },
-    )
-    assert respuesta.status_code == 302
-    cierre = CierreCaja.query.one()
-    assert cierre.diferencia == 0
+    assert Pago.query.count() == 2
 
 
 def test_cambio_fecha_base_deja_historial_y_respaldo_logico(client):
@@ -584,13 +575,8 @@ def test_numero_qr_activo_no_se_repite(client):
     assert Pago.query.filter_by(numero_operacion="OPERACION-UNICA").count() == 1
 
 
-def test_caja_cerrada_bloquea_nuevo_pago(client):
+def test_registro_pago_directo_sin_bloqueo_de_caja(client):
     alumno, _ = alumno_base()
-    db.session.add(CierreCaja(
-        fecha=date.today(), efectivo_sistema=0, qr_sistema=0,
-        efectivo_contado=0, qr_confirmado=0, diferencia=0,
-    ))
-    db.session.commit()
     client.post(
         f"/pagos/alumno/{alumno.id_alumno}/nuevo",
         data={
@@ -598,7 +584,7 @@ def test_caja_cerrada_bloquea_nuevo_pago(client):
             "fecha_pago": date.today().isoformat(), "modo_pago": "Efectivo",
         },
     )
-    assert Pago.query.count() == 0
+    assert Pago.query.count() == 1
 
 
 def test_calendario_rechaza_mes_invalido(client):

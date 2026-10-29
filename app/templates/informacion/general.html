@@ -19,7 +19,6 @@
                 <i class="bi bi-folder2-open me-1"></i> Abrir Descargas
             </button>
         </form>
-        <a href="{{ url_for('pagos.caja') }}" class="btn btn-outline-secondary"><i class="bi bi-calculator"></i> Cierre de caja</a>
         <a href="{{ url_for('informacion.auditoria') }}" class="btn btn-outline-secondary"><i class="bi bi-shield-check"></i> Auditoría interna</a>
         <a href="{{ url_for('alumnos.crear') }}" class="btn btn-success"><i class="bi bi-person-plus me-1"></i> Nuevo alumno</a>
     </div>
@@ -27,9 +26,7 @@
 <div class="alert alert-light d-flex flex-wrap justify-content-between gap-2">
     <span><i class="bi bi-database-check"></i> Último respaldo completo: <span id="ultimo-respaldo-completo">{{ ultimo_respaldo.name if ultimo_respaldo else 'No disponible' }}</span></span>
     <span><i class="bi bi-folder-check"></i> Documentos: {{ carpeta_descargas }}</span>
-    <span><i class="bi bi-cash-stack"></i> Último cierre: {{ ultimo_cierre.fecha.strftime('%d/%m/%Y') if ultimo_cierre else 'Pendiente' }}{% if ultimo_cierre and ultimo_cierre.diferencia %} · Diferencia Bs {{ ultimo_cierre.diferencia }}{% endif %}</span>
 </div>
-{% if cuotas_pendientes %}<div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2"><span><i class="bi bi-calendar-exclamation"></i> <strong>{{ cuotas_pendientes|length }} pago(s) programado(s)</strong> vencidos o próximos durante los siguientes 30 días.</span><a href="{{ url_for('gestion.pagos_programados') }}" class="btn btn-sm btn-warning">Revisar pagos</a></div>{% endif %}
 
 <div class="row g-3 mb-4">
     {% set tarjetas = [
@@ -52,16 +49,12 @@
 </div>
 
 <div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center"><div><h5 class="mb-0">Resumen de módulos</h5><small class="text-muted">Indicadores operativos del mes actual.</small></div></div>
+    <div class="card-header d-flex justify-content-between align-items-center"><div><h5 class="mb-0">Resumen operativo</h5><small class="text-muted">Indicadores deportivos y de mensualidades del mes actual.</small></div></div>
     <div class="card-body"><div class="row g-3">
-        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('gestion.contabilidad') }}"><div class="p-3 border rounded h-100"><i class="bi bi-graph-up-arrow text-success"></i><small class="d-block text-muted">Saldo financiero del mes</small><strong class="fs-4">Bs {{ '%.2f'|format(indicadores.saldo_finanzas_mes) }}</strong><span class="d-block small">Ingresos {{ '%.2f'|format(indicadores.ingresos_finanzas_mes) }} · Egresos {{ '%.2f'|format(indicadores.egresos_finanzas_mes) }}</span></div></a></div>
         <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('pagos.listar') }}"><div class="p-3 border rounded h-100"><i class="bi bi-receipt text-danger"></i><small class="d-block text-muted">Obligaciones pendientes</small><strong class="fs-4">{{ indicadores.obligaciones_pendientes }}</strong><span class="d-block small">Saldo Bs {{ '%.2f'|format(indicadores.saldo_pendiente) }}</span></div></a></div>
-        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('gestion.inventario') }}"><div class="p-3 border rounded h-100"><i class="bi bi-box-seam text-warning"></i><small class="d-block text-muted">Inventario</small><strong class="fs-4">{{ indicadores.stock_bajo }} stock bajo</strong><span class="d-block small">{{ indicadores.compras_mes }} compras · {{ indicadores.ventas_mes }} ventas · {{ indicadores.devoluciones_mes }} devoluciones</span></div></a></div>
+        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('pagos.listar') }}"><div class="p-3 border rounded h-100"><i class="bi bi-cash-stack text-success"></i><small class="d-block text-muted">Recaudación mensual</small><strong class="fs-4">Bs {{ '%.2f'|format(indicadores.recaudacion_mes) }}</strong><span class="d-block small">{{ indicadores.pagos_mes }} cuotas cobradas</span></div></a></div>
         <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('calendario.personal') }}"><div class="p-3 border rounded h-100"><i class="bi bi-person-workspace text-primary"></i><small class="d-block text-muted">Actividad deportiva</small><strong class="fs-4">{{ indicadores.personal_activo }} profesores</strong><span class="d-block small">Asistencia del mes: {{ indicadores.asistencia_mes }} %</span></div></a></div>
-        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('gestion.pagos_programados') }}"><div class="p-3 border rounded h-100"><small class="text-muted">Pagos próximos</small><strong class="fs-4 d-block">{{ cuotas_pendientes|length }}</strong><span class="small">Vencidos o dentro de 30 días</span></div></a></div>
-        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('gestion.inventario_conteo') }}"><div class="p-3 border rounded h-100"><small class="text-muted">Conteos pendientes</small><strong class="fs-4 d-block">{{ indicadores.conteos_pendientes }}</strong><span class="small">Requieren aprobación</span></div></a></div>
-        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('pagos.caja') }}"><div class="p-3 border rounded h-100"><small class="text-muted">Cajas abiertas</small><strong class="fs-4 d-block">{{ indicadores.cajas_abiertas }}</strong><span class="small">Sesiones activas o reabiertas</span></div></a></div>
-        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('alumnos.listar') }}"><div class="p-3 border rounded h-100"><small class="text-muted">Inscripciones {{ hoy.year }}</small><strong class="fs-4 d-block">{{ indicadores.inscripciones_activas }}</strong><span class="small">Inscripciones activas</span></div></a></div>
+        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('alumnos.listar') }}"><div class="p-3 border rounded h-100"><i class="bi bi-calendar-check text-info"></i><small class="d-block text-muted">Inscripciones {{ hoy.year }}</small><strong class="fs-4">{{ indicadores.inscripciones_activas }}</strong><span class="d-block small">Inscripciones activas</span></div></a></div>
     </div></div>
 </div>
 

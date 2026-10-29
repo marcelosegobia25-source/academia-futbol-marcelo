@@ -182,20 +182,6 @@
     </div>
 </section>
 {% endif %}
-{% if alumno.ventas %}
-<section class="card mt-4">
-    <div class="card-header"><strong>Compras de uniformes y productos</strong></div>
-    <div class="table-responsive"><table class="table table-sm mb-0">
-        <thead><tr><th>Fecha</th><th>Detalle</th><th>Total</th><th>Estado</th><th>Recibo</th></tr></thead>
-        <tbody>{% for venta in alumno.ventas %}<tr class="{{ 'table-secondary' if not venta.activo }}">
-            <td>{{ venta.fecha.strftime('%d/%m/%Y') }}</td>
-            <td>{% for detalle in venta.detalles %}{{ detalle.cantidad }} × {{ detalle.variante.nombre_completo }}{% if not loop.last %}<br>{% endif %}{% endfor %}</td>
-            <td>{{ '%.2f'|format(venta.total) }}</td><td>{{ 'Vigente' if venta.activo else 'Anulada' }}</td>
-            <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('gestion.venta_recibo', id_venta=venta.id_venta) }}"><i class="bi bi-file-pdf"></i></a></td>
-        </tr>{% endfor %}</tbody>
-    </table></div>
-</section>
-{% endif %}
 {% if alumno.historial %}
 <section class="card mt-4">
     <div class="card-header"><strong>Historial deportivo y administrativo</strong></div>

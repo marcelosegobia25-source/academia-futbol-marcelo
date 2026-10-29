@@ -200,120 +200,47 @@
     </div>
 </div>
 
-<!-- SECCIÓN 2: CAJA Y ADMINISTRACIÓN FINANCIERA -->
+<!-- SECCIÓN 2: CONTROL DE MENSUALIDADES Y CUOTAS -->
 <div class="dashboard-section-wrap mb-4">
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div class="section-heading-group">
-            <span class="section-tag bg-finanzas"><i class="bi bi-cash-coin"></i> Administración & Finanzas</span>
-            <h2 class="section-title">Control de Mensualidades, Caja & Cuotas</h2>
+            <span class="section-tag bg-finanzas"><i class="bi bi-cash-coin"></i> Mensualidades</span>
+            <h2 class="section-title">Control de Cobros & Cuotas</h2>
         </div>
-        <span class="text-muted small">Flujo de caja y estados contables</span>
+        <span class="text-muted small">Seguimiento de pensiones y recibos</span>
     </div>
     <div class="row g-3">
-        <div class="col-md-6 col-xl-3">
+        <div class="col-md-6 col-xl-4">
             <a href="{{ url_for('pagos.listar') }}" class="hub-card-link">
                 <div class="card hub-card h-100">
                     <div class="hub-card-icon icon-emerald"><i class="bi bi-receipt"></i></div>
                     <div class="hub-card-body">
                         <h5 class="hub-card-title">Pagos de Mensualidad</h5>
-                        <p class="hub-card-desc">Registro de cuotas, emisión de comprobantes oficiales y seguimiento de mora.</p>
+                        <p class="hub-card-desc">Historial de cobros, emisión de comprobantes en PDF y registro de cuotas.</p>
                     </div>
                     <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
                 </div>
             </a>
         </div>
-        <div class="col-md-6 col-xl-3">
-            <a href="{{ url_for('pagos.caja') }}" class="hub-card-link">
+        <div class="col-md-6 col-xl-4">
+            <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Con deuda') }}" class="hub-card-link">
                 <div class="card hub-card h-100">
-                    <div class="hub-card-icon icon-amber"><i class="bi bi-calculator"></i></div>
+                    <div class="hub-card-icon icon-rose"><i class="bi bi-exclamation-circle"></i></div>
                     <div class="hub-card-body">
-                        <h5 class="hub-card-title">Arqueo & Cierre de Caja</h5>
-                        <p class="hub-card-desc">Apertura por cajero, balance de efectivo, diferencias y cierres diarios.</p>
+                        <h5 class="hub-card-title">Alumnos con Deuda</h5>
+                        <p class="hub-card-desc">Padrón de deportistas con cuotas vencidas o pendientes de regularización.</p>
                     </div>
                     <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
                 </div>
             </a>
         </div>
-        <div class="col-md-6 col-xl-3">
-            <a href="{{ url_for('gestion.pagos_programados') }}" class="hub-card-link">
+        <div class="col-md-6 col-xl-4">
+            <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Próximo a vencer') }}" class="hub-card-link">
                 <div class="card hub-card h-100">
-                    <div class="hub-card-icon icon-blue"><i class="bi bi-calendar-check"></i></div>
+                    <div class="hub-card-icon icon-amber"><i class="bi bi-clock"></i></div>
                     <div class="hub-card-body">
-                        <h5 class="hub-card-title">Pagos Programados</h5>
-                        <p class="hub-card-desc">Compromisos a plazo, matrículas en cuotas y cronograma de vencimientos.</p>
-                    </div>
-                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a href="{{ url_for('gestion.contabilidad') }}" class="hub-card-link">
-                <div class="card hub-card h-100">
-                    <div class="hub-card-icon icon-teal"><i class="bi bi-graph-up-arrow"></i></div>
-                    <div class="hub-card-body">
-                        <h5 class="hub-card-title">Contabilidad General</h5>
-                        <p class="hub-card-desc">Asientos de ingresos, egresos operativos, categorías y balance mensual.</p>
-                    </div>
-                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
-                </div>
-            </a>
-        </div>
-    </div>
-</div>
-
-<!-- SECCIÓN 3: INDUMENTARIA, VENTAS E INVENTARIO -->
-<div class="dashboard-section-wrap mb-4">
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <div class="section-heading-group">
-            <span class="section-tag bg-inventario"><i class="bi bi-box-seam"></i> Indumentaria & Tienda</span>
-            <h2 class="section-title">Stock, Compras & Punto de Venta</h2>
-        </div>
-        <span class="text-muted small">Uniformes, balones y accesorios</span>
-    </div>
-    <div class="row g-3">
-        <div class="col-md-6 col-xl-3">
-            <a href="{{ url_for('gestion.inventario') }}" class="hub-card-link">
-                <div class="card hub-card h-100">
-                    <div class="hub-card-icon icon-amber"><i class="bi bi-boxes"></i></div>
-                    <div class="hub-card-body">
-                        <h5 class="hub-card-title">Control de Inventario</h5>
-                        <p class="hub-card-desc">Productos, tallas, variantes, existencias mínimas y kardex de movimientos.</p>
-                    </div>
-                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a href="{{ url_for('gestion.ventas') }}" class="hub-card-link">
-                <div class="card hub-card h-100">
-                    <div class="hub-card-icon icon-emerald"><i class="bi bi-bag-check"></i></div>
-                    <div class="hub-card-body">
-                        <h5 class="hub-card-title">Ventas & Recibos</h5>
-                        <p class="hub-card-desc">Punto de venta directo a alumnos, emisión de notas de venta y devoluciones.</p>
-                    </div>
-                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a href="{{ url_for('gestion.compras') }}" class="hub-card-link">
-                <div class="card hub-card h-100">
-                    <div class="hub-card-icon icon-indigo"><i class="bi bi-cart-plus"></i></div>
-                    <div class="hub-card-body">
-                        <h5 class="hub-card-title">Compras & Abastecimiento</h5>
-                        <p class="hub-card-desc">Registro de pedidos a proveedores con incremento automático de stock.</p>
-                    </div>
-                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a href="{{ url_for('gestion.inventario_conteo') }}" class="hub-card-link">
-                <div class="card hub-card h-100">
-                    <div class="hub-card-icon icon-cyan"><i class="bi bi-clipboard-check"></i></div>
-                    <div class="hub-card-body">
-                        <h5 class="hub-card-title">Conteo Físico</h5>
-                        <p class="hub-card-desc">Auditoría física periódica, cuadre de existencias y aprobación de ajustes.</p>
+                        <h5 class="hub-card-title">Próximos a Vencer</h5>
+                        <p class="hub-card-desc">Pensiones que vencen durante los próximos 5 días para aviso oportuno a tutores.</p>
                     </div>
                     <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
                 </div>
@@ -390,19 +317,6 @@
                     </div>
                     <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
                 </div>
-            </a>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <a href="{{ url_for('gestion.proveedores') }}" class="hub-card-link">
-                <div class="card hub-card h-100">
-                    <div class="hub-card-icon icon-indigo"><i class="bi bi-truck"></i></div>
-                    <div class="hub-card-body">
-                        <h5 class="hub-card-title">Directorio de Proveedores</h5>
-                        <p class="hub-card-desc">Contactos comerciales, compras asociadas y cuentas por pagar.</p>
-                    </div>
-                    <span class="hub-card-arrow"><i class="bi bi-chevron-right"></i></span>
-                </div>
-            </a>
         </div>
         {% if puede('administrar') %}
         <div class="col-md-6 col-xl-3">

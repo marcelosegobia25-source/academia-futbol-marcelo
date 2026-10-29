@@ -12,9 +12,9 @@
         <a href="{{ url_for('informacion.auditoria') }}" class="btn btn-outline-light">
             <i class="bi bi-arrow-repeat"></i> Volver a comprobar
         </a>
-        <form method="post" action="{{ url_for('informacion.reparar_vinculos_caja') }}" class="d-inline">
-            <button class="btn btn-outline-warning" onclick="return confirm('Se creará un respaldo y solo se reconstruirán vínculos verificables. ¿Continuar?')">
-                <i class="bi bi-tools"></i> Reparar vínculos
+        <form method="post" action="{{ url_for('informacion.reparar_agenda') }}" class="d-inline">
+            <button class="btn btn-outline-warning" onclick="return confirm('Se creará un respaldo y se verificarán las proyecciones deportivas de la agenda. ¿Continuar?')">
+                <i class="bi bi-tools"></i> Sincronizar agenda
             </button>
         </form>
     </div>

@@ -67,13 +67,6 @@
                     <a class="dropdown-item" data-module href="{{ url_for('calendario.listar_entrenamientos') }}"><i class="bi bi-clock-history me-2"></i>Entrenamientos y asistencia</a>
                     <a class="dropdown-item" data-module href="{{ url_for('calendario.personal') }}"><i class="bi bi-person-workspace me-2"></i>Profesores y entrenadores</a>
                     <a class="dropdown-item" data-module href="{{ url_for('campeonatos.listar') }}"><i class="bi bi-trophy me-2"></i>Campeonatos</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('gestion.contabilidad') }}"><i class="bi bi-graph-up-arrow me-2"></i>Contabilidad</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('gestion.pagos_programados') }}"><i class="bi bi-calendar-check me-2"></i>Pagos programados</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('gestion.inventario') }}"><i class="bi bi-box-seam me-2"></i>Inventario</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('gestion.inventario_conteo') }}"><i class="bi bi-clipboard-check me-2"></i>Conteo físico</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('gestion.compras') }}"><i class="bi bi-cart-plus me-2"></i>Compras</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('gestion.ventas') }}"><i class="bi bi-bag-check me-2"></i>Ventas y devoluciones</a>
-                    <a class="dropdown-item" data-module href="{{ url_for('gestion.proveedores') }}"><i class="bi bi-truck me-2"></i>Proveedores</a>
                     <a class="dropdown-item" data-module href="{{ url_for('categorias.listar') }}"><i class="bi bi-diagram-3 me-2"></i>Categorías</a>
                     <a class="dropdown-item" data-module href="{{ url_for('equipos.listar') }}"><i class="bi bi-shield-check me-2"></i>Equipos</a>
                     <a class="dropdown-item" data-module href="{{ url_for('lugares.listar') }}"><i class="bi bi-geo-alt me-2"></i>Canchas y lugares</a>
@@ -85,7 +78,7 @@
             </button>
             <nav class="sidebar-nav collapse show" id="menuOperaciones">
                 <a class="sidebar-link {{ 'active' if request.endpoint == 'index' }}" href="{{ url_for('index') }}"><i class="bi bi-speedometer2"></i><span>Inicio</span></a>
-                {% if puede('ver_finanzas') %}<a class="sidebar-link {{ 'active' if modulo == 'informacion' }}" href="{{ url_for('informacion.general') }}"><i class="bi bi-grid-1x2"></i><span>Información general</span></a>{% endif %}
+                {% if puede('ver_alumnos') or puede('ver_pagos') or puede('ver_deportivo') %}<a class="sidebar-link {{ 'active' if modulo == 'informacion' }}" href="{{ url_for('informacion.general') }}"><i class="bi bi-grid-1x2"></i><span>Información general</span></a>{% endif %}
                 {% if puede('ver_alumnos') %}<a class="sidebar-link {{ 'active' if modulo == 'alumnos' and request.endpoint != 'alumnos.asistencias' }}" href="{{ url_for('alumnos.listar') }}"><i class="bi bi-people"></i><span>Alumnos</span></a>{% endif %}
                 {% if puede('gestionar_asistencia') or puede('ver_deportivo') %}<a class="sidebar-link {{ 'active' if request.endpoint == 'alumnos.asistencias' }}" href="{{ url_for('alumnos.asistencias') }}"><i class="bi bi-calendar2-check"></i><span>Asistencias</span></a>{% endif %}
                 {% if puede('ver_pagos') %}<a class="sidebar-link {{ 'active' if modulo == 'pagos' }}" href="{{ url_for('pagos.listar') }}"><i class="bi bi-cash-stack"></i><span>Pagos</span></a>{% endif %}
@@ -93,12 +86,6 @@
                 {% if puede('ver_deportivo') %}<a class="sidebar-link {{ 'active' if modulo == 'agenda' }}" href="{{ url_for('agenda.listar') }}"><i class="bi bi-journal-text"></i><span>Agenda</span></a>{% endif %}
                 {% if puede('ver_deportivo') %}<a class="sidebar-link {{ 'active' if modulo == 'calendario' and request.endpoint == 'calendario.ver' }}" href="{{ url_for('calendario.ver') }}"><i class="bi bi-calendar3"></i><span>Calendario</span></a>{% endif %}
                 {% if puede('ver_deportivo') %}<a class="sidebar-link {{ 'active' if modulo == 'campeonatos' }}" href="{{ url_for('campeonatos.listar') }}"><i class="bi bi-trophy"></i><span>Campeonatos</span></a>{% endif %}
-                {% if puede('ver_finanzas') %}<a class="sidebar-link {{ 'active' if modulo == 'gestion' and request.endpoint and 'contabilidad' in request.endpoint }}" href="{{ url_for('gestion.contabilidad') }}"><i class="bi bi-graph-up-arrow"></i><span>Contabilidad</span></a>{% endif %}
-                {% if puede('gestionar_finanzas') or puede('ver_finanzas') %}<a class="sidebar-link {{ 'active' if request.endpoint and 'programad' in request.endpoint }}" href="{{ url_for('gestion.pagos_programados') }}"><i class="bi bi-calendar-check"></i><span>Pagos programados</span></a>{% endif %}
-                {% if puede('gestionar_inventario') or puede('ver_finanzas') %}<a class="sidebar-link {{ 'active' if modulo == 'gestion' and request.endpoint and 'inventario' in request.endpoint }}" href="{{ url_for('gestion.inventario') }}"><i class="bi bi-box-seam"></i><span>Inventario</span></a>{% endif %}
-                {% if puede('gestionar_inventario') %}<a class="sidebar-link {{ 'active' if request.endpoint and 'conteo' in request.endpoint }}" href="{{ url_for('gestion.inventario_conteo') }}"><i class="bi bi-clipboard-check"></i><span>Conteo físico</span></a>{% endif %}
-                {% if puede('gestionar_compras') or puede('gestionar_inventario') %}<a class="sidebar-link {{ 'active' if request.endpoint and 'compra' in request.endpoint }}" href="{{ url_for('gestion.compras') }}"><i class="bi bi-cart-plus"></i><span>Compras</span></a>{% endif %}
-                {% if puede('gestionar_inventario') %}<a class="sidebar-link {{ 'active' if modulo == 'gestion' and request.endpoint and 'venta' in request.endpoint }}" href="{{ url_for('gestion.ventas') }}"><i class="bi bi-bag-check"></i><span>Ventas</span></a>{% endif %}
             </nav>
             <button class="sidebar-label w-100 border-0 text-start d-flex justify-content-between align-items-center mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#menuAdministracion" aria-expanded="true">
                 <span>Administración</span> <i class="bi bi-chevron-down toggle-icon"></i>
@@ -109,10 +96,7 @@
                 {% if puede('gestionar_equipos') or puede('ver_deportivo') or puede('administrar') %}<a class="sidebar-link {{ 'active' if modulo == 'categorias' }}" href="{{ url_for('categorias.listar') }}"><i class="bi bi-diagram-3"></i><span>Categorías</span></a>{% endif %}
                 {% if puede('gestionar_equipos') or puede('ver_deportivo') or puede('administrar') %}<a class="sidebar-link {{ 'active' if modulo == 'equipos' }}" href="{{ url_for('equipos.listar') }}"><i class="bi bi-shield-check"></i><span>Equipos</span></a>{% endif %}
                 {% if puede('gestionar_lugares') or puede('ver_deportivo') or puede('administrar') %}<a class="sidebar-link {{ 'active' if modulo == 'lugares' }}" href="{{ url_for('lugares.listar') }}"><i class="bi bi-geo-alt"></i><span>Canchas y lugares</span></a>{% endif %}
-                {% if puede('gestionar_compras') or puede('gestionar_inventario') or puede('administrar') %}<a class="sidebar-link {{ 'active' if request.endpoint and 'proveedor' in request.endpoint }}" href="{{ url_for('gestion.proveedores') }}"><i class="bi bi-truck"></i><span>Proveedores</span></a>{% endif %}
                 {% if puede('ver_deportivo') or puede('administrar') %}<a class="sidebar-link {{ 'active' if request.endpoint and 'personal' in request.endpoint }}" href="{{ url_for('calendario.personal') }}"><i class="bi bi-person-workspace"></i><span>Profesores</span></a>{% endif %}
-                {% if puede('gestionar_finanzas') or puede('administrar') %}<a class="sidebar-link {{ 'active' if request.endpoint and 'categorias_contables' in request.endpoint }}" href="{{ url_for('gestion.categorias_contables') }}"><i class="bi bi-tags"></i><span>Categorías financieras</span></a>{% endif %}
-                {% if puede('gestionar_inventario') %}<a class="sidebar-link {{ 'active' if request.endpoint and 'producto_nuevo' in request.endpoint }}" href="{{ url_for('gestion.producto_nuevo') }}"><i class="bi bi-box-seam"></i><span>Añadir productos</span></a>{% endif %}
             </nav>
             <div class="sidebar-footer">
                 <div class="sidebar-user-card">
@@ -151,7 +135,6 @@
                         {% elif modulo == 'partidos' %}Partidos
                         {% elif modulo == 'agenda' %}Agenda
                         {% elif modulo == 'informacion' %}Información General
-                        {% elif modulo == 'gestion' %}Gestión y Finanzas
                         {% elif modulo == 'usuarios' %}Usuarios y Accesos
                         {% elif modulo == 'configuracion' %}Configuración
                         {% elif modulo == 'categorias' %}Categorías

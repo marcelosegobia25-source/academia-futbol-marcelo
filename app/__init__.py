@@ -81,7 +81,6 @@ def create_app(config_class=Config):
     from app.routes.informacion import bp as informacion_bp
     from app.routes.lugares import bp as lugares_bp
     from app.routes.autenticacion import bp as autenticacion_bp
-    from app.routes.gestion import bp as gestion_bp
     from app.routes.usuarios import bp as usuarios_bp
 
     app.register_blueprint(alumnos_bp)
@@ -96,7 +95,6 @@ def create_app(config_class=Config):
     app.register_blueprint(informacion_bp)
     app.register_blueprint(lugares_bp)
     app.register_blueprint(autenticacion_bp)
-    app.register_blueprint(gestion_bp)
     app.register_blueprint(usuarios_bp)
 
     from app.utils.tiempo import fecha_hora_bo, fecha_bo, hora_bo, hoy_bolivia, ahora_bolivia
@@ -260,8 +258,6 @@ def create_app(config_class=Config):
         _sembrar_seguridad_inicial()
         _sembrar_categorias_por_defecto()
         _sembrar_configuracion_por_defecto()
-        from app.routes.gestion import generar_calendario_programado
-        generar_calendario_programado()
 
     return app
 
@@ -305,7 +301,7 @@ def _sembrar_seguridad_inicial():
     perfiles = {
         "Administrador": set(PERMISOS),
         "Secretaría": {"ver_alumnos", "gestionar_alumnos", "ver_pagos", "registrar_pagos", "ver_deportivo", "gestionar_deportivo", "gestionar_asistencia"},
-        "Caja": {"ver_alumnos", "ver_pagos", "registrar_pagos", "cerrar_caja", "ver_finanzas", "gestionar_inventario"},
+        "Cobranzas": {"ver_alumnos", "ver_pagos", "registrar_pagos"},
         "Profesor": {"ver_alumnos", "ver_deportivo", "gestionar_asistencia"},
     }
     roles = {}

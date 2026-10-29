@@ -34,15 +34,6 @@ from app.utils.validacion import (
 bp = Blueprint("pagos", __name__, url_prefix="/pagos")
 
 
-def _sesion_caja_actual():
-    id_usuario = session.get("id_usuario")
-    if not id_usuario:
-        return None
-    return SesionCaja.query.filter(
-        SesionCaja.id_usuario == id_usuario,
-        SesionCaja.estado.in_(("Abierta", "Reabierta")),
-    ).order_by(SesionCaja.abierta_en.desc()).first()
-
 COLUMNAS_EXPORTACION = {
     "id_pago": ("ID Pago", lambda p: p.id_pago),
     "alumno": ("Alumno", lambda p: p.alumno.nombre_completo),
@@ -261,10 +252,6 @@ def crear(id_alumno):
     es_primer_pago = alumno.fecha_base_pago is None and not any(p.activo for p in alumno.pagos)
 
     if request.method == "POST":
-        sesion_caja = _sesion_caja_actual()
-        if current_app.config.get("AUTH_REQUIRED", True) and not sesion_caja:
-            flash("Debe abrir su caja antes de registrar un pago.", "warning")
-            return redirect(url_for("pagos.caja"))
         try:
             mes_pagado = mes_iso(request.form.get("mes_pagado"))
             modo_pago = opcion(
@@ -301,12 +288,8 @@ def crear(id_alumno):
             id_alumno=alumno.id_alumno, concepto="Mensualidad", periodo=mes_pagado
         ).first()
         if obligacion and obligacion.saldo <= 0:
-            flash(f"La mensualidad {mes_pagado} ya estÃ¡ completamente cubierta.", "danger")
+            flash(f"La mensualidad {mes_pagado} ya está completamente cubierta.", "danger")
             return redirect(url_for("pagos.crear", id_alumno=id_alumno))
-        cierre_hoy = CierreCaja.query.filter_by(fecha=date.today(), reabierto_en=None).first()
-        if cierre_hoy and not sesion_caja:
-            flash("La caja de hoy está cerrada. Abra una nueva sesión para registrar pagos.", "danger")
-            return redirect(url_for("pagos.caja"))
         ultimo_registro = Pago.query.order_by(Pago.creado_en.desc()).first()
         if ultimo_registro and ultimo_registro.creado_en:
             if ahora_utc() + timedelta(minutes=5) < ultimo_registro.creado_en:
@@ -442,15 +425,9 @@ def recibo_pdf(id_pago):
 @bp.route("/<int:id_pago>/eliminar", methods=["POST"])
 def eliminar(id_pago):
     pago = Pago.query.filter(Pago.eliminado_en.is_(None)).filter_by(id_pago=id_pago).first_or_404()
-    if CierreCaja.query.filter_by(fecha=pago.fecha_pago, reabierto_en=None).first():
-        flash("No se puede anular un pago de una caja cerrada. Reabra primero ese cierre.", "danger")
-        return redirect(url_for("pagos.caja"))
     movimiento = MovimientoContable.query.filter_by(
         origen_tipo="Pago", origen_id=pago.id_pago
     ).first()
-    if movimiento and movimiento.sesion_caja and movimiento.sesion_caja.estado == "Cerrada":
-        flash("No se puede anular un pago perteneciente a una sesión de caja cerrada. Reabra primero esa sesión.", "danger")
-        return redirect(url_for("pagos.caja"))
     try:
         motivo = texto_requerido(
             request.form.get("motivo"), "Motivo de anulación", 255
@@ -544,157 +521,6 @@ def cambiar_fecha_base(id_alumno):
         "success",
     )
     return redirect(url_for("alumnos.detalle", id_alumno=id_alumno))
-
-
-@bp.route("/caja/<int:id_cierre>/reabrir", methods=["POST"])
-def reabrir_caja(id_cierre):
-    cierre = CierreCaja.query.get_or_404(id_cierre)
-    if cierre.reabierto_en is not None:
-        flash("Ese cierre ya fue reabierto.", "warning")
-        return redirect(url_for("pagos.caja"))
-    try:
-        motivo = texto_requerido(
-            request.form.get("motivo"), "Motivo de reapertura", 255
-        )
-    except ErrorValidacion as error:
-        flash(str(error), "danger")
-        return redirect(url_for("pagos.caja"))
-    cierre.reabierto_en = ahora_utc()
-    cierre.motivo_reapertura = motivo
-    sesion_historica = SesionCaja.query.filter_by(id_cierre_legacy=cierre.id_cierre).first()
-    if sesion_historica:
-        sesion_historica.estado = "Reabierta"
-        sesion_historica.motivo_reapertura = motivo
-    db.session.add(Auditoria(
-        modulo="Pagos", accion="Reabrir caja", entidad="CierreCaja",
-        id_entidad=cierre.id_cierre, detalle=motivo,
-    ))
-    db.session.commit()
-    flash("Caja reabierta. Las operaciones posteriores quedarán auditadas.", "success")
-    return redirect(url_for("pagos.caja"))
-
-
-def _totales_caja(fecha):
-    pagos = Pago.query.filter(
-        Pago.eliminado_en.is_(None),
-        Pago.fecha_pago == fecha,
-        Pago.es_beca.is_(False),
-    ).all()
-    efectivo = sum((p.monto for p in pagos if p.modo_pago == "Efectivo"), Decimal("0"))
-    qr = sum((p.monto for p in pagos if p.modo_pago == "QR"), Decimal("0"))
-    return pagos, efectivo, qr
-
-
-@bp.route("/caja", methods=["GET", "POST"])
-def caja():
-    fecha_texto = request.values.get("fecha") or date.today().isoformat()
-    try:
-        fecha_caja = fecha_iso(fecha_texto, "Fecha de caja")
-    except ErrorValidacion as error:
-        flash(str(error), "danger")
-        return redirect(url_for("pagos.caja"))
-    pagos, efectivo, qr = _totales_caja(fecha_caja)
-    sesion_actual = _sesion_caja_actual()
-    if sesion_actual:
-        totales_metodo = {modo: Decimal("0") for modo in ("Efectivo", "QR", "Transferencia", "Otro")}
-        for movimiento in sesion_actual.movimientos_caja:
-            if movimiento.activo:
-                signo = Decimal("1") if movimiento.tipo == "Ingreso" else Decimal("-1")
-                totales_metodo[movimiento.modo_pago] += signo * Decimal(movimiento.monto)
-        efectivo = sesion_actual.ingresos_efectivo - sesion_actual.egresos_efectivo
-        qr = totales_metodo["QR"]
-    else:
-        totales_metodo = {"Efectivo": efectivo, "QR": qr, "Transferencia": Decimal("0"), "Otro": Decimal("0")}
-    cierre = CierreCaja.query.filter_by(fecha=fecha_caja).first()
-    if request.method == "POST":
-        if current_app.config.get("AUTH_REQUIRED", True) and not sesion_actual:
-            flash("No existe una sesión abierta para cerrar.", "warning")
-            return redirect(url_for("pagos.caja"))
-        if cierre and cierre.reabierto_en is None and not sesion_actual:
-            flash("La caja de esa fecha ya está cerrada.", "warning")
-            return redirect(url_for("pagos.caja", fecha=fecha_texto))
-        try:
-            efectivo_contado = Decimal(request.form.get("efectivo_contado", "0"))
-            qr_confirmado = Decimal(request.form.get("qr_confirmado", "0"))
-            if efectivo_contado < 0 or qr_confirmado < 0:
-                raise ValueError
-            observacion = texto_opcional(
-                request.form.get("observacion"), "Observación", 255
-            )
-        except (ValueError, ArithmeticError):
-            flash("Los montos conciliados deben ser números positivos.", "danger")
-            return redirect(url_for("pagos.caja", fecha=fecha_texto))
-        efectivo_sistema_cierre = sesion_actual.esperado_actual if sesion_actual else efectivo
-        diferencia = (efectivo_contado + qr_confirmado) - (efectivo_sistema_cierre + qr)
-        if cierre:
-            cierre.efectivo_sistema = efectivo_sistema_cierre
-            cierre.qr_sistema = qr
-            cierre.efectivo_contado = efectivo_contado
-            cierre.qr_confirmado = qr_confirmado
-            cierre.diferencia = diferencia
-            cierre.observacion = observacion
-            cierre.cerrado_en = ahora_utc()
-            cierre.reabierto_en = None
-            accion_cierre = "Cerrar nuevamente"
-        else:
-            cierre = CierreCaja(
-                fecha=fecha_caja, efectivo_sistema=efectivo_sistema_cierre, qr_sistema=qr,
-                efectivo_contado=efectivo_contado, qr_confirmado=qr_confirmado,
-                diferencia=diferencia, observacion=observacion,
-            )
-            db.session.add(cierre)
-            accion_cierre = "Cerrar"
-        db.session.flush()
-        if sesion_actual:
-            sesion_actual.efectivo_esperado = sesion_actual.esperado_actual
-            sesion_actual.efectivo_contado = efectivo_contado
-            sesion_actual.diferencia = efectivo_contado - sesion_actual.esperado_actual
-            sesion_actual.cerrada_en = ahora_utc()
-            sesion_actual.estado = "Cerrada"
-            sesion_actual.observacion = observacion
-            sesion_actual.id_cierre_legacy = cierre.id_cierre
-        db.session.add(Auditoria(
-            modulo="Caja", accion=accion_cierre, entidad="CierreCaja",
-            id_entidad=cierre.id_cierre,
-            detalle=f"fecha={fecha_caja}; diferencia={diferencia}",
-        ))
-        db.session.commit()
-        flash("Cierre diario registrado correctamente.", "success")
-        return redirect(url_for("pagos.caja", fecha=fecha_texto))
-    cierres = CierreCaja.query.order_by(CierreCaja.fecha.desc()).limit(30).all()
-    sesiones = SesionCaja.query.order_by(SesionCaja.abierta_en.desc()).limit(50).all()
-    return render_template(
-        "pagos/caja.html", fecha_caja=fecha_caja, pagos=pagos,
-        efectivo=efectivo, qr=qr, cierre=cierre, cierres=cierres,
-        sesion_actual=sesion_actual, totales_metodo=totales_metodo, sesiones=sesiones,
-    )
-
-
-@bp.route("/caja/abrir", methods=["POST"])
-def abrir_caja():
-    if _sesion_caja_actual():
-        flash("Ya tiene una caja abierta.", "warning")
-        return redirect(url_for("pagos.caja"))
-    try:
-        saldo = Decimal(request.form.get("saldo_inicial", "0"))
-        if saldo < 0:
-            raise ValueError
-        observacion = texto_opcional(request.form.get("observacion"), "Observación", 255)
-    except (ValueError, ArithmeticError):
-        flash("El saldo inicial debe ser un número positivo.", "danger")
-        return redirect(url_for("pagos.caja"))
-    nueva = SesionCaja(
-        id_usuario=session["id_usuario"], saldo_inicial=saldo,
-        estado="Abierta", observacion=observacion,
-    )
-    db.session.add(nueva); db.session.flush()
-    db.session.add(Auditoria(
-        modulo="Caja", accion="Abrir", entidad="SesionCaja", id_entidad=nueva.id_sesion,
-        valor_nuevo=f"saldo_inicial={saldo}",
-    ))
-    db.session.commit()
-    flash("Caja abierta correctamente.", "success")
-    return redirect(url_for("pagos.caja"))
 
 
 @bp.route("/exportar")

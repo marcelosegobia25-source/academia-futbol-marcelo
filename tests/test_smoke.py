@@ -5,9 +5,7 @@ def test_pantallas_principales(client):
         "/calendario/entrenamientos", "/campeonatos/",
         "/campeonatos/rivales", "/lugares/", "/lugares/nuevo",
         "/configuracion/",
-        "/gestion/contabilidad", "/gestion/inventario", "/gestion/ventas",
-        "/gestion/proveedores", "/informacion/auditoria",
-        "/gestion/pagos-programados", "/gestion/pagos-programados/nuevo",
+        "/informacion/auditoria",
     ]
     for ruta in rutas:
         respuesta = client.get(ruta)

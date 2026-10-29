@@ -13,7 +13,7 @@ El presente documento constituye la **Propuesta Comercial Oficial, Términos de 
 Nuestra plataforma está concebida exclusivamente para resolver los problemas críticos de administración deportiva en Bolivia:
 1. **Control de Cobranza y Cero Evasión:** Elimina las mensualidades olvidadas o no cobradas mediante semaforización en tiempo real (*Vigente*, *Próximo a vencer*, *Vencido*) y cálculo automatizado de continuidad.
 2. **Llamada de Asistencia Rápida en Cancha:** Interfaz táctil de alto contraste diseñada para profesores y entrenadores que permite pasar lista por categoría en menos de 30 segundos desde cualquier teléfono móvil.
-3. **Caja Diaria y Arqueo Transparente:** Conciliación estricta entre pagos en efectivo y transferencias QR, con cierre diario inmutable y control de diferencias.
+3. **Control Transparente de Pagos y Recibos:** Registro inmediato de cuotas en Efectivo o QR con emisión instantánea de recibo oficial en PDF y control riguroso de deudores.
 4. **Ficha Deportiva y Médica Integral:** Historial de habilitación a torneos, categorías, equipos, posiciones y control de edad con alerta de cambio de categoría.
 
 ---
@@ -24,9 +24,9 @@ Los planes están escalonados para acompañar el crecimiento orgánico de la ins
 
 | Plan Comercial | Tarifa Mensual | Capacidad Alumnos Activos | Perfil Institucional / Alcance Principal |
 | :--- | :---: | :---: | :--- |
-| **Plan Formativo** | **150 Bs / mes** | Hasta 60 alumnos | Escuelas formativas de barrio o proyectos en etapa inicial. Módulo esencial de registro, asistencia y cobro de mensualidades. |
-| **Plan Pro (Estándar)** <br>*(Más Recomendado)* | **200 Bs / mes** | Hasta 120 alumnos | Academias en consolidación con múltiples turnos y profesores. Incluye caja diaria, arqueos, tienda de uniformes y respaldos en la nube. |
-| **Plan Élite** | **250 Bs / mes** | **Alumnos ilimitados** | Clubes competitivos, múltiples categorías y alta rotación. Soporte 24/7 prioritario, multiusuario ilimitado y personalización visual. |
+| **Plan Formativo** | **150 Bs / mes** | Hasta 60 alumnos | Escuelas formativas de barrio o proyectos en etapa inicial. Módulo esencial de registro, asistencia y cobro de mensualidades con recibo digital. |
+| **Plan Pro (Estándar)** <br>*(Más Recomendado)* | **200 Bs / mes** | Hasta 120 alumnos | Academias en consolidación con múltiples categorías y profesores. Incluye convocatorias por WhatsApp, ficha médica/deportiva, fotos protegidas y respaldos. |
+| **Plan Élite** | **250 Bs / mes** | **Alumnos ilimitados** | Clubes competitivos, múltiples categorías y alta rotación. Torneos/fixtures en vivo, soporte 24/7 prioritario, multiusuario ilimitado y marca propia. |
 
 ---
 
@@ -45,8 +45,8 @@ Los planes están escalonados para acompañar el crecimiento orgánico de la ins
 #### B. Plan Pro — Estándar (200 Bs / mes) · *Plan Más Popular*
 * **Capacidad:** Hasta 120 deportistas activos.
 * **Módulos incluidos (todo lo del Plan Formativo más):**
-  * **Módulo de Tesorería y Caja Diaria:** Apertura, control de entradas/salidas, arqueo de efectivo vs. QR y cierre de caja.
-  * **Tienda e Inventario:** Control de stock de indumentaria deportiva, venta de uniformes asociada a la ficha del alumno y compras a proveedores.
+  * **Control Avanzado de Cobranzas y Deudores:** Alertas automáticas de vencimiento, reportes de morosidad y exportación a Excel/PDF.
+  * **Ficha Médica y Carnets Oficiales:** Registro de grupo sanguíneo, alergias, contactos de emergencia y carnet digital plastificable.
   * **Gestión de Entrenadores y Personal:** Asignación de profesores a horarios y control de solapamiento de canchas.
   * **Subida Segura de Fotografías:** Procesamiento y saneamiento automático de fotos de alumnos con compresión y protección antimalware.
   * **Convocatorias Oficiales:** Generación de listas de citación para partidos con botón directo para compartir vía WhatsApp con padres de familia.
@@ -56,7 +56,7 @@ Los planes están escalonados para acompañar el crecimiento orgánico de la ins
 * **Capacidad:** **Alumnos ilimitados** (sin restricción de padrón).
 * **Módulos incluidos (todo lo de los planes anteriores más):**
   * **Módulo Completo de Campeonatos y Torneos:** Fixture automatizado, cálculo de tablas de posiciones en vivo, fases de grupos y eliminatorias directas.
-  * **Cuentas de Usuario Ilimitadas:** Accesos independientes para directores, coordinadores, profesores y personal de caja con permisos granulares.
+  * **Cuentas de Usuario Ilimitadas:** Accesos independientes para directores, coordinadores y profesores con permisos diferenciados.
   * **Personalización de Marca:** Configuración de escudo/logo institucional y colores corporativos de la academia en toda la plataforma y recibos.
   * **Respaldos Automatizados Diarios:** Copias de seguridad automáticas en la nube y herramienta de descarga de respaldo completo con un solo clic.
 * **Soporte:** Soporte prioritario 24/7 para incidencias de servicio y atención de urgencia para eventos deportivos de fin de semana.
@@ -96,7 +96,7 @@ El sistema está construido siguiendo estándares modernos de desarrollo de soft
 ├────────────────────────────────────────────────────────────────────────┤
 │                  CAPA 4: PROCESAMIENTO MULTIMEDIA Y REPORTES           │
 │   Pillow Engine (Sanitización de Imágenes) · ReportLab (PDFs Oficiales)│
-│   OpenPyXL Engine (Exportación de Libros Financieros y Padrón Excel)   │
+│   OpenPyXL Engine (Exportación de Padrón y Reportes de Pagos en Excel)│
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -112,7 +112,7 @@ El sistema está construido siguiendo estándares modernos de desarrollo de soft
 Para proteger jurídicamente a ambas partes y establecer con total claridad el alcance y la responsabilidad en el manejo de datos (especialmente de menores de edad y transacciones económicas), se fijan las siguientes condiciones:
 
 ### Cláusula 4.1: Delimitación de Roles y Propiedad de los Datos
-1. **Propiedad Exclusiva:** La Academia Cliente es la **única y exclusiva propietaria** de toda la información ingresada a la plataforma, incluyendo nombres, cédulas de identidad, números telefónicos, direcciones, imágenes de los menores, datos de tutores y registros contables.
+1. **Propiedad Exclusiva:** La Academia Cliente es la **única y exclusiva propietaria** de toda la información ingresada a la plataforma, incluyendo nombres, cédulas de identidad, números telefónicos, direcciones, imágenes de los menores, datos de tutores y registros de pagos.
 2. **Rol del Proveedor:** El Proveedor actúa exclusivamente en calidad de **Encargado del Tratamiento Tecnológico y Custodio Digital**. Bajo ninguna circunstancia el Proveedor podrá:
    * Vender, ceder, transferir, comercializar o compartir información del Cliente con terceras empresas, patrocinadores o agencias de publicidad.
    * Utilizar los números de contacto o correos de los tutores para fines distintos al estricto soporte del sistema.

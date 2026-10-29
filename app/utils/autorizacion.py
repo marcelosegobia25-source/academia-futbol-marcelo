@@ -8,12 +8,10 @@ CATEGORIAS_PERMISOS = {
         ("eliminar_alumnos", "Retirar alumnos", "Dar de baja o retirar alumnos de la academia."),
         ("gestionar_becas", "Autorizar becas", "Asignar, modificar y aprobar becas a alumnos."),
     ],
-    "Pagos, Recibos y Caja": [
-        ("ver_pagos", "Ver mensualidades y caja", "Consultar historial de pagos, estado de deudas y deudores."),
+    "Cobros y Mensualidades": [
+        ("ver_pagos", "Ver mensualidades", "Consultar historial de pagos, estado de deudas y deudores."),
         ("registrar_pagos", "Registrar mensualidades", "Cobrar cuotas, mensualidades y emitir recibos."),
         ("anular_pagos", "Anular mensualidades", "Anular cobros y recibos erróneos."),
-        ("cerrar_caja", "Cerrar caja", "Realizar el arqueo y cierre diario de caja chica."),
-        ("reabrir_caja", "Reabrir caja", "Reabrir un turno o jornada de caja ya cerrada."),
     ],
     "Deporte, Torneos y Asistencia": [
         ("ver_deportivo", "Ver actividad deportiva", "Consultar partidos, agenda, calendario y torneos."),
@@ -21,15 +19,6 @@ CATEGORIAS_PERMISOS = {
         ("gestionar_asistencia", "Registrar asistencia", "Tomar asistencia a los entrenamientos y partidos."),
         ("gestionar_equipos", "Gestionar categorías y equipos", "Administrar divisiones por edades y planteles."),
         ("gestionar_lugares", "Gestionar canchas y sedes", "Administrar canchas, predios y lugares de práctica."),
-    ],
-    "Tienda e Inventario": [
-        ("gestionar_inventario", "Gestionar inventario y ventas", "Ver stock, conteos y registrar ventas de indumentaria."),
-        ("gestionar_compras", "Registrar compras a proveedores", "Registrar ingresos de mercadería e indumentaria."),
-        ("anular_ventas", "Anular ventas y devoluciones", "Anular tickets de venta y procesar devoluciones."),
-    ],
-    "Finanzas y Contabilidad": [
-        ("ver_finanzas", "Ver finanzas", "Consultar reportes económicos y balances."),
-        ("gestionar_finanzas", "Gestionar finanzas", "Registrar egresos, gastos y pagos programados."),
     ],
     "Seguridad y Sistema": [
         ("auditoria", "Ver auditoría", "Consultar la bitácora de auditoría y trazabilidad."),
@@ -84,29 +73,15 @@ def permiso_para_solicitud():
             return "eliminar_alumnos"
         return "gestionar_alumnos" if escritura else "ver_alumnos"
     if bp == "pagos":
-        if "reabrir" in endpoint:
-            return "reabrir_caja"
-        if "abrir_caja" in endpoint:
-            return "registrar_pagos"
         if "eliminar" in endpoint:
             return "anular_pagos"
-        if "caja" in endpoint and escritura:
-            return "cerrar_caja"
         return "registrar_pagos" if escritura else "ver_pagos"
     if bp == "informacion":
         if "auditoria" in endpoint:
             return "auditoria"
         if "respaldo" in endpoint or "descargas" in endpoint:
             return "respaldos"
-        return "ver_finanzas"
-    if bp == "gestion":
-        if any(x in endpoint for x in ("venta_anular", "venta_devolver")):
-            return "anular_ventas"
-        if "compra" in endpoint and escritura:
-            return "gestionar_compras"
-        if any(x in endpoint for x in ("inventario", "venta", "producto", "variante")):
-            return "gestionar_inventario" if escritura else "ver_finanzas"
-        return "gestionar_finanzas" if escritura else "ver_finanzas"
+        return "ver_alumnos"
     if bp in {"partidos", "agenda", "calendario", "campeonatos"}:
         if endpoint == "calendario.asistencia" and escritura:
             return "gestionar_asistencia"

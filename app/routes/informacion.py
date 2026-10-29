@@ -10,10 +10,11 @@ from flask import (
 from sqlalchemy.orm import selectinload, joinedload
 
 from app.extensions import db
-from app.models import (Alumno, Auditoria, Categoria, CuotaProgramada, Equipo, EventoAgenda,
-    MovimientoCaja, MovimientoContable, Partido, Pago, CierreCaja, Obligacion, AplicacionPago,
-    Producto, ProductoVariante, Compra, Venta, DevolucionVenta, ConteoInventario,
-    PersonalDeportivo, AsistenciaEntrenamiento, SesionCaja, InscripcionGestion)
+from app.models import (
+    Alumno, Auditoria, Categoria, Equipo, EventoAgenda, Partido, Pago,
+    Obligacion, AplicacionPago, PersonalDeportivo, AsistenciaEntrenamiento,
+    InscripcionGestion
+)
 from app.utils.resumen_categorias import construir_resumen_categorias
 from app.utils.backup import crear_respaldo, crear_respaldo_completo, ruta_sqlite
 from app.utils.descargas import carpeta_descargas, guardar_archivo
@@ -166,25 +167,12 @@ def general():
         .limit(8)
         .all()
     )
-    cuotas_pendientes = CuotaProgramada.query.filter(
-        CuotaProgramada.estado == "Pendiente",
-        CuotaProgramada.fecha_vencimiento <= hoy + timedelta(days=30),
-    ).order_by(CuotaProgramada.fecha_vencimiento).all()
     inicio_mes = hoy.replace(day=1)
     obligaciones_pendientes = [
         o for o in Obligacion.query.options(
             selectinload(Obligacion.aplicaciones).joinedload(AplicacionPago.pago)
         ).all() if o.saldo > 0
     ]
-    movimientos_mes = MovimientoContable.query.filter(
-        MovimientoContable.fecha >= inicio_mes, MovimientoContable.fecha <= hoy,
-        MovimientoContable.anulado_en.is_(None),
-    ).all()
-    ingresos_mes = sum((Decimal(m.monto) for m in movimientos_mes if m.tipo == "Ingreso"), Decimal("0"))
-    egresos_mes = sum((Decimal(m.monto) for m in movimientos_mes if m.tipo == "Egreso"), Decimal("0"))
-    variantes = ProductoVariante.query.join(Producto).filter(
-        Producto.activo.is_(True)
-    ).all()
     asistencias_mes = AsistenciaEntrenamiento.query.filter(
         AsistenciaEntrenamiento.registrado_en >= inicio_mes
     ).all()
@@ -218,19 +206,10 @@ def general():
         "recaudacion_mes": recaudacion_mes,
         "obligaciones_pendientes": len(obligaciones_pendientes),
         "saldo_pendiente": sum((o.saldo for o in obligaciones_pendientes), Decimal("0")),
-        "ingresos_finanzas_mes": ingresos_mes, "egresos_finanzas_mes": egresos_mes,
-        "saldo_finanzas_mes": ingresos_mes - egresos_mes,
-        "stock_bajo": sum(1 for v in variantes if v.stock <= v.stock_minimo),
-        "compras_mes": Compra.query.filter(Compra.fecha >= inicio_mes, Compra.fecha <= hoy, Compra.anulado_en.is_(None)).count(),
-        "ventas_mes": Venta.query.filter(Venta.fecha >= inicio_mes, Venta.fecha <= hoy, Venta.anulado_en.is_(None)).count(),
-        "devoluciones_mes": DevolucionVenta.query.filter(DevolucionVenta.fecha >= inicio_mes, DevolucionVenta.fecha <= hoy).count(),
-        "conteos_pendientes": ConteoInventario.query.filter_by(estado="Pendiente").count(),
         "personal_activo": PersonalDeportivo.query.filter_by(activo=True).count(),
         "asistencia_mes": round((presentes_mes / len(asistencias_mes) * 100), 1) if asistencias_mes else 0,
-        "cajas_abiertas": SesionCaja.query.filter(SesionCaja.estado.in_(("Abierta", "Reabierta"))).count(),
         "inscripciones_activas": InscripcionGestion.query.filter_by(gestion=hoy.year, estado="Activa").count(),
     }
-    ultimo_cierre = CierreCaja.query.order_by(CierreCaja.fecha.desc()).first()
     ruta_base = ruta_sqlite(current_app)
     respaldos = ruta_base.parent / "backups" if ruta_base else Path()
     ultimo_respaldo = max(
@@ -246,9 +225,7 @@ def general():
         becas=becas,
         becas_vencidas=becas_vencidas,
         proximos_eventos=proximos_eventos,
-        cuotas_pendientes=cuotas_pendientes,
         proximos_cumpleanos=proximos_cumpleanos,
-        ultimo_cierre=ultimo_cierre,
         ultimo_respaldo=ultimo_respaldo,
         carpeta_descargas=carpeta_descargas(),
         hoy=hoy,
@@ -266,20 +243,9 @@ def auditoria():
     return render_template("informacion/auditoria.html", resultado=resultado, registros=registros)
 
 
-@bp.route("/auditoria/reparar-vinculos-caja", methods=["POST"])
-def reparar_vinculos_caja():
-    respaldo = crear_respaldo(current_app, "antes_reparar_integridad")
-    faltantes = MovimientoContable.query.filter(
-        MovimientoContable.id_sesion_caja.is_not(None),
-        ~MovimientoContable.id_movimiento.in_(db.select(MovimientoCaja.id_movimiento_contable)),
-    ).all()
-    for movimiento in faltantes:
-        db.session.add(MovimientoCaja(
-            id_sesion=movimiento.id_sesion_caja,
-            id_movimiento_contable=movimiento.id_movimiento,
-            tipo=movimiento.tipo, monto=movimiento.monto,
-            modo_pago=movimiento.modo_pago, creado_en=movimiento.creado_en,
-        ))
+@bp.route("/auditoria/reparar-agenda", methods=["POST"])
+def reparar_agenda():
+    respaldo = crear_respaldo(current_app, "antes_reparar_agenda")
     proyecciones = 0
     for partido in Partido.query.all():
         evento = EventoAgenda.query.filter_by(id_partido=partido.id_partido).first()
@@ -291,11 +257,11 @@ def reparar_vinculos_caja():
         evento.id_lugar=partido.id_lugar; evento.id_categoria=partido.id_categoria
         evento.id_equipo=partido.id_equipo; proyecciones += 1
     db.session.add(Auditoria(
-        modulo="Integridad", accion="Reparar vínculos de caja", entidad="MovimientoCaja",
-        valor_nuevo=f"caja={len(faltantes)}; agenda_sincronizada={proyecciones}; respaldo={respaldo}",
+        modulo="Integridad", accion="Sincronizar agenda", entidad="EventoAgenda",
+        valor_nuevo=f"agenda_sincronizada={proyecciones}; respaldo={respaldo}",
     ))
     db.session.commit()
-    flash(f"Reparación controlada terminada: {len(faltantes)} vínculos de caja y {proyecciones} proyecciones deportivas verificadas.", "success")
+    flash(f"Sincronización terminada: {proyecciones} proyecciones deportivas verificadas en agenda.", "success")
     return redirect(url_for("informacion.auditoria"))
 
 
