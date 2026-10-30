@@ -44,7 +44,7 @@
                         <label for="nombre_usuario" class="form-label">Usuario</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-person"></i></span>
-                            <input id="nombre_usuario" name="nombre_usuario" class="form-control" value="admin" maxlength="40" required>
+                            <input id="nombre_usuario" name="nombre_usuario" class="form-control" maxlength="40" required autofocus autocomplete="off" value="">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -54,7 +54,7 @@
                             <input id="contrasena" name="contrasena" type="password"
                                    class="form-control text-center fw-bold"
                                    pattern="[0-9]{5}|.{8,128}" minlength="5"
-                                   maxlength="128" autocomplete="current-password" required autofocus
+                                   maxlength="128" autocomplete="current-password" required
                                    placeholder="•••••">
                         </div>
                         <div class="form-text text-muted small mt-1"><i class="bi bi-shield-lock me-1"></i>La contraseña debe contener exactamente 5 números o al menos 8 caracteres para mayor seguridad.</div>

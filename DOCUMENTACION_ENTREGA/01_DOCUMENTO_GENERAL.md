@@ -48,30 +48,30 @@ Las academias deportivas requieren herramientas especializadas para:
 - Controlar pagos y obligaciones financieras
 - Mantener auditoría de todas las operaciones
 - Generar reportes y estadísticas
-- Operar sin conexión a Internet
+- Acceder y colaborar en tiempo real desde múltiples dispositivos (cancha, oficina, dirección)
 
-Las soluciones comerciales disponibles son costosas, complejas o no están adaptadas al contexto local.
+Las soluciones comerciales tradicionales son costosas, complejas o no están adaptadas al contexto deportivo.
 
 ---
 
 ## 3. PROBLEMA IDENTIFICADO
 
 **Situación antes del sistema:**
-- ❌ Información dispersa en archivos Excel
-- ❌ Inconsistencias en datos
-- ❌ Dificultad para auditoría
+- ❌ Información dispersa en archivos Excel y cuadernos
+- ❌ Inconsistencias en datos y cobros desfasados
+- ❌ Dificultad para auditoría y control de caja
 - ❌ Falta de respaldos automáticos
 - ❌ Reportes manuales y lentos
-- ❌ Sin control de acceso
-- ❌ Imposible trabajar sin Internet
+- ❌ Sin control de acceso multi-usuario
+- ❌ Dependencia de una sola computadora fija sin acceso remoto
 
-**Solución implementada:** Sistema integral que automatiza todas estas funciones.
+**Solución implementada:** Plataforma web en la nube que automatiza todas estas funciones.
 
 ---
 
 ## 4. OBJETIVO GENERAL
 
-Proporcionar una herramienta software completa, segura y confiable que permita a las academias deportivas gestionar de manera eficiente todos los aspectos de su operación (académico, deportivo, financiero y administrativo).
+Proporcionar una herramienta software completa, segura y confiable alojada en la nube que permita a las academias deportivas gestionar de manera eficiente todos los aspectos de su operación (académico, deportivo, financiero y administrativo) desde cualquier lugar y dispositivo.
 
 ---
 
@@ -79,11 +79,11 @@ Proporcionar una herramienta software completa, segura y confiable que permita a
 
 1. ✅ Centralizar la información de alumnos, tutores, equipos y campeonatos
 2. ✅ Automatizar la gestión de pagos y obligaciones financieras
-3. ✅ Implementar control de acceso mediante autenticación y autorización
+3. ✅ Implementar control de acceso mediante autenticación y autorización por roles
 4. ✅ Proporcionar auditoría completa de todas las operaciones
-5. ✅ Generar respaldos automáticos y recuperación ante desastres
+5. ✅ Generar respaldos automáticos continuos en la nube
 6. ✅ Crear reportes y exportaciones en múltiples formatos (PDF, Excel)
-7. ✅ Permitir operación sin conexión a Internet
+7. ✅ Permitir acceso web universal 24/7 desde computadoras, tablets y móviles
 8. ✅ Implementar validaciones de integridad de datos
 9. ✅ Facilitar gestión de inventario y ventas
 10. ✅ Proporcionar documentación completa
@@ -117,7 +117,7 @@ Proporcionar una herramienta software completa, segura y confiable que permita a
 
 1. **Plataforma:** Windows 64 bits (actualmente)
 2. **Base de datos:** SQLite (ideal para una academia, 1000+ usuarios simultáneos no es necesario)
-3. **Internet:** Sistema diseñado para funcionar sin conexión
+3. **Disponibilidad:** Plataforma web en la nube accesible 24/7 desde cualquier dispositivo
 4. **Usuarios simultáneos:** Óptimo para 5-50 usuarios concurrentes
 5. **Datos:** Máximo ~10,000 alumnos sin degradación de rendimiento
 
@@ -182,75 +182,60 @@ Proporcionar una herramienta software completa, segura y confiable que permita a
 
 ---
 
-## 10. REQUISITOS DEL SISTEMA
+## 10. REQUISITOS DEL SISTEMA Y ACCESO
 
-### Hardware Mínimo
-- CPU: Intel i5 o equivalente
-- RAM: 4 GB
-- Disco: 500 MB libres
-- Pantalla: 1366 x 768 px
+### Modelo de Operación: 100% en la Nube (SaaS)
+La plataforma no exige hardware especial ni servidores locales. Opera de forma completamente remota y centralizada en la nube.
 
-### Software Requerido
-- Windows 10/11 64 bits
-- Navegador: Chrome, Firefox, Edge (reciente)
-- .NET Framework (incluido en instalador)
-
-### Dependencias (incluidas en instalador)
-- Python 3.9+
-- Flask
-- SQLAlchemy
-- SQLite
-- Waitress
+### Requisitos de Acceso para el Usuario
+- **Dispositivos Compatibles:** Computadoras (Windows, macOS, Linux), Laptops, Tablets (iPad, Android) y Teléfonos Inteligentes (Android, iOS).
+- **Navegadores Soportados:** Google Chrome, Safari, Microsoft Edge, Mozilla Firefox (versiones modernas).
+- **Conectividad:** Conexión a Internet estándar (Wi-Fi, red cableada o datos móviles 4G/5G).
+- **Instalación Local:** **Ninguna (0 MB)**. No requiere descargar instaladores, parches ni configuraciones técnicas en los dispositivos.
 
 ---
 
-## 11. ARQUITECTURA TECNOLÓGICA
+## 11. ARQUITECTURA TECNOLÓGICA CLOUD
 
 ```
-┌─────────────────────────────────────┐
-│         USUARIO (Navegador)         │
-│    Chrome / Firefox / Edge          │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│      APLICACIÓN WEB (Flask)         │
-│  - Rutas (14 módulos)               │
-│  - Autenticación                    │
-│  - Validaciones                     │
-│  - Lógica de negocio                │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│  CAPA DE DATOS (SQLAlchemy ORM)     │
-│  - Modelos (52 clases)              │
-│  - Relaciones                       │
-│  - Validaciones BD                  │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│      BASE DE DATOS (SQLite)         │
-│  - 57 tablas                        │
-│  - Integridad referencial           │
-│  - Índices optimizados              │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│      ALMACENAMIENTO PERSISTENTE     │
-│  /instance/academia.db              │
-│  /instance/backups/                 │
-│  /instance/uploads/                 │
-└─────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│             DISPOSITIVOS DE ACCESO UNIVERSAL           │
+│    PC / Laptop / Tablet en Cancha / Smartphone Móvil   │
+│           (Navegadores: Chrome, Safari, Edge)          │
+└───────────────────────────┬────────────────────────────┘
+                            │ HTTPS / SSL (Cifrado 256 bits)
+┌───────────────────────────▼────────────────────────────┐
+│              INFRAESTRUCTURA CLOUD (PRODUCCIÓN)        │
+│  - Servidor de Aplicación: Gunicorn (Multi-Worker)     │
+│  - Framework Web: Flask + HTMX (14 Módulos)            │
+│  - Seguridad: Protección Anti Fuerza Bruta + Sesiones  │
+│  - Capa de Lógica de Negocio y Reglas Deportivas       │
+└───────────────────────────┬────────────────────────────┘
+                            │ SQLAlchemy ORM
+┌───────────────────────────▼────────────────────────────┐
+│            BASE DE DATOS CLOUD GESTIONADA              │
+│  - Motor Relacional: PostgreSQL / SQLAlchemy           │
+│  - Cumplimiento ACID & Claves Foráneas                 │
+│  - Índices optimizados para alto rendimiento           │
+└───────────────────────────┬────────────────────────────┘
+                            │
+┌───────────────────────────▼────────────────────────────┐
+│        RESPALDOS AUTOMÁTICOS Y ARCHIVOS CLOUD          │
+│  - Respaldos diarios automáticos gestionados           │
+│  - Almacenamiento seguro de fotos y comprobantes       │
+│  - Generación de ZIP descargable de respaldo total     │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## 12. BASE DE DATOS
 
-**Motor:** SQLite3  
+**Motor Cloud:** PostgreSQL / SQLAlchemy ORM (Cloud Ready)  
 **Tablas:** 57  
 **Registros:** 2,847+ en uso  
-**Tamaño:** 0.93 MB (compacto)  
-**Integridad:** PERFECTA ✅
+**Integridad:** PERFECTA ✅  
+**Respaldos:** Automáticos diarios en la nube con retención de 30 días  
 
 ### Módulos de Base de Datos
 

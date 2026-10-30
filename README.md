@@ -1,12 +1,26 @@
-# Academia de Fútbol — Sistema de gestión (offline)
+# Academia de Fútbol — Sistema de Gestión Deportiva en la Nube (SaaS)
 
-Aplicación web local para gestionar alumnos, mensualidades, categorías,
-equipos, partidos, agenda, calendario y campeonatos de una academia de
-fútbol. Funciona **100% sin conexión a internet**: HTMX y Bootstrap están
-incluidos localmente (no se cargan desde ningún CDN), y los datos se
-guardan en un archivo SQLite en el propio equipo.
+Plataforma web en la nube para gestionar alumnos, mensualidades, categorías,
+equipos, partidos, agenda, calendario y campeonatos de una academia de fútbol.
+Opera **100% en la nube**: acceso universal 24/7 desde cualquier dispositivo
+(computadoras, laptops, tablets en cancha y smartphones), base de datos cloud,
+respaldos automáticos continuos y cero requerimientos de instalación local.
 
-## Requisitos
+## Características Principales Cloud
+
+- **Acceso Multi-Dispositivo 24/7:** Compatible con PC, Mac, tablets y celulares sin instalar nada.
+- **Base de Datos Cloud Segura:** Gestión integral de datos bajo motor relacional (PostgreSQL / SQLAlchemy).
+- **Control Financiero Inteligente:** Semáforo de estados de pago, continuidad de cuotas y emisión de recibos oficiales en PDF.
+- **Motor Deportivo Automático:** Generación de fixtures, tablas de posiciones en tiempo real y convocatorias oficiales.
+- **Respaldos Automáticos en la Nube:** Copias de seguridad diarias gestionadas con retención de 30 días.
+
+## Requisitos de Acceso para Usuarios
+
+- Cualquier dispositivo con conexión a Internet y navegador web moderno (Chrome, Safari, Edge, Firefox).
+
+---
+
+## Entorno de Desarrollo y Despliegue Local (Desarrolladores)
 
 - Python 3.10 o superior instalado en la computadora donde se usará.
 

@@ -266,15 +266,16 @@
 
 ## 📊 REQUISITOS NO FUNCIONALES
 
-### RNF-001: Operación sin Internet
-- El sistema debe funcionar completamente offline
-- No requiere conexión a Internet
-- Datos se sincronizan cuando hay conexión (futuro)
+### RNF-001: Operación y Disponibilidad en la Nube (SaaS)
+- La plataforma opera 100% en la nube bajo modelo SaaS
+- Acceso universal 24/7 los 365 días del año
+- Cero instalación local ni requerimientos de servidores propios
+- Copias de seguridad automáticas gestionadas en la nube
 
-### RNF-002: Plataforma Objetivo
-- Windows 10/11 64 bits
-- Navegador Chrome, Firefox, Edge
-- .NET Framework incluido
+### RNF-002: Compatibilidad Multi-Dispositivo
+- Compatible con cualquier sistema: Windows, macOS, Linux, Android, iOS
+- Compatible con navegadores modernos: Chrome, Safari, Edge, Firefox
+- Adaptabilidad total a pantallas de PC, tablet y celular
 
 ### RNF-003: Rendimiento
 - Tiempo respuesta < 2 segundos (operaciones típicas)

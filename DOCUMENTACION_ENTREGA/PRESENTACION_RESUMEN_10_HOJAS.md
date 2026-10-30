@@ -37,7 +37,7 @@ El proyecto se encuentra en una etapa de desarrollo funcional avanzada, con estr
 La academia requiere un sistema que centralice la gestión administrativa y deportiva en una sola plataforma, reduciendo la dependencia de procesos manuales, hojas de cálculo y registros dispersos.
 
 ### Solución implementada
-Se ha desarrollado una plataforma web con arquitectura modular y base de datos local, diseñada para operar en entorno institucional con controles de seguridad, permisos por rol y registros de auditoría.
+Se ha desarrollado una plataforma web en la nube (SaaS) con arquitectura modular, acceso multi-dispositivo 24/7 y base de datos cloud, diseñada para operar en entorno institucional con controles de seguridad, permisos por rol y registros de auditoría.
 
 ### Beneficios esperados
 - Aumento de eficiencia operativa
@@ -87,7 +87,7 @@ El sistema está diseñado bajo una arquitectura modular en Python con Flask, se
 ### Componentes principales
 - Frontend: HTML, CSS y templates dinámicos
 - Backend: Flask + lógica de negocio
-- Base de datos: SQLite en entorno local, con estructura relacional
+- Base de datos: Motor relacional en la nube (Cloud PostgreSQL / SQLAlchemy)
 - Módulos funcionales: alumnos, deportes, pagos, inventario, auditoría
 - Seguridad: autenticación, permisos, auditoría y validaciones
 

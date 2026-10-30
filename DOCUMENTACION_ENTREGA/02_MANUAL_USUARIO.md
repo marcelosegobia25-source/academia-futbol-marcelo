@@ -31,9 +31,11 @@
 Este manual le ayudará a utilizar todas las funciones del sistema de forma rápida y eficiente. No se requieren conocimientos técnicos.
 
 **Requisitos:**
-- Navegador web (Chrome, Firefox o Edge)
-- Usuario y contraseña
-- Conexión a Internet (opcional - el sistema también funciona sin conexión)
+- Conexión a Internet
+- Cualquier dispositivo: Computadora, Tablet o Teléfono Móvil
+- Navegador web (Chrome, Firefox, Safari o Edge)
+- Usuario y contraseña institucionales
+- **Cero instalación:** Se accede directamente desde la web sin descargar programas.
 
 ---
 
@@ -583,11 +585,11 @@ Si algo salió mal:
 ### P: ¿Qué pasa si se va la luz?
 R: No hay problema. El sistema guarda todo en la base de datos cada vez que haces clic en "Guardar". Si se va la luz, pierdes solo lo que estabas escribiendo en ese momento.
 
-### P: ¿Puedo trabajar sin Internet?
-R: Sí. El sistema funciona completamente sin conexión a Internet. Solo necesita estar instalado localmente.
+### P: ¿Cómo accedo a la plataforma?
+R: Al ser una plataforma web en la nube, puede acceder las 24 horas del día, los 365 días del año desde cualquier computadora, tablet o teléfono móvil con conexión a Internet (Wi-Fi o datos móviles). No requiere instalar nada en sus equipos.
 
-### P: ¿Puedo ver reportes en mi teléfono?
-R: Actualmente el sistema solo funciona en navegador de computadora. En el futuro habrá versión móvil.
+### P: ¿Puedo ver reportes y tomar asistencia desde mi teléfono o tablet?
+R: ¡Totalmente! La plataforma cuenta con un diseño web responsivo de última generación, permitiendo a los profesores registrar asistencias directamente desde la cancha con su celular o tablet, y a los directores supervisar la recaudación en tiempo real desde cualquier lugar.
 
 ### P: ¿Qué pasa si me equivoco al registrar un pago?
 R: No hay problema. Ve a Pagos, busca el pago, haz clic en [Anular], y registra el pago correcto. Los dos quedan en auditoría.
