@@ -434,6 +434,9 @@
                 } catch(e) {}
             }
 
+            // Inicializar de inmediato la marca de tiempo de la nueva sesión activa
+            marcarActividad();
+
             // Registrar actividad del usuario (teclado, ratón, scroll, clic o táctil)
             ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function(evt) {
                 window.addEventListener(evt, marcarActividad, { passive: true });
@@ -442,7 +445,7 @@
             // Revisión periódica en segundo plano cada 15 segundos
             setInterval(function() {
                 if (Date.now() - ultimoRegistroActividad >= LIMITE_INACTIVIDAD_MS) {
-                    window.location.href = "{{ url_for('autenticacion.logout') }}";
+                    window.location.href = "{{ url_for('autenticacion.logout') }}?inactividad=1";
                 }
             }, 15000);
 
@@ -455,7 +458,7 @@
                     } catch(e) {}
                     const referencia = tiempoGuardado || ultimoRegistroActividad;
                     if (Date.now() - referencia >= LIMITE_INACTIVIDAD_MS) {
-                        window.location.href = "{{ url_for('autenticacion.logout') }}";
+                        window.location.href = "{{ url_for('autenticacion.logout') }}?inactividad=1";
                     } else {
                         marcarActividad();
                     }

@@ -200,7 +200,7 @@ def create_app(config_class=Config):
         path = (request.path or "").strip()
         path_limpio = path.rstrip("/")
         if path_limpio in {"/ping", "/health"} or path.startswith(("/ping", "/health")) or request.endpoint in {
-            "static", "autenticacion.login", "health", "ping"
+            "static", "autenticacion.login", "autenticacion.logout", "health", "ping"
         }:
             return None
         if session.get("autenticado"):
@@ -224,14 +224,16 @@ def create_app(config_class=Config):
                     except Exception:
                         db.session.rollback()
                 flash("Su sesión ha expirado por inactividad. Ingrese nuevamente.", "warning")
-                return redirect(url_for("autenticacion.login", next=request.full_path))
+                next_url = request.full_path if request.full_path and not request.path.startswith("/acceso") else None
+                return redirect(url_for("autenticacion.login", next=next_url) if next_url else url_for("autenticacion.login"))
 
             session["ultimo_acceso"] = ahora
             from app.utils.autorizacion import cargar_usuario_actual, permiso_para_solicitud, tiene_permiso
             usuario = cargar_usuario_actual()
             if usuario is None or not usuario.activo:
                 session.clear()
-                return redirect(url_for("autenticacion.login", next=request.full_path))
+                next_url = request.full_path if request.full_path and not request.path.startswith("/acceso") else None
+                return redirect(url_for("autenticacion.login", next=next_url) if next_url else url_for("autenticacion.login"))
             if usuario.debe_cambiar_clave and request.endpoint not in {
                 "configuracion.contrasena", "configuracion.logo",
                 "autenticacion.logout", "static",
@@ -241,7 +243,8 @@ def create_app(config_class=Config):
             if requerido and not tiene_permiso(requerido):
                 abort(403)
             return None
-        return redirect(url_for("autenticacion.login", next=request.full_path))
+        next_url = request.full_path if request.full_path and not request.path.startswith("/acceso") else None
+        return redirect(url_for("autenticacion.login", next=next_url) if next_url else url_for("autenticacion.login"))
 
     @app.errorhandler(404)
     def no_encontrado(error):

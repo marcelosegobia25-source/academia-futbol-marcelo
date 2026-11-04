@@ -195,3 +195,20 @@ def test_inactividad_cierra_sesion_automaticamente(client, app):
         assert aud is not None
         assert "tiempo de inactividad" in aud.detalle
 
+
+
+def test_login_con_next_salir_evita_bucle_y_redirige_a_inicio(client, app):
+    activar_acceso(app)
+    res = client.post("/acceso/", data={"nombre_usuario": "admin", "contrasena": "00000", "next": "/acceso/salir"})
+    assert res.status_code == 302
+    assert not res.location.endswith("/acceso/salir")
+    assert "/informacion/" in res.location
+
+
+def test_logout_con_inactividad_mensaje_adecuado(client, app):
+    activar_acceso(app)
+    client.post("/acceso/", data={"nombre_usuario": "admin", "contrasena": "00000"})
+    res = client.get("/acceso/salir?inactividad=1", follow_redirects=True)
+    assert res.status_code == 200
+    assert b"Su sesi\xc3\xb3n ha expirado por inactividad" in res.data
+    assert b"Sesi\xc3\xb3n cerrada correctamente" not in res.data

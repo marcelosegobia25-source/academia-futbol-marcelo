@@ -29,6 +29,9 @@ def _destino_local(valor):
     valor = (valor or "").strip()
     partes = urlsplit(valor)
     if valor.startswith("/") and not valor.startswith("//") and not partes.netloc:
+        ruta = partes.path.rstrip("/")
+        if ruta.startswith("/acceso"):
+            return url_for("informacion.general")
         return valor
     return url_for("informacion.general")
 
@@ -100,9 +103,19 @@ def login():
 
 @bp.route("/salir", methods=["GET", "POST"])
 def logout():
+    inactividad = request.args.get("inactividad")
     if session.get("id_usuario"):
-        db.session.add(Auditoria(modulo="Acceso", accion="Cerrar sesión", entidad="Usuario", id_entidad=session["id_usuario"], id_usuario=session["id_usuario"]))
+        db.session.add(Auditoria(
+            modulo="Acceso",
+            accion="Cierre por inactividad" if inactividad else "Cerrar sesión",
+            entidad="Usuario",
+            id_entidad=session["id_usuario"],
+            id_usuario=session["id_usuario"]
+        ))
         db.session.commit()
     session.clear()
-    flash("Sesión cerrada correctamente.", "success")
+    if inactividad:
+        flash("Su sesión ha expirado por inactividad. Ingrese nuevamente.", "warning")
+    else:
+        flash("Sesión cerrada correctamente.", "success")
     return redirect(url_for("autenticacion.login"))
