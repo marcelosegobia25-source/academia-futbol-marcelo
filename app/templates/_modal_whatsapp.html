@@ -1,0 +1,353 @@
+<!-- Modal Universal de Mensaje Directo por WhatsApp -->
+<div class="modal fade" id="modalWhatsAppDirecto" tabindex="-1" aria-labelledby="modalWhatsAppDirectoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-success text-white py-2 px-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-whatsapp fs-4"></i>
+                    <div>
+                        <h5 class="modal-title fs-6 fw-bold mb-0" id="modalWhatsAppDirectoLabel">Enviar Mensaje Directo por WhatsApp</h5>
+                        <small class="opacity-75">Contacto personal con el alumno o tutor de familia</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-3">
+                <!-- Tarjeta con resumen del Alumno -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between p-2 mb-3 rounded bg-body-tertiary border">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle bg-success-subtle text-success p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-person-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <strong id="waAlumnoNombre" class="fs-6 d-block">—</strong>
+                            <small class="text-muted">
+                                Categoría: <span id="waAlumnoCategoria" class="fw-semibold">—</span>
+                                <span id="waAlumnoTurnoWrap" class="ms-1">· Turno: <span id="waAlumnoTurno" class="fw-semibold">—</span></span>
+                            </small>
+                        </div>
+                    </div>
+                    <div>
+                        <span id="waAlumnoEstadoMensualidad" class="badge bg-secondary">—</span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <!-- Destinatario y Número de Teléfono -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small mb-1">
+                            <i class="bi bi-telephone-outbound text-success me-1"></i> Número de WhatsApp
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-body-tertiary font-monospace small px-2">+<span id="waPrefijoPais">{{ plantillas_whatsapp.get('prefijo_pais', '591') }}</span></span>
+                            <input type="tel" id="waNumeroDestino" class="form-control" placeholder="Ej: 71234567" autocomplete="off">
+                        </div>
+                        <div id="waSugerenciasTelefonos" class="d-flex flex-wrap gap-1 mt-1"></div>
+                        <div id="waAlertaSinTelefono" class="alert alert-warning py-1 px-2 small mt-2 mb-0 d-none">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> No tiene teléfono guardado. Ingrese el número arriba para enviarlo directamente.
+                        </div>
+                    </div>
+
+                    <!-- Tipo de Mensaje -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small mb-1">
+                            <i class="bi bi-chat-text text-primary me-1"></i> Tipo de mensaje / Plantilla
+                        </label>
+                        <select id="waSelectorTipo" class="form-select">
+                            <option value="deuda">🔴 Recordatorio de Cuota / Mensualidad Vencida</option>
+                            <option value="proximo_vencer">🟡 Mensualidad Próxima a Vencer</option>
+                            <option value="al_dia">🟢 Confirmación de Pago / Cuota al Día</option>
+                            <option value="citacion">⚽ Citación a Entrenamiento / Partido</option>
+                            <option value="comunicado">📢 Comunicado Oficial / Aviso General</option>
+                            <option value="cumpleanos">🎂 Felicitación de Cumpleaños</option>
+                            <option value="personalizado">✍️ Mensaje Personalizado / Libre</option>
+                        </select>
+                        <small class="text-muted d-block mt-1">Selecciona el tipo de mensaje para autocompletar el texto.</small>
+                    </div>
+                </div>
+
+                <!-- Contenido del Mensaje -->
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label fw-semibold small mb-0">
+                            <i class="bi bi-pencil-square me-1"></i> Mensaje listo para enviar
+                        </label>
+                        <button type="button" class="btn btn-link btn-sm text-decoration-none py-0 text-muted" onclick="waRestablecerPlantillaActual()">
+                            <i class="bi bi-arrow-counterclockwise"></i> Restablecer plantilla
+                        </button>
+                    </div>
+                    <textarea id="waCuerpoMensaje" class="form-control font-monospace small bg-light text-dark" rows="7" placeholder="Escriba su mensaje aquí..."></textarea>
+                    <div class="d-flex justify-content-between align-items-center mt-1 text-muted small">
+                        <span><i class="bi bi-info-circle me-1"></i> Puede editar y agregar cualquier nota antes de enviar.</span>
+                        <span id="waContadorCaracteres">0 caracteres</span>
+                    </div>
+                </div>
+
+                <div id="waAlertaCopiado" class="alert alert-success py-1 px-2 small mb-0 d-none">
+                    <i class="bi bi-check-circle-fill me-1"></i> ¡Texto copiado al portapapeles!
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between py-2 px-3">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="waBtnCopiar" onclick="waCopiarMensaje()">
+                        <i class="bi bi-clipboard me-1"></i> Copiar mensaje
+                    </button>
+                    <button type="button" class="btn btn-success btn-sm fw-semibold shadow-sm" id="waBtnAbrirWhatsApp" onclick="waAbrirWhatsAppChat()">
+                        <i class="bi bi-whatsapp me-1"></i> Abrir en WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Plantillas de WhatsApp cargadas dinámicamente desde el servidor
+window.PLANTILLAS_WHATSAPP_SISTEMA = {{ plantillas_whatsapp|tojson|safe }};
+
+let _waDatosActuales = null;
+
+function abrirModalWhatsAppAlumno(datos) {
+    _waDatosActuales = Object.assign({
+        nombre: 'Alumno',
+        telefono: '',
+        tutor: '',
+        tutor_telefono: '',
+        categoria: 'General',
+        turno: 'No definido',
+        estado_mensualidad: 'Vigente',
+        vencimiento: '',
+        monto: '{{ marca.monto_mensualidad }}',
+        moneda: '{{ marca.moneda }}',
+        academia: '{{ marca.nombre_academia|e }}',
+        tipo_sugerido: ''
+    }, datos || {});
+
+    // 1. Mostrar nombre y datos del alumno
+    const elNombre = document.getElementById('waAlumnoNombre');
+    const elCat = document.getElementById('waAlumnoCategoria');
+    const elTurno = document.getElementById('waAlumnoTurno');
+    const elEstado = document.getElementById('waAlumnoEstadoMensualidad');
+    const inputNumero = document.getElementById('waNumeroDestino');
+    const selectorTipo = document.getElementById('waSelectorTipo');
+    const alertaSinTel = document.getElementById('waAlertaSinTelefono');
+    const contSugerencias = document.getElementById('waSugerenciasTelefonos');
+    const prefijoEl = document.getElementById('waPrefijoPais');
+
+    if (elNombre) elNombre.textContent = _waDatosActuales.nombre;
+    if (elCat) elCat.textContent = _waDatosActuales.categoria || 'Sin categoría';
+    if (elTurno) elTurno.textContent = _waDatosActuales.turno || 'Sin turno';
+    
+    // Badge de estado de mensualidad
+    if (elEstado) {
+        const em = _waDatosActuales.estado_mensualidad || 'Vigente';
+        elEstado.textContent = em;
+        elEstado.className = 'badge ' + (
+            em === 'Vigente' ? 'bg-success' :
+            (em === 'Próximo a vencer' ? 'bg-warning text-dark' :
+            (em === 'Vencido' || em === 'Con deuda' ? 'bg-danger' : 'bg-secondary'))
+        );
+    }
+
+    // Prefijo de país
+    const prefijo = (window.PLANTILLAS_WHATSAPP_SISTEMA && window.PLANTILLAS_WHATSAPP_SISTEMA.prefijo_pais) ? window.PLANTILLAS_WHATSAPP_SISTEMA.prefijo_pais : '591';
+    if (prefijoEl) prefijoEl.textContent = prefijo;
+
+    // Configurar números de teléfono y chips
+    contSugerencias.innerHTML = '';
+    const telefonosDisponibles = [];
+
+    if (_waDatosActuales.telefono) {
+        telefonosDisponibles.push({
+            tipo: 'Alumno',
+            numero: _waDatosActuales.telefono.trim()
+        });
+    }
+    if (_waDatosActuales.tutor_telefono) {
+        telefonosDisponibles.push({
+            tipo: 'Tutor' + (_waDatosActuales.tutor ? ` (${_waDatosActuales.tutor})` : ''),
+            numero: _waDatosActuales.tutor_telefono.trim()
+        });
+    }
+
+    if (telefonosDisponibles.length > 0) {
+        inputNumero.value = telefonosDisponibles[0].numero;
+        if (alertaSinTel) alertaSinTel.classList.add('d-none');
+
+        // Generar botones rápidos para cambiar de número si hay más de 1
+        telefonosDisponibles.forEach((item, idx) => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = `btn btn-sm ${idx === 0 ? 'btn-success' : 'btn-outline-secondary'} py-0 px-2 small rounded-pill`;
+            chip.innerHTML = `<i class="bi bi-phone"></i> ${item.tipo}: ${item.numero}`;
+            chip.onclick = function() {
+                inputNumero.value = item.numero;
+                contSugerencias.querySelectorAll('button').forEach(b => {
+                    b.classList.remove('btn-success');
+                    b.classList.add('btn-outline-secondary');
+                });
+                chip.classList.remove('btn-outline-secondary');
+                chip.classList.add('btn-success');
+            };
+            contSugerencias.appendChild(chip);
+        });
+    } else {
+        inputNumero.value = '';
+        if (alertaSinTel) alertaSinTel.classList.remove('d-none');
+    }
+
+    // Seleccionar tipo de mensaje adecuado según estado o sugerencia
+    let tipoElegido = _waDatosActuales.tipo_sugerido;
+    if (!tipoElegido) {
+        const em = _waDatosActuales.estado_mensualidad;
+        if (em === 'Vencido' || em === 'Con deuda') {
+            tipoElegido = 'deuda';
+        } else if (em === 'Próximo a vencer') {
+            tipoElegido = 'proximo_vencer';
+        } else {
+            tipoElegido = 'al_dia';
+        }
+    }
+    if (selectorTipo) {
+        selectorTipo.value = tipoElegido;
+    }
+
+    // Renderizar plantilla
+    waCargarPlantilla(tipoElegido);
+
+    // Ocultar alerta de copiado
+    const alertaCopiado = document.getElementById('waAlertaCopiado');
+    if (alertaCopiado) alertaCopiado.classList.add('d-none');
+
+    // Mostrar modal
+    const modalEl = document.getElementById('modalWhatsAppDirecto');
+    if (modalEl) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
+}
+
+function waCargarPlantilla(tipo) {
+    if (!_waDatosActuales) return;
+    const textarea = document.getElementById('waCuerpoMensaje');
+    if (!textarea) return;
+
+    const plantillas = window.PLANTILLAS_WHATSAPP_SISTEMA || {};
+    let textoBase = plantillas[tipo] || plantillas['personalizado'] || '';
+
+    // Reemplazo dinámico de variables
+    const nombre = _waDatosActuales.nombre || 'Alumno';
+    const categoria = _waDatosActuales.categoria || 'General';
+    const estado = _waDatosActuales.estado_mensualidad || 'Vigente';
+    const vencimiento = _waDatosActuales.vencimiento || 'No registrado';
+    const monto = _waDatosActuales.monto || '{{ marca.monto_mensualidad }}';
+    const moneda = _waDatosActuales.moneda || '{{ marca.moneda }}';
+    const academia = _waDatosActuales.academia || '{{ marca.nombre_academia|e }}';
+    const turno = _waDatosActuales.turno || 'Habitual';
+
+    let resultado = textoBase
+        .replaceAll('{nombre}', nombre)
+        .replaceAll('{categoria}', categoria)
+        .replaceAll('{estado_mensualidad}', estado)
+        .replaceAll('{vencimiento}', vencimiento)
+        .replaceAll('{monto}', monto)
+        .replaceAll('{moneda}', moneda)
+        .replaceAll('{academia}', academia)
+        .replaceAll('{turno}', turno);
+
+    textarea.value = resultado;
+    waActualizarContador();
+}
+
+function waRestablecerPlantillaActual() {
+    const selector = document.getElementById('waSelectorTipo');
+    if (selector) {
+        waCargarPlantilla(selector.value);
+    }
+}
+
+function waActualizarContador() {
+    const textarea = document.getElementById('waCuerpoMensaje');
+    const contador = document.getElementById('waContadorCaracteres');
+    if (textarea && contador) {
+        contador.textContent = `${textarea.value.length} caracteres`;
+    }
+}
+
+async function waCopiarMensaje() {
+    const textarea = document.getElementById('waCuerpoMensaje');
+    const alerta = document.getElementById('waAlertaCopiado');
+    const texto = textarea ? textarea.value : '';
+
+    if (!texto.trim()) {
+        alert('El mensaje está vacío.');
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(texto);
+    } catch (_) {
+        if (textarea) {
+            textarea.select();
+            document.execCommand('copy');
+        }
+    }
+
+    if (alerta) {
+        alerta.classList.remove('d-none');
+        setTimeout(() => alerta.classList.add('d-none'), 3000);
+    }
+}
+
+function waAbrirWhatsAppChat() {
+    const inputNumero = document.getElementById('waNumeroDestino');
+    const textarea = document.getElementById('waCuerpoMensaje');
+    const prefijoEl = document.getElementById('waPrefijoPais');
+
+    const rawNum = inputNumero ? inputNumero.value.trim() : '';
+    const texto = textarea ? textarea.value.trim() : '';
+    const prefijo = prefijoEl ? prefijoEl.textContent.trim().replace(/\D/g, '') : '591';
+
+    if (!rawNum) {
+        alert('Por favor ingrese o seleccione un número de teléfono celular para WhatsApp.');
+        if (inputNumero) inputNumero.focus();
+        return;
+    }
+
+    if (!texto) {
+        alert('El mensaje no puede estar vacío.');
+        if (textarea) textarea.focus();
+        return;
+    }
+
+    // Limpiar dígitos del número
+    let digitos = rawNum.replace(/\D/g, '');
+
+    // Si tiene 8 dígitos (celular local en Bolivia) y no empieza con el prefijo, anteponer el prefijo
+    if (digitos.length === 8 && prefijo && !digitos.startsWith(prefijo)) {
+        digitos = prefijo + digitos;
+    }
+
+    const enlaceWhatsApp = `https://wa.me/${digitos}?text=${encodeURIComponent(texto)}`;
+    window.open(enlaceWhatsApp, '_blank', 'noopener,noreferrer');
+}
+
+// Configurar listeners del modal cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    const selector = document.getElementById('waSelectorTipo');
+    if (selector) {
+        selector.addEventListener('change', function() {
+            waCargarPlantilla(this.value);
+        });
+    }
+
+    const textarea = document.getElementById('waCuerpoMensaje');
+    if (textarea) {
+        textarea.addEventListener('input', waActualizarContador);
+    }
+});
+</script>
+

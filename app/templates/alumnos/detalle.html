@@ -4,6 +4,21 @@
 <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
     <div><span class="eyebrow">Ficha del alumno</span><h2 class="mb-0">Perfil integral</h2></div>
     <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-success shadow-sm" onclick="abrirModalWhatsAppAlumno({
+            nombre: '{{ alumno.nombre_completo|e }}',
+            telefono: '{{ alumno.telefono or '' }}',
+            tutor: '{{ alumno.tutor or '' }}',
+            tutor_telefono: '{{ alumno.tutores_rel[0].tutor.telefono if alumno.tutores_rel and alumno.tutores_rel[0].tutor and alumno.tutores_rel[0].tutor.telefono else '' }}',
+            categoria: '{{ alumno.categoria.nombre if alumno.categoria else '' }}',
+            turno: '{{ alumno.turno or '' }}',
+            estado_mensualidad: '{{ alumno.estado_mensualidad }}',
+            vencimiento: '{{ alumno.ultimo_pago.fecha_vencimiento.strftime('%d/%m/%Y') if alumno.ultimo_pago and alumno.ultimo_pago.fecha_vencimiento else '' }}',
+            monto: '{{ marca.monto_mensualidad }}',
+            moneda: '{{ marca.moneda }}',
+            academia: '{{ marca.nombre_academia|e }}'
+        })">
+            <i class="bi bi-whatsapp"></i> Mensaje WhatsApp
+        </button>
         <a href="{{ url_for('alumnos.ficha_pdf', id_alumno=alumno.id_alumno) }}" class="btn btn-danger"><i class="bi bi-file-earmark-person"></i> Descargar ficha</a>
         {% if puede('gestionar_alumnos') %}
         <a href="{{ url_for('alumnos.editar', id_alumno=alumno.id_alumno) }}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Editar información</a>
@@ -41,7 +56,7 @@
                 <div class="profile-section-title"><i class="bi bi-person-vcard"></i><div><h5>Información personal</h5><small>Identificación y contacto</small></div></div>
                 <div class="profile-data-grid profile-data-compact">
                     <div><span>CI</span><strong>{{ alumno.ci or '—' }}</strong></div><div><span>Sexo</span><strong>{{ alumno.sexo or '—' }}</strong></div>
-                    <div><span>Fecha de nacimiento</span><strong>{{ alumno.fecha_nacimiento.strftime('%d/%m/%Y') }}</strong></div><div><span>Teléfono</span><strong>{{ alumno.telefono or '—' }}</strong></div>
+                    <div><span>Fecha de nacimiento</span><strong>{{ alumno.fecha_nacimiento.strftime('%d/%m/%Y') }}</strong></div><div><span>Teléfono</span><strong>{{ alumno.telefono or '—' }}{% if alumno.telefono %}<button type="button" class="btn btn-sm btn-outline-success p-0 px-1 ms-1" title="Contactar por WhatsApp" onclick="abrirModalWhatsAppAlumno({ nombre: '{{ alumno.nombre_completo|e }}', telefono: '{{ alumno.telefono }}', tutor: '{{ alumno.tutor or '' }}', categoria: '{{ alumno.categoria.nombre if alumno.categoria else '' }}', turno: '{{ alumno.turno or '' }}', estado_mensualidad: '{{ alumno.estado_mensualidad }}', vencimiento: '{{ alumno.ultimo_pago.fecha_vencimiento.strftime('%d/%m/%Y') if alumno.ultimo_pago and alumno.ultimo_pago.fecha_vencimiento else '' }}', monto: '{{ marca.monto_mensualidad }}', moneda: '{{ marca.moneda }}', academia: '{{ marca.nombre_academia|e }}' })"><i class="bi bi-whatsapp"></i></button>{% endif %}</strong></div>
                     <div class="wide"><span>Dirección</span><strong>{{ alumno.direccion or '—' }}</strong></div>
                     <div><span>Tutor principal</span><strong>{{ alumno.tutor or '—' }}</strong></div><div><span>Tutor secundario</span><strong>{{ alumno.tutor2 or '—' }}</strong></div>
                 </div>
@@ -119,9 +134,35 @@
 
     {% set em = alumno.estado_mensualidad %}
     <div class="card mensualidad-status-card mensualidad-{{ em|lower|replace(' ', '-')|replace('ó','o') }} p-3 mb-3">
-        <div class="d-flex align-items-center justify-content-between gap-3">
-            <div><span class="small text-muted d-block">Estado actual de la mensualidad</span><strong class="fs-4">{{ em }}</strong>{% if alumno.ultimo_pago %}<small class="text-muted d-block">Cobertura hasta {{ alumno.ultimo_pago.fecha_vencimiento.strftime('%d/%m/%Y') }}</small>{% else %}<small class="text-muted d-block">No existen pagos registrados</small>{% endif %}</div>
-            <span class="mensualidad-status-icon {{ 'bg-success-subtle text-success' if em == 'Vigente' else ('bg-warning-subtle text-warning-emphasis' if em == 'Próximo a vencer' else ('bg-danger-subtle text-danger' if em == 'Vencido' else 'bg-secondary-subtle text-secondary')) }}"><i class="bi {{ 'bi-check-circle' if em == 'Vigente' else ('bi-clock-history' if em == 'Próximo a vencer' else ('bi-exclamation-circle' if em == 'Vencido' else 'bi-dash-circle')) }}"></i></span>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <span class="small text-muted d-block">Estado actual de la mensualidad</span>
+                <strong class="fs-4">{{ em }}</strong>
+                {% if alumno.ultimo_pago %}
+                <small class="text-muted d-block">Cobertura hasta {{ alumno.ultimo_pago.fecha_vencimiento.strftime('%d/%m/%Y') }}</small>
+                {% else %}
+                <small class="text-muted d-block">No existen pagos registrados</small>
+                {% endif %}
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="abrirModalWhatsAppAlumno({
+                    nombre: '{{ alumno.nombre_completo|e }}',
+                    telefono: '{{ alumno.telefono or '' }}',
+                    tutor: '{{ alumno.tutor or '' }}',
+                    tutor_telefono: '{{ alumno.tutores_rel[0].tutor.telefono if alumno.tutores_rel and alumno.tutores_rel[0].tutor and alumno.tutores_rel[0].tutor.telefono else '' }}',
+                    categoria: '{{ alumno.categoria.nombre if alumno.categoria else '' }}',
+                    turno: '{{ alumno.turno or '' }}',
+                    estado_mensualidad: '{{ em }}',
+                    vencimiento: '{{ alumno.ultimo_pago.fecha_vencimiento.strftime('%d/%m/%Y') if alumno.ultimo_pago and alumno.ultimo_pago.fecha_vencimiento else '' }}',
+                    monto: '{{ marca.monto_mensualidad }}',
+                    moneda: '{{ marca.moneda }}',
+                    academia: '{{ marca.nombre_academia|e }}',
+                    tipo_sugerido: '{{ 'deuda' if em in ['Vencido', 'Con deuda', 'Sin pagos'] else ('proximo_vencer' if em == 'Próximo a vencer' else 'al_dia') }}'
+                })">
+                    <i class="bi bi-whatsapp me-1"></i> Notificar estado por WhatsApp
+                </button>
+                <span class="mensualidad-status-icon {{ 'bg-success-subtle text-success' if em == 'Vigente' else ('bg-warning-subtle text-warning-emphasis' if em == 'Próximo a vencer' else ('bg-danger-subtle text-danger' if em == 'Vencido' else 'bg-secondary-subtle text-secondary')) }}"><i class="bi {{ 'bi-check-circle' if em == 'Vigente' else ('bi-clock-history' if em == 'Próximo a vencer' else ('bi-exclamation-circle' if em == 'Vencido' else 'bi-dash-circle')) }}"></i></span>
+            </div>
         </div>
     </div>
     {% if alumno.estado == 'Retirado' %}<div class="alert alert-warning"><i class="bi bi-lock"></i> Los pagos están bloqueados mientras el alumno permanezca retirado.</div>{% endif %}

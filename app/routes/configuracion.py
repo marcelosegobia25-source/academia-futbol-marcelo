@@ -142,3 +142,43 @@ def contrasena():
             from app.routes.autenticacion import destino_inicial
             return redirect(destino_inicial(usuario))
     return render_template("configuracion/contrasena.html")
+
+
+@bp.route("/whatsapp", methods=["GET", "POST"])
+def whatsapp():
+    from app.utils.whatsapp import (
+        obtener_plantillas_whatsapp,
+        guardar_plantillas_whatsapp,
+        PLANTILLAS_PREDETERMINADAS,
+    )
+    config = Configuracion.obtener()
+    plantillas = obtener_plantillas_whatsapp()
+
+    if request.method == "POST":
+        accion = request.form.get("accion", "guardar")
+        if accion == "restablecer":
+            guardar_plantillas_whatsapp(PLANTILLAS_PREDETERMINADAS)
+            flash("Se han restablecido las plantillas predeterminadas de WhatsApp.", "info")
+            return redirect(url_for("configuracion.whatsapp"))
+
+        nuevas = {
+            "prefijo_pais": request.form.get("prefijo_pais", "591").strip() or "591",
+            "deuda": request.form.get("deuda", "").strip(),
+            "proximo_vencer": request.form.get("proximo_vencer", "").strip(),
+            "al_dia": request.form.get("al_dia", "").strip(),
+            "citacion": request.form.get("citacion", "").strip(),
+            "comunicado": request.form.get("comunicado", "").strip(),
+            "cumpleanos": request.form.get("cumpleanos", "").strip(),
+            "personalizado": request.form.get("personalizado", "").strip(),
+        }
+        guardar_plantillas_whatsapp(nuevas)
+        db.session.add(Auditoria(
+            modulo="Configuración", accion="Actualizar",
+            entidad="WhatsAppPlantillas", id_entidad=config.id,
+            detalle="Plantillas de mensajes WhatsApp actualizadas.",
+        ))
+        db.session.commit()
+        flash("Plantillas de mensajes de WhatsApp guardadas correctamente.", "success")
+        return redirect(url_for("configuracion.whatsapp"))
+
+    return render_template("configuracion/whatsapp.html", config=config, plantillas=plantillas)

@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block titulo %}Plantillas de WhatsApp - {{ marca.nombre_academia }}{% endblock %}
+{% block contenido %}
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <span class="eyebrow"><i class="bi bi-whatsapp text-success me-1"></i> Mensajería Directa</span>
+        <h1 class="hero-title mb-1">Plantillas de WhatsApp</h1>
+        <p class="hero-subtitle mb-0">Configura los mensajes predeterminados para cobranzas, avisos preventivos, confirmaciones y comunicados a los alumnos y tutores.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('configuracion.panel') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a Configuración
+        </a>
+    </div>
+</div>
+
+<div class="alert alert-info d-flex align-items-start gap-2 shadow-sm mb-4">
+    <i class="bi bi-info-circle-fill fs-5 mt-1"></i>
+    <div>
+        <strong>Variables dinámicas disponibles:</strong>
+        Puedes usar las siguientes etiquetas en tus plantillas. El sistema las reemplazará automáticamente con la información real de cada alumno:
+        <div class="d-flex flex-wrap gap-2 mt-2">
+            <span class="badge bg-light text-dark font-monospace border"><code>{nombre}</code>: Nombre completo</span>
+            <span class="badge bg-light text-dark font-monospace border"><code>{categoria}</code>: Categoría</span>
+            <span class="badge bg-light text-dark font-monospace border"><code>{estado_mensualidad}</code>: Vigente / Vencido</span>
+            <span class="badge bg-light text-dark font-monospace border"><code>{vencimiento}</code>: Fecha de vencimiento</span>
+            <span class="badge bg-light text-dark font-monospace border"><code>{monto}</code>: Monto o cuota</span>
+            <span class="badge bg-light text-dark font-monospace border"><code>{moneda}</code>: Moneda (BOB, USD)</span>
+            <span class="badge bg-light text-dark font-monospace border"><code>{academia}</code>: Nombre de la academia</span>
+            <span class="badge bg-light text-dark font-monospace border"><code>{turno}</code>: Turno de entrenamiento</span>
+        </div>
+    </div>
+</div>
+
+<form method="post" action="{{ url_for('configuracion.whatsapp') }}" class="mb-5">
+    <input type="hidden" name="accion" value="guardar">
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-body-tertiary">
+            <h5 class="card-title mb-0"><i class="bi bi-telephone text-primary me-2"></i> Parámetros de Envío</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Prefijo internacional por defecto</label>
+                    <div class="input-group">
+                        <span class="input-group-text">+</span>
+                        <input type="text" class="form-control" name="prefijo_pais" value="{{ plantillas.get('prefijo_pais', '591') }}" placeholder="591" required>
+                    </div>
+                    <small class="text-muted">Se agregará automáticamente a números locales de 8 dígitos (ej: 591 para Bolivia).</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Cobro de Mensualidad Vencida -->
+    <div class="card shadow-sm mb-4 border-danger border-opacity-50">
+        <div class="card-header d-flex justify-content-between align-items-center bg-danger-subtle text-danger-emphasis">
+            <strong><i class="bi bi-exclamation-octagon-fill me-2"></i> 1. Mensualidad Vencida / Recordatorio de Deuda</strong>
+            <span class="badge bg-danger">Cobranza</span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-2">Se sugiere cuando el estado de mensualidad del alumno es <strong>Vencido</strong> o <strong>Con deuda</strong>.</p>
+            <textarea name="deuda" rows="7" class="form-control font-monospace">{{ plantillas.get('deuda', '') }}</textarea>
+        </div>
+    </div>
+
+    <!-- 2. Próximo a Vencer -->
+    <div class="card shadow-sm mb-4 border-warning border-opacity-50">
+        <div class="card-header d-flex justify-content-between align-items-center bg-warning-subtle text-warning-emphasis">
+            <strong><i class="bi bi-clock-history me-2"></i> 2. Mensualidad Próxima a Vencer (Aviso Preventivo)</strong>
+            <span class="badge bg-warning text-dark">Preventivo</span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-2">Se sugiere cuando faltan pocos días para el vencimiento de la cuota.</p>
+            <textarea name="proximo_vencer" rows="6" class="form-control font-monospace">{{ plantillas.get('proximo_vencer', '') }}</textarea>
+        </div>
+    </div>
+
+    <!-- 3. Pago al Día -->
+    <div class="card shadow-sm mb-4 border-success border-opacity-50">
+        <div class="card-header d-flex justify-content-between align-items-center bg-success-subtle text-success-emphasis">
+            <strong><i class="bi bi-check-circle-fill me-2"></i> 3. Mensualidad al Día / Confirmación de Pago</strong>
+            <span class="badge bg-success">Comprobación</span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-2">Mensaje de agradecimiento y confirmación de cobertura vigente para el alumno.</p>
+            <textarea name="al_dia" rows="6" class="form-control font-monospace">{{ plantillas.get('al_dia', '') }}</textarea>
+        </div>
+    </div>
+
+    <!-- 4. Citación Deportiva -->
+    <div class="card shadow-sm mb-4 border-primary border-opacity-50">
+        <div class="card-header d-flex justify-content-between align-items-center bg-primary-subtle text-primary-emphasis">
+            <strong><i class="bi bi-trophy-fill me-2"></i> 4. Citación a Entrenamiento o Partido</strong>
+            <span class="badge bg-primary">Deportivo</span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-2">Para convocar o citar al alumno a sesiones de entrenamiento, amistosos o torneos.</p>
+            <textarea name="citacion" rows="7" class="form-control font-monospace">{{ plantillas.get('citacion', '') }}</textarea>
+        </div>
+    </div>
+
+    <!-- 5. Comunicado General -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center bg-body-tertiary">
+            <strong><i class="bi bi-megaphone-fill text-info me-2"></i> 5. Comunicado Oficial / Aviso General</strong>
+            <span class="badge bg-info text-dark">Institucional</span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-2">Avisos generales de la academia dirigidos a los tutores de familia.</p>
+            <textarea name="comunicado" rows="6" class="form-control font-monospace">{{ plantillas.get('comunicado', '') }}</textarea>
+        </div>
+    </div>
+
+    <!-- 6. Felicitación de Cumpleaños -->
+    <div class="card shadow-sm mb-4 border-info border-opacity-50">
+        <div class="card-header d-flex justify-content-between align-items-center bg-info-subtle text-info-emphasis">
+            <strong><i class="bi bi-cake2-fill me-2"></i> 6. Felicitación de Cumpleaños</strong>
+            <span class="badge bg-info text-dark">Social</span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-2">Para enviar un saludo cariñoso y motivador al alumno en el día de su cumpleaños.</p>
+            <textarea name="cumpleanos" rows="5" class="form-control font-monospace">{{ plantillas.get('cumpleanos', '') }}</textarea>
+        </div>
+    </div>
+
+    <!-- 7. Mensaje Personalizado -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center bg-body-tertiary">
+            <strong><i class="bi bi-pen-fill text-secondary me-2"></i> 7. Plantilla Base Libre / Personalizada</strong>
+            <span class="badge bg-secondary">Libre</span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-2">Estructura base para cualquier mensaje libre redactado por el usuario.</p>
+            <textarea name="personalizado" rows="4" class="form-control font-monospace">{{ plantillas.get('personalizado', '') }}</textarea>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pt-3 border-top">
+        <button type="submit" class="btn btn-success btn-lg px-4 shadow-sm">
+            <i class="bi bi-check2-circle me-1"></i> Guardar plantillas
+        </button>
+        <button type="button" class="btn btn-outline-danger" onclick="restablecerPlantillas()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> Restablecer valores predeterminados
+        </button>
+    </div>
+</form>
+
+<form id="form-restablecer-plantillas" method="post" action="{{ url_for('configuracion.whatsapp') }}" class="d-none">
+    <input type="hidden" name="accion" value="restablecer">
+</form>
+
+<script>
+function restablecerPlantillas() {
+    if (confirm("¿Está seguro de restablecer todas las plantillas a los textos sugeridos originales de fábrica? Se perderán las modificaciones no guardadas.")) {
+        document.getElementById('form-restablecer-plantillas').submit();
+    }
+}
+</script>
+{% endblock %}
+

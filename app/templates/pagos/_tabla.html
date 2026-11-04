@@ -19,7 +19,23 @@
                     <td><span class="badge {{ 'bg-secondary' if p.estado == 'Anulado' else ('bg-success' if p.estado == 'Vigente' else ('bg-warning text-dark' if p.estado == 'Próximo a vencer' else 'bg-primary')) }}">{{ p.estado }}</span>{% if not p.activo and p.anulacion %}<small class="d-block text-muted mt-1">{{ p.anulacion.motivo }}</small>{% endif %}</td>
                     <td>{{ p.alumno.beca }}</td>
                     <td>{{ '%.2f' % p.monto }}</td>
-                    <td class="text-end">
+                    <td class="text-end text-nowrap">
+                        <button type="button" class="btn btn-sm btn-outline-success me-1" title="Enviar WhatsApp a {{ p.alumno.nombre_completo }}"
+                                onclick="abrirModalWhatsAppAlumno({
+                                    nombre: '{{ p.alumno.nombre_completo|e }}',
+                                    telefono: '{{ p.alumno.telefono or '' }}',
+                                    tutor: '{{ p.alumno.tutor or '' }}',
+                                    categoria: '{{ p.alumno.categoria.nombre if p.alumno.categoria else '' }}',
+                                    turno: '{{ p.alumno.turno or '' }}',
+                                    estado_mensualidad: '{{ p.estado }}',
+                                    vencimiento: '{{ p.fecha_vencimiento.strftime('%d/%m/%Y') }}',
+                                    monto: '{{ '%.2f' % p.monto }}',
+                                    moneda: '{{ marca.moneda }}',
+                                    academia: '{{ marca.nombre_academia|e }}',
+                                    tipo_sugerido: '{{ 'deuda' if p.estado == 'Vencido' else ('proximo_vencer' if p.estado == 'Próximo a vencer' else 'al_dia') }}'
+                                })">
+                            <i class="bi bi-whatsapp"></i>
+                        </button>
                         {% if p.activo %}<a href="{{ url_for('pagos.recibo_pdf', id_pago=p.id_pago, copia=1) }}" class="btn btn-sm btn-outline-secondary" title="Copia del recibo PDF">
                             <i class="bi bi-file-earmark-pdf"></i>
                         </a>

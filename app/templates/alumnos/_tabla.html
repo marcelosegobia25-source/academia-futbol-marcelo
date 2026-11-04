@@ -16,6 +16,7 @@
                     <th>Campeonatos activos</th>
                     <th>Estado mensualidad</th>
                     <th>Equipos</th>
+                    <th class="text-end">Contacto</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,9 +44,26 @@
                         <span class="badge {{ 'bg-success' if em == 'Vigente' else ('bg-warning text-dark' if em == 'Próximo a vencer' else ('bg-danger' if em == 'Vencido' else 'bg-secondary')) }}">{{ em }}</span>
                     </td>
                     <td>{{ a.equipos | map(attribute='nombre') | join(', ') if a.equipos else '—' }}</td>
+                    <td class="text-end text-nowrap" onclick="event.stopPropagation();">
+                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-2" title="Enviar WhatsApp a {{ a.nombre_completo }}"
+                                onclick="abrirModalWhatsAppAlumno({
+                                    nombre: '{{ a.nombre_completo|e }}',
+                                    telefono: '{{ a.telefono or '' }}',
+                                    tutor: '{{ a.tutor or '' }}',
+                                    categoria: '{{ a.categoria.nombre if a.categoria else '' }}',
+                                    turno: '{{ a.turno or '' }}',
+                                    estado_mensualidad: '{{ a.estado_mensualidad }}',
+                                    vencimiento: '{{ a.ultimo_pago.fecha_vencimiento.strftime('%d/%m/%Y') if a.ultimo_pago and a.ultimo_pago.fecha_vencimiento else '' }}',
+                                    monto: '{{ marca.monto_mensualidad }}',
+                                    moneda: '{{ marca.moneda }}',
+                                    academia: '{{ marca.nombre_academia|e }}'
+                                })">
+                            <i class="bi bi-whatsapp"></i> WhatsApp
+                        </button>
+                    </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="13" class="text-center text-muted py-4">No se encontraron alumnos con esos filtros.</td></tr>
+                <tr><td colspan="14" class="text-center text-muted py-4">No se encontraron alumnos con esos filtros.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

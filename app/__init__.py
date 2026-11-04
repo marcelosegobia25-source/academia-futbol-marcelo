@@ -116,12 +116,14 @@ def create_app(config_class=Config):
     def personalizacion_global():
         from app.models import Configuracion
         from app.utils.autorizacion import tiene_permiso
+        from app.utils.whatsapp import obtener_plantillas_whatsapp
         return {
             "marca": Configuracion.obtener(),
             "usuario_actual": getattr(g, "usuario_actual", None),
             "puede": tiene_permiso,
             "hoy_bo": hoy_bolivia(),
             "ahora_bo": ahora_bolivia(),
+            "plantillas_whatsapp": obtener_plantillas_whatsapp(),
         }
 
     @app.route("/")
