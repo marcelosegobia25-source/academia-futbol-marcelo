@@ -4,6 +4,7 @@
 <div class="page-heading d-flex justify-content-between align-items-center mb-3">
     <div><span class="eyebrow">Gestión de plantel</span><h2 class="mb-0">Alumnos</h2></div>
     <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-success" onclick="abrirDifusionWhatsAppAlumnos()"><i class="bi bi-whatsapp"></i> Mensaje Masivo</button>
         <button type="button" class="btn btn-outline-info" onclick="compartirAlumnosListado()"><i class="bi bi-share"></i> Compartir Lista</button>
         <a href="{{ url_for('alumnos.asistencias') }}" class="btn btn-outline-primary"><i class="bi bi-calendar2-check"></i> Ver asistencias</a>
         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportarAlumnos"><i class="bi bi-download"></i> Exportar</button>

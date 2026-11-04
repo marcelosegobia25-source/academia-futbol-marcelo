@@ -21,7 +21,8 @@
             </thead>
             <tbody>
                 {% for a in alumnos %}
-                <tr onclick="window.location='{{ url_for('alumnos.detalle', id_alumno=a.id_alumno) }}'">
+                <tr onclick="window.location='{{ url_for('alumnos.detalle', id_alumno=a.id_alumno) }}'"
+    data-alumno-json='{"nombre": "{{ a.nombre_completo|e }}", "telefono": "{{ a.telefono or '' }}", "tutor": "{{ a.tutor or '' }}", "categoria": "{{ a.categoria.nombre if a.categoria else '' }}", "turno": "{{ a.turno or '' }}", "estado_mensualidad": "{{ a.estado_mensualidad }}", "vencimiento": "{{ a.ultimo_pago.fecha_vencimiento.strftime('%d/%m/%Y') if a.ultimo_pago and a.ultimo_pago.fecha_vencimiento else '' }}", "monto": "{{ marca.monto_mensualidad }}", "moneda": "{{ marca.moneda }}", "academia": "{{ marca.nombre_academia|e }}"}'>
                     <td><strong>{{ a.codigo_interno }}</strong></td>
                     <td>
                         {% if a.foto %}

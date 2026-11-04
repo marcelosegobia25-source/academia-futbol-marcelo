@@ -121,3 +121,39 @@ def test_botones_whatsapp_en_listado_y_detalle(client, app):
     assert resp_pagos.status_code == 200
     assert b"abrirModalWhatsAppAlumno" in resp_pagos.data
     assert b"Mateo Rios" in resp_pagos.data
+
+
+def test_difusion_masiva_whatsapp_presente_en_vistas(client, app):
+    with app.app_context():
+        categoria = Categoria.query.first()
+        alumno = Alumno(
+            nombre="Lucas",
+            apellido="Suarez",
+            fecha_nacimiento=date(2013, 3, 15),
+            ci="99887766",
+            telefono="78901234",
+            tutor="Maria Suarez",
+            categoria=categoria,
+            estado="Activo",
+        )
+        db.session.add(alumno)
+        db.session.commit()
+
+    # Base contiene el modal de difusión masiva
+    resp_base = client.get("/")
+    assert resp_base.status_code == 200
+    assert b"modalDifusionWhatsApp" in resp_base.data
+    assert b"abrirDifusionWhatsAppAlumnos" in resp_base.data
+    assert b"difusionEnviarSiguiente" in resp_base.data
+
+    # Alumnos contiene el botón de mensaje masivo y datos JSON en las filas
+    resp_alumnos = client.get("/alumnos/")
+    assert resp_alumnos.status_code == 200
+    assert b"abrirDifusionWhatsAppAlumnos()" in resp_alumnos.data
+    assert b"data-alumno-json" in resp_alumnos.data
+    assert b"Lucas" in resp_alumnos.data
+
+    # Pagos contiene el botón de mensaje masivo
+    resp_pagos = client.get("/pagos/")
+    assert resp_pagos.status_code == 200
+    assert b"abrirDifusionWhatsAppPagos()" in resp_pagos.data

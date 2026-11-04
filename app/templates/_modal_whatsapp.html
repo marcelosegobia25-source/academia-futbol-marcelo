@@ -1,4 +1,4 @@
-<!-- Modal Universal de Mensaje Directo por WhatsApp -->
+<!-- Modal Universal de Mensaje Directo Individual por WhatsApp -->
 <div class="modal fade" id="modalWhatsAppDirecto" tabindex="-1" aria-labelledby="modalWhatsAppDirectoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content shadow-lg">
@@ -99,12 +99,150 @@
     </div>
 </div>
 
+<!-- Modal Universal de Mensaje Masivo por WhatsApp (Filtro Actual) -->
+<div class="modal fade" id="modalDifusionWhatsApp" tabindex="-1" aria-labelledby="modalDifusionWhatsAppLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header">
+                <div>
+                    <span class="eyebrow"><i class="bi bi-broadcast text-emerald"></i> Difusión Masiva</span>
+                    <h5 class="modal-title mb-0" id="modalDifusionWhatsAppLabel">Mensaje Masivo por WhatsApp (Filtro Actual)</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Barra de estadísticas del filtro -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 mb-4 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-funnel-fill fs-3 text-emerald"></i>
+                        <div>
+                            <strong class="text-white d-block">Destinatarios filtrados en pantalla</strong>
+                            <small class="text-muted" id="difusionOrigenTexto">Alumnos seleccionados por el filtro actual</small>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge font-monospace p-2 px-3" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);">
+                            Total: <strong id="difusionTotalAlumnos" class="text-white">0</strong>
+                        </span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle p-2 px-3">
+                            Con WhatsApp: <strong id="difusionConTelefono">0</strong>
+                        </span>
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle p-2 px-3" id="difusionSinTelefonoBadge">
+                            Sin número: <strong id="difusionSinTelefono">0</strong>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Configuración del Mensaje Masivo -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold small mb-1">
+                            <i class="bi bi-chat-text text-primary me-1"></i> Tipo de mensaje / Plantilla
+                        </label>
+                        <select id="difusionSelectorTipo" class="form-select" onchange="difusionCambiarTipo(this.value)">
+                            <option value="deuda">🔴 Recordatorio de Cuota / Mensualidad Vencida</option>
+                            <option value="proximo_vencer">🟡 Mensualidad Próxima a Vencer</option>
+                            <option value="al_dia">🟢 Confirmación de Pago / Cuota al Día</option>
+                            <option value="citacion">⚽ Citación a Entrenamiento / Partido</option>
+                            <option value="comunicado">📢 Comunicado Oficial / Aviso General</option>
+                            <option value="cumpleanos">🎂 Felicitación de Cumpleaños</option>
+                            <option value="personalizado">✍️ Mensaje Personalizado / Libre</option>
+                        </select>
+                        <div class="mt-2 text-muted small">
+                            <i class="bi bi-info-circle me-1"></i> El mensaje se personalizará automáticamente para cada alumno con su nombre, categoría, deuda o vencimiento.
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label fw-semibold small mb-0">
+                                <i class="bi bi-pencil-square me-1"></i> Plantilla base (se aplicará a todos)
+                            </label>
+                            <button type="button" class="btn btn-link btn-sm text-decoration-none py-0 text-muted" onclick="difusionRestablecerPlantilla()">
+                                <i class="bi bi-arrow-counterclockwise"></i> Restablecer plantilla
+                            </button>
+                        </div>
+                        <textarea id="difusionCuerpoPlantilla" class="form-control font-monospace small" rows="5" oninput="difusionActualizarTodosMensajes()" style="resize: vertical;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Panel de Envío Rápido 1 a 1 -->
+                <div class="p-3 mb-4 rounded-3 border border-success border-opacity-25" style="background: rgba(16, 185, 129, 0.05);">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-2">
+                        <div>
+                            <h6 class="text-white fw-bold mb-1"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Asistente de Envío Secuencial Rápido</h6>
+                            <small class="text-muted">Abre WhatsApp para cada alumno con un solo clic con su mensaje ya redactado.</small>
+                        </div>
+                        <div>
+                            <span class="small text-white fw-semibold" id="difusionProgresoTexto">0 de 0 enviados (0%)</span>
+                        </div>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px; background: rgba(255,255,255,0.08);">
+                        <div id="difusionBarraProgreso" class="progress-bar bg-success" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <button type="button" id="btnDifusionSiguiente" class="btn btn-success btn-lg fw-bold shadow px-4" onclick="difusionEnviarSiguiente()">
+                            <i class="bi bi-whatsapp me-2"></i> <span id="btnDifusionSiguienteTexto">Iniciar envío secuencial</span>
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="difusionReiniciarEnvios()">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reiniciar progreso
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="difusionCopiarNumeros()">
+                                <i class="bi bi-clipboard-data me-1"></i> Copiar teléfonos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista detallada de la cola de envío -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold text-white mb-0"><i class="bi bi-list-check me-1 text-emerald"></i> Lista de alumnos en la cola de envío</h6>
+                    <small class="text-muted">Puedes enviar individualmente o usar el botón verde superior para ir uno por uno.</small>
+                </div>
+                <div class="table-responsive rounded-3 border" style="max-height: 280px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th style="width: 40px;">#</th>
+                                <th>Alumno</th>
+                                <th>Categoría</th>
+                                <th>Teléfono</th>
+                                <th>Mensualidad</th>
+                                <th>Estado</th>
+                                <th class="text-end" style="width: 140px;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="difusionTablaCuerpo">
+                            <!-- Filas generadas por JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="difusionAlertaCopiado" class="alert alert-success py-2 px-3 small mt-3 mb-0 d-none">
+                    <i class="bi bi-check-circle-fill me-1"></i> ¡Teléfonos copiados al portapapeles!
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between p-3">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+                <span class="text-muted small">
+                    <i class="bi bi-shield-check text-emerald me-1"></i> Abre directamente la conversación de WhatsApp con el mensaje listo para presionar Enviar.
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Plantillas de WhatsApp cargadas dinámicamente desde el servidor
 window.PLANTILLAS_WHATSAPP_SISTEMA = {{ plantillas_whatsapp|tojson|safe }};
 
 let _waDatosActuales = null;
 
+// =============================================================================
+// 1. MODAL INDIVIDUAL DE WHATSAPP
+// =============================================================================
 function abrirModalWhatsAppAlumno(datos) {
     _waDatosActuales = Object.assign({
         nombre: 'Alumno',
@@ -172,7 +310,6 @@ function abrirModalWhatsAppAlumno(datos) {
         inputNumero.value = telefonosDisponibles[0].numero;
         if (alertaSinTel) alertaSinTel.classList.add('d-none');
 
-        // Generar botones rápidos para cambiar de número si hay más de 1
         telefonosDisponibles.forEach((item, idx) => {
             const chip = document.createElement('button');
             chip.type = 'button';
@@ -210,14 +347,11 @@ function abrirModalWhatsAppAlumno(datos) {
         selectorTipo.value = tipoElegido;
     }
 
-    // Renderizar plantilla
     waCargarPlantilla(tipoElegido);
 
-    // Ocultar alerta de copiado
     const alertaCopiado = document.getElementById('waAlertaCopiado');
     if (alertaCopiado) alertaCopiado.classList.add('d-none');
 
-    // Mostrar modal
     const modalEl = document.getElementById('modalWhatsAppDirecto');
     if (modalEl) {
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
@@ -233,7 +367,6 @@ function waCargarPlantilla(tipo) {
     const plantillas = window.PLANTILLAS_WHATSAPP_SISTEMA || {};
     let textoBase = plantillas[tipo] || plantillas['personalizado'] || '';
 
-    // Reemplazo dinámico de variables
     const nombre = _waDatosActuales.nombre || 'Alumno';
     const categoria = _waDatosActuales.categoria || 'General';
     const estado = _waDatosActuales.estado_mensualidad || 'Vigente';
@@ -318,10 +451,7 @@ function waAbrirWhatsAppChat() {
         return;
     }
 
-    // Limpiar dígitos del número
     let digitos = rawNum.replace(/\D/g, '');
-
-    // Si tiene 8 dígitos (celular local en Bolivia) y no empieza con el prefijo, anteponer el prefijo
     if (digitos.length === 8 && prefijo && !digitos.startsWith(prefijo)) {
         digitos = prefijo + digitos;
     }
@@ -330,7 +460,289 @@ function waAbrirWhatsAppChat() {
     window.open(enlaceWhatsApp, '_blank', 'noopener,noreferrer');
 }
 
-// Configurar listeners del modal cuando el DOM esté listo
+// =============================================================================
+// 2. MODAL DE DIFUSIÓN / ENVÍO MASIVO POR WHATSAPP
+// =============================================================================
+let _difusionLista = [];
+let _difusionPasoActual = 0;
+
+function abrirDifusionWhatsAppAlumnos() {
+    const filas = document.querySelectorAll('#tabla-alumnos tr[data-alumno-json]');
+    const alumnos = Array.from(filas).map(tr => {
+        try {
+            return JSON.parse(tr.getAttribute('data-alumno-json'));
+        } catch(e) {
+            return null;
+        }
+    }).filter(Boolean);
+
+    if (alumnos.length === 0) {
+        alert('No hay alumnos visibles en el listado actual con los filtros aplicados.');
+        return;
+    }
+
+    iniciarModalDifusion(alumnos, 'Listado de Alumnos');
+}
+
+function abrirDifusionWhatsAppPagos() {
+    const filas = document.querySelectorAll('#tabla-pagos tr[data-pago-json]');
+    const alumnos = Array.from(filas).map(tr => {
+        try {
+            return JSON.parse(tr.getAttribute('data-pago-json'));
+        } catch(e) {
+            return null;
+        }
+    }).filter(Boolean);
+
+    if (alumnos.length === 0) {
+        alert('No hay alumnos/pagos visibles en el listado actual con los filtros aplicados.');
+        return;
+    }
+
+    iniciarModalDifusion(alumnos, 'Listado de Cobranzas y Mensualidades');
+}
+
+function iniciarModalDifusion(destinatarios, origen) {
+    _difusionLista = destinatarios.map((d, idx) => ({
+        ...d,
+        idx: idx,
+        enviado: false
+    }));
+    _difusionPasoActual = 0;
+
+    // Estadísticas
+    const total = _difusionLista.length;
+    const conTel = _difusionLista.filter(a => !!a.telefono && a.telefono.replace(/\D/g, '').length >= 7).length;
+    const sinTel = total - conTel;
+
+    document.getElementById('difusionOrigenTexto').textContent = `${origen} (${total} elementos según los filtros aplicados)`;
+    document.getElementById('difusionTotalAlumnos').textContent = total;
+    document.getElementById('difusionConTelefono').textContent = conTel;
+    document.getElementById('difusionSinTelefono').textContent = sinTel;
+
+    const badgeSinTel = document.getElementById('difusionSinTelefonoBadge');
+    if (badgeSinTel) {
+        badgeSinTel.classList.toggle('d-none', sinTel === 0);
+    }
+
+    // Elegir tipo sugerido predominante
+    const conDeuda = _difusionLista.filter(a => a.estado_mensualidad === 'Vencido' || a.estado_mensualidad === 'Con deuda').length;
+    let tipoInicial = 'comunicado';
+    if (conDeuda > total / 2) {
+        tipoInicial = 'deuda';
+    } else if (_difusionLista.some(a => a.tipo_sugerido === 'proximo_vencer')) {
+        tipoInicial = 'proximo_vencer';
+    }
+    document.getElementById('difusionSelectorTipo').value = tipoInicial;
+
+    // Cargar plantilla base
+    const plantillas = window.PLANTILLAS_WHATSAPP_SISTEMA || {};
+    document.getElementById('difusionCuerpoPlantilla').value = plantillas[tipoInicial] || plantillas['personalizado'] || '';
+
+    // Renderizar tabla y asistente
+    difusionRenderizarTabla();
+    difusionActualizarAsistente();
+
+    const alerta = document.getElementById('difusionAlertaCopiado');
+    if (alerta) alerta.classList.add('d-none');
+
+    // Mostrar modal
+    const modalEl = document.getElementById('modalDifusionWhatsApp');
+    if (modalEl) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
+}
+
+function difusionCambiarTipo(tipo) {
+    const plantillas = window.PLANTILLAS_WHATSAPP_SISTEMA || {};
+    document.getElementById('difusionCuerpoPlantilla').value = plantillas[tipo] || plantillas['personalizado'] || '';
+    difusionRenderizarTabla();
+}
+
+function difusionRestablecerPlantilla() {
+    const tipo = document.getElementById('difusionSelectorTipo').value;
+    difusionCambiarTipo(tipo);
+}
+
+function difusionActualizarTodosMensajes() {
+    // Cuando el usuario edita la plantilla en tiempo real, no cambia el orden pero sí los mensajes
+    difusionActualizarAsistente();
+}
+
+function difusionConstruirMensajePara(alumno) {
+    const plantilla = document.getElementById('difusionCuerpoPlantilla').value || '';
+    const nombre = alumno.nombre || 'Alumno';
+    const categoria = alumno.categoria || 'General';
+    const estado = alumno.estado_mensualidad || 'Vigente';
+    const vencimiento = alumno.vencimiento || 'No registrado';
+    const monto = alumno.monto || '{{ marca.monto_mensualidad }}';
+    const moneda = alumno.moneda || '{{ marca.moneda }}';
+    const academia = alumno.academia || '{{ marca.nombre_academia|e }}';
+    const turno = alumno.turno || 'Habitual';
+
+    return plantilla
+        .replaceAll('{nombre}', nombre)
+        .replaceAll('{categoria}', categoria)
+        .replaceAll('{estado_mensualidad}', estado)
+        .replaceAll('{vencimiento}', vencimiento)
+        .replaceAll('{monto}', monto)
+        .replaceAll('{moneda}', moneda)
+        .replaceAll('{academia}', academia)
+        .replaceAll('{turno}', turno);
+}
+
+function difusionRenderizarTabla() {
+    const tbody = document.getElementById('difusionTablaCuerpo');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    _difusionLista.forEach((al, i) => {
+        const tr = document.createElement('tr');
+        tr.id = `difusion-fila-${i}`;
+
+        const telLimpio = (al.telefono || '').replace(/\D/g, '');
+        const tieneTel = telLimpio.length >= 7;
+
+        tr.innerHTML = `
+            <td><strong>${i + 1}</strong></td>
+            <td><strong>${al.nombre}</strong></td>
+            <td><span class="badge bg-secondary-subtle text-secondary">${al.categoria || '—'}</span></td>
+            <td>${tieneTel ? `<span class="text-white">${al.telefono}</span>` : `<span class="badge bg-danger-subtle text-danger">Sin número</span>`}</td>
+            <td><span class="badge ${al.estado_mensualidad === 'Vigente' ? 'bg-success' : (al.estado_mensualidad === 'Próximo a vencer' ? 'bg-warning text-dark' : (al.estado_mensualidad === 'Vencido' ? 'bg-danger' : 'bg-secondary'))}">${al.estado_mensualidad}</span></td>
+            <td id="difusion-estado-${i}">
+                ${al.enviado ? `<span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle-fill me-1"></i> Enviado</span>` : `<span class="badge bg-light text-dark">Pendiente</span>`}
+            </td>
+            <td class="text-end">
+                ${tieneTel ? `
+                    <button type="button" class="btn btn-sm ${al.enviado ? 'btn-outline-secondary' : 'btn-outline-success'} py-0 px-2" onclick="difusionEnviarIndividual(${i})">
+                        <i class="bi bi-whatsapp"></i> ${al.enviado ? 'Reenviar' : 'Enviar'}
+                    </button>
+                ` : `<span class="text-muted small">—</span>`}
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function difusionActualizarAsistente() {
+    const total = _difusionLista.length;
+    const conTel = _difusionLista.filter(a => !!a.telefono && a.telefono.replace(/\D/g, '').length >= 7);
+    const enviados = _difusionLista.filter(a => a.enviado).length;
+
+    const pct = conTel.length > 0 ? Math.round((enviados / conTel.length) * 100) : 0;
+    const barra = document.getElementById('difusionBarraProgreso');
+    const textoProgreso = document.getElementById('difusionProgresoTexto');
+    const btnSiguiente = document.getElementById('btnDifusionSiguiente');
+    const btnTexto = document.getElementById('btnDifusionSiguienteTexto');
+
+    if (barra) barra.style.width = `${pct}%`;
+    if (textoProgreso) textoProgreso.textContent = `${enviados} de ${conTel.length} enviados (${pct}%)`;
+
+    // Buscar el siguiente pendiente con teléfono
+    const siguiente = _difusionLista.find(a => !a.enviado && !!a.telefono && a.telefono.replace(/\D/g, '').length >= 7);
+
+    if (siguiente) {
+        btnSiguiente.disabled = false;
+        btnSiguiente.className = 'btn btn-success btn-lg fw-bold shadow px-4';
+        btnTexto.innerHTML = `Abrir WhatsApp para: <strong class="ms-1">${siguiente.nombre}</strong> <i class="bi bi-arrow-right ms-1"></i>`;
+    } else {
+        if (conTel.length > 0 && enviados >= conTel.length) {
+            btnSiguiente.disabled = true;
+            btnSiguiente.className = 'btn btn-secondary btn-lg fw-bold px-4';
+            btnTexto.innerHTML = `<i class="bi bi-check-all me-1"></i> ¡Todos los mensajes fueron enviados!`;
+        } else {
+            btnSiguiente.disabled = true;
+            btnSiguiente.className = 'btn btn-secondary btn-lg fw-bold px-4';
+            btnTexto.textContent = 'No hay números disponibles para enviar';
+        }
+    }
+}
+
+function difusionEnviarSiguiente() {
+    const siguiente = _difusionLista.find(a => !a.enviado && !!a.telefono && a.telefono.replace(/\D/g, '').length >= 7);
+    if (!siguiente) {
+        alert('Todos los alumnos con teléfono ya han sido completados.');
+        return;
+    }
+    difusionEnviarIndividual(siguiente.idx);
+}
+
+function difusionEnviarIndividual(idx) {
+    const alumno = _difusionLista[idx];
+    if (!alumno) return;
+
+    const rawNum = alumno.telefono || '';
+    let digitos = rawNum.replace(/\D/g, '');
+    const prefijo = (window.PLANTILLAS_WHATSAPP_SISTEMA && window.PLANTILLAS_WHATSAPP_SISTEMA.prefijo_pais) ? window.PLANTILLAS_WHATSAPP_SISTEMA.prefijo_pais : '591';
+
+    if (!digitos || digitos.length < 7) {
+        alert(`El alumno ${alumno.nombre} no tiene un número válido.`);
+        return;
+    }
+
+    if (digitos.length === 8 && prefijo && !digitos.startsWith(prefijo)) {
+        digitos = prefijo + digitos;
+    }
+
+    const mensaje = difusionConstruirMensajePara(alumno);
+    const url = `https://wa.me/${digitos}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+
+    // Marcar como enviado
+    alumno.enviado = true;
+
+    // Actualizar UI de la fila
+    const tdEstado = document.getElementById(`difusion-estado-${idx}`);
+    if (tdEstado) {
+        tdEstado.innerHTML = `<span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle-fill me-1"></i> Enviado</span>`;
+    }
+
+    const fila = document.getElementById(`difusion-fila-${idx}`);
+    if (fila) {
+        const btn = fila.querySelector('button');
+        if (btn) {
+            btn.className = 'btn btn-sm btn-outline-secondary py-0 px-2';
+            btn.innerHTML = '<i class="bi bi-whatsapp"></i> Reenviar';
+        }
+    }
+
+    difusionActualizarAsistente();
+}
+
+function difusionReiniciarEnvios() {
+    _difusionLista.forEach(a => a.enviado = false);
+    difusionRenderizarTabla();
+    difusionActualizarAsistente();
+}
+
+async function difusionCopiarNumeros() {
+    const prefijo = (window.PLANTILLAS_WHATSAPP_SISTEMA && window.PLANTILLAS_WHATSAPP_SISTEMA.prefijo_pais) ? window.PLANTILLAS_WHATSAPP_SISTEMA.prefijo_pais : '591';
+    const numeros = _difusionLista
+        .map(a => (a.telefono || '').replace(/\D/g, ''))
+        .filter(n => n.length >= 7)
+        .map(n => (n.length === 8 && !n.startsWith(prefijo)) ? `${prefijo}${n}` : n);
+
+    if (numeros.length === 0) {
+        alert('No hay números disponibles para copiar.');
+        return;
+    }
+
+    const texto = numeros.join(', ');
+    try {
+        await navigator.clipboard.writeText(texto);
+    } catch (_) {
+        window.prompt('Copie los teléfonos separados por coma:', texto);
+    }
+
+    const alerta = document.getElementById('difusionAlertaCopiado');
+    if (alerta) {
+        alerta.classList.remove('d-none');
+        setTimeout(() => alerta.classList.add('d-none'), 3500);
+    }
+}
+
+// Configurar listeners generales del DOM
 document.addEventListener('DOMContentLoaded', function() {
     const selector = document.getElementById('waSelectorTipo');
     if (selector) {

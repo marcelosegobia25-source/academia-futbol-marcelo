@@ -9,7 +9,8 @@
             </thead>
             <tbody>
                 {% for p in pagos %}
-                <tr class="{{ 'table-secondary' if not p.activo }}">
+                <tr class="{{ 'table-secondary' if not p.activo }}"
+    data-pago-json='{"nombre": "{{ p.alumno.nombre_completo|e }}", "telefono": "{{ p.alumno.telefono or '' }}", "tutor": "{{ p.alumno.tutor or '' }}", "categoria": "{{ p.alumno.categoria.nombre if p.alumno.categoria else '' }}", "turno": "{{ p.alumno.turno or '' }}", "estado_mensualidad": "{{ p.estado }}", "vencimiento": "{{ p.fecha_vencimiento.strftime('%d/%m/%Y') }}", "monto": "{{ '%.2f' % p.monto }}", "moneda": "{{ marca.moneda }}", "academia": "{{ marca.nombre_academia|e }}", "tipo_sugerido": "{{ 'deuda' if p.estado == 'Vencido' else ('proximo_vencer' if p.estado == 'Próximo a vencer' else 'al_dia') }}"}'>
                     <td><a href="{{ url_for('alumnos.detalle', id_alumno=p.id_alumno) }}">{{ p.alumno.nombre_completo }}</a></td>
                     <td>{{ p.alumno.categoria.nombre if p.alumno.categoria else '—' }}</td>
                     <td>{{ p.alumno.edad }}</td>
