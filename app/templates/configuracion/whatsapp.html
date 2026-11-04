@@ -3,7 +3,7 @@
 {% block contenido %}
 <div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <span class="eyebrow"><i class="bi bi-whatsapp text-success me-1"></i> Mensajería Directa</span>
+        <span class="eyebrow"><i class="bi bi-whatsapp text-emerald me-1"></i> Mensajería Directa</span>
         <h1 class="hero-title mb-1">Plantillas de WhatsApp</h1>
         <p class="hero-subtitle mb-0">Configura los mensajes predeterminados para cobranzas, avisos preventivos, confirmaciones y comunicados a los alumnos y tutores.</p>
     </div>
@@ -14,20 +14,20 @@
     </div>
 </div>
 
-<div class="alert alert-info d-flex align-items-start gap-2 shadow-sm mb-4">
-    <i class="bi bi-info-circle-fill fs-5 mt-1"></i>
+<div class="alert alert-info d-flex align-items-start gap-3 shadow-sm mb-4">
+    <i class="bi bi-info-circle-fill fs-5 mt-1 text-primary"></i>
     <div>
-        <strong>Variables dinámicas disponibles:</strong>
+        <strong class="d-block mb-1">Variables dinámicas disponibles:</strong>
         Puedes usar las siguientes etiquetas en tus plantillas. El sistema las reemplazará automáticamente con la información real de cada alumno:
         <div class="d-flex flex-wrap gap-2 mt-2">
-            <span class="badge bg-light text-dark font-monospace border"><code>{nombre}</code>: Nombre completo</span>
-            <span class="badge bg-light text-dark font-monospace border"><code>{categoria}</code>: Categoría</span>
-            <span class="badge bg-light text-dark font-monospace border"><code>{estado_mensualidad}</code>: Vigente / Vencido</span>
-            <span class="badge bg-light text-dark font-monospace border"><code>{vencimiento}</code>: Fecha de vencimiento</span>
-            <span class="badge bg-light text-dark font-monospace border"><code>{monto}</code>: Monto o cuota</span>
-            <span class="badge bg-light text-dark font-monospace border"><code>{moneda}</code>: Moneda (BOB, USD)</span>
-            <span class="badge bg-light text-dark font-monospace border"><code>{academia}</code>: Nombre de la academia</span>
-            <span class="badge bg-light text-dark font-monospace border"><code>{turno}</code>: Turno de entrenamiento</span>
+            <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{nombre}</code>: Nombre completo</span>
+            <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{categoria}</code>: Categoría</span>
+            <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{estado_mensualidad}</code>: Vigente / Vencido</span>
+            <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{vencimiento}</code>: Fecha de vencimiento</span>
+            <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{monto}</code>: Monto o cuota</span>
+            <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{moneda}</code>: Moneda (BOB, USD)</span>
+            <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{academia}</code>: Nombre de la academia</span>
+            <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{turno}</code>: Turno de entrenamiento</span>
         </div>
     </div>
 </div>
@@ -36,15 +36,15 @@
     <input type="hidden" name="accion" value="guardar">
     
     <div class="card shadow-sm mb-4">
-        <div class="card-header bg-body-tertiary">
-            <h5 class="card-title mb-0"><i class="bi bi-telephone text-primary me-2"></i> Parámetros de Envío</h5>
+        <div class="card-header">
+            <h5 class="card-title mb-0"><i class="bi bi-telephone text-emerald me-2"></i> Parámetros de Envío</h5>
         </div>
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Prefijo internacional por defecto</label>
                     <div class="input-group">
-                        <span class="input-group-text">+</span>
+                        <span class="input-group-text font-monospace">+</span>
                         <input type="text" class="form-control" name="prefijo_pais" value="{{ plantillas.get('prefijo_pais', '591') }}" placeholder="591" required>
                     </div>
                     <small class="text-muted">Se agregará automáticamente a números locales de 8 dígitos (ej: 591 para Bolivia).</small>
@@ -54,10 +54,13 @@
     </div>
 
     <!-- 1. Cobro de Mensualidad Vencida -->
-    <div class="card shadow-sm mb-4 border-danger border-opacity-50">
-        <div class="card-header d-flex justify-content-between align-items-center bg-danger-subtle text-danger-emphasis">
-            <strong><i class="bi bi-exclamation-octagon-fill me-2"></i> 1. Mensualidad Vencida / Recordatorio de Deuda</strong>
-            <span class="badge bg-danger">Cobranza</span>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-exclamation-octagon-fill text-danger me-2"></i>
+                <strong class="text-white">1. Mensualidad Vencida / Recordatorio de Deuda</strong>
+            </div>
+            <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">Cobranza</span>
         </div>
         <div class="card-body">
             <p class="text-muted small mb-2">Se sugiere cuando el estado de mensualidad del alumno es <strong>Vencido</strong> o <strong>Con deuda</strong>.</p>
@@ -66,10 +69,13 @@
     </div>
 
     <!-- 2. Próximo a Vencer -->
-    <div class="card shadow-sm mb-4 border-warning border-opacity-50">
-        <div class="card-header d-flex justify-content-between align-items-center bg-warning-subtle text-warning-emphasis">
-            <strong><i class="bi bi-clock-history me-2"></i> 2. Mensualidad Próxima a Vencer (Aviso Preventivo)</strong>
-            <span class="badge bg-warning text-dark">Preventivo</span>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-clock-history text-warning me-2"></i>
+                <strong class="text-white">2. Mensualidad Próxima a Vencer (Aviso Preventivo)</strong>
+            </div>
+            <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">Preventivo</span>
         </div>
         <div class="card-body">
             <p class="text-muted small mb-2">Se sugiere cuando faltan pocos días para el vencimiento de la cuota.</p>
@@ -78,10 +84,13 @@
     </div>
 
     <!-- 3. Pago al Día -->
-    <div class="card shadow-sm mb-4 border-success border-opacity-50">
-        <div class="card-header d-flex justify-content-between align-items-center bg-success-subtle text-success-emphasis">
-            <strong><i class="bi bi-check-circle-fill me-2"></i> 3. Mensualidad al Día / Confirmación de Pago</strong>
-            <span class="badge bg-success">Comprobación</span>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <strong class="text-white">3. Mensualidad al Día / Confirmación de Pago</strong>
+            </div>
+            <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">Comprobación</span>
         </div>
         <div class="card-body">
             <p class="text-muted small mb-2">Mensaje de agradecimiento y confirmación de cobertura vigente para el alumno.</p>
@@ -90,10 +99,13 @@
     </div>
 
     <!-- 4. Citación Deportiva -->
-    <div class="card shadow-sm mb-4 border-primary border-opacity-50">
-        <div class="card-header d-flex justify-content-between align-items-center bg-primary-subtle text-primary-emphasis">
-            <strong><i class="bi bi-trophy-fill me-2"></i> 4. Citación a Entrenamiento o Partido</strong>
-            <span class="badge bg-primary">Deportivo</span>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-trophy-fill text-primary me-2"></i>
+                <strong class="text-white">4. Citación a Entrenamiento o Partido</strong>
+            </div>
+            <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">Deportivo</span>
         </div>
         <div class="card-body">
             <p class="text-muted small mb-2">Para convocar o citar al alumno a sesiones de entrenamiento, amistosos o torneos.</p>
@@ -103,9 +115,12 @@
 
     <!-- 5. Comunicado General -->
     <div class="card shadow-sm mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center bg-body-tertiary">
-            <strong><i class="bi bi-megaphone-fill text-info me-2"></i> 5. Comunicado Oficial / Aviso General</strong>
-            <span class="badge bg-info text-dark">Institucional</span>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-megaphone-fill text-info me-2"></i>
+                <strong class="text-white">5. Comunicado Oficial / Aviso General</strong>
+            </div>
+            <span class="badge" style="background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3);">Institucional</span>
         </div>
         <div class="card-body">
             <p class="text-muted small mb-2">Avisos generales de la academia dirigidos a los tutores de familia.</p>
@@ -114,10 +129,13 @@
     </div>
 
     <!-- 6. Felicitación de Cumpleaños -->
-    <div class="card shadow-sm mb-4 border-info border-opacity-50">
-        <div class="card-header d-flex justify-content-between align-items-center bg-info-subtle text-info-emphasis">
-            <strong><i class="bi bi-cake2-fill me-2"></i> 6. Felicitación de Cumpleaños</strong>
-            <span class="badge bg-info text-dark">Social</span>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-cake2-fill me-2" style="color: #f472b6;"></i>
+                <strong class="text-white">6. Felicitación de Cumpleaños</strong>
+            </div>
+            <span class="badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3);">Social</span>
         </div>
         <div class="card-body">
             <p class="text-muted small mb-2">Para enviar un saludo cariñoso y motivador al alumno en el día de su cumpleaños.</p>
@@ -127,9 +145,12 @@
 
     <!-- 7. Mensaje Personalizado -->
     <div class="card shadow-sm mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center bg-body-tertiary">
-            <strong><i class="bi bi-pen-fill text-secondary me-2"></i> 7. Plantilla Base Libre / Personalizada</strong>
-            <span class="badge bg-secondary">Libre</span>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-pen-fill text-secondary me-2"></i>
+                <strong class="text-white">7. Plantilla Base Libre / Personalizada</strong>
+            </div>
+            <span class="badge" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3);">Libre</span>
         </div>
         <div class="card-body">
             <p class="text-muted small mb-2">Estructura base para cualquier mensaje libre redactado por el usuario.</p>
@@ -137,7 +158,7 @@
         </div>
     </div>
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pt-3 border-top">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pt-3 border-top border-secondary border-opacity-25">
         <button type="submit" class="btn btn-success btn-lg px-4 shadow-sm">
             <i class="bi bi-check2-circle me-1"></i> Guardar plantillas
         </button>
@@ -159,4 +180,3 @@ function restablecerPlantillas() {
 }
 </script>
 {% endblock %}
-

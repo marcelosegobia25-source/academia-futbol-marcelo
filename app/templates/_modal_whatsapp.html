@@ -1,34 +1,29 @@
 <!-- Modal Universal de Mensaje Directo por WhatsApp -->
 <div class="modal fade" id="modalWhatsAppDirecto" tabindex="-1" aria-labelledby="modalWhatsAppDirectoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content shadow">
-            <div class="modal-header bg-success text-white py-2 px-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-whatsapp fs-4"></i>
-                    <div>
-                        <h5 class="modal-title fs-6 fw-bold mb-0" id="modalWhatsAppDirectoLabel">Enviar Mensaje Directo por WhatsApp</h5>
-                        <small class="opacity-75">Contacto personal con el alumno o tutor de familia</small>
-                    </div>
+        <div class="modal-content shadow-lg">
+            <div class="modal-header">
+                <div>
+                    <span class="eyebrow"><i class="bi bi-whatsapp text-emerald"></i> Mensajería Directa</span>
+                    <h5 class="modal-title mb-0" id="modalWhatsAppDirectoLabel">Enviar Mensaje por WhatsApp</h5>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-            <div class="modal-body p-3">
-                <!-- Tarjeta con resumen del Alumno -->
-                <div class="d-flex flex-wrap align-items-center justify-content-between p-2 mb-3 rounded bg-body-tertiary border">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="rounded-circle bg-success-subtle text-success p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                            <i class="bi bi-person-fill fs-5"></i>
-                        </div>
+            <div class="modal-body p-4">
+                <!-- Resumen integrado del Alumno -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 mb-4 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-person-circle fs-2 text-emerald"></i>
                         <div>
-                            <strong id="waAlumnoNombre" class="fs-6 d-block">—</strong>
-                            <small class="text-muted">
-                                Categoría: <span id="waAlumnoCategoria" class="fw-semibold">—</span>
-                                <span id="waAlumnoTurnoWrap" class="ms-1">· Turno: <span id="waAlumnoTurno" class="fw-semibold">—</span></span>
-                            </small>
+                            <div class="d-flex align-items-center gap-2">
+                                <strong id="waAlumnoNombre" class="fs-6 text-white">—</strong>
+                                <span id="waAlumnoEstadoMensualidad" class="badge bg-secondary">—</span>
+                            </div>
+                            <div class="small text-muted mt-1">
+                                Categoría: <span id="waAlumnoCategoria" class="text-light fw-medium">—</span>
+                                <span id="waAlumnoTurnoWrap" class="ms-2">· Turno: <span id="waAlumnoTurno" class="text-light fw-medium">—</span></span>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <span id="waAlumnoEstadoMensualidad" class="badge bg-secondary">—</span>
                     </div>
                 </div>
 
@@ -36,15 +31,15 @@
                     <!-- Destinatario y Número de Teléfono -->
                     <div class="col-md-6">
                         <label class="form-label fw-semibold small mb-1">
-                            <i class="bi bi-telephone-outbound text-success me-1"></i> Número de WhatsApp
+                            <i class="bi bi-telephone-outbound text-emerald me-1"></i> Número de WhatsApp
                         </label>
                         <div class="input-group">
-                            <span class="input-group-text bg-body-tertiary font-monospace small px-2">+<span id="waPrefijoPais">{{ plantillas_whatsapp.get('prefijo_pais', '591') }}</span></span>
+                            <span class="input-group-text font-monospace small px-2">+<span id="waPrefijoPais">{{ plantillas_whatsapp.get('prefijo_pais', '591') }}</span></span>
                             <input type="tel" id="waNumeroDestino" class="form-control" placeholder="Ej: 71234567" autocomplete="off">
                         </div>
-                        <div id="waSugerenciasTelefonos" class="d-flex flex-wrap gap-1 mt-1"></div>
+                        <div id="waSugerenciasTelefonos" class="d-flex flex-wrap gap-1 mt-2"></div>
                         <div id="waAlertaSinTelefono" class="alert alert-warning py-1 px-2 small mt-2 mb-0 d-none">
-                            <i class="bi bi-exclamation-triangle-fill me-1"></i> No tiene teléfono guardado. Ingrese el número arriba para enviarlo directamente.
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Sin teléfono guardado. Ingréselo arriba para enviar directamente.
                         </div>
                     </div>
 
@@ -62,7 +57,7 @@
                             <option value="cumpleanos">🎂 Felicitación de Cumpleaños</option>
                             <option value="personalizado">✍️ Mensaje Personalizado / Libre</option>
                         </select>
-                        <small class="text-muted d-block mt-1">Selecciona el tipo de mensaje para autocompletar el texto.</small>
+                        <small class="text-muted d-block mt-1">El texto se adaptará automáticamente con los datos del alumno.</small>
                     </div>
                 </div>
 
@@ -76,18 +71,18 @@
                             <i class="bi bi-arrow-counterclockwise"></i> Restablecer plantilla
                         </button>
                     </div>
-                    <textarea id="waCuerpoMensaje" class="form-control font-monospace small bg-light text-dark" rows="7" placeholder="Escriba su mensaje aquí..."></textarea>
-                    <div class="d-flex justify-content-between align-items-center mt-1 text-muted small">
-                        <span><i class="bi bi-info-circle me-1"></i> Puede editar y agregar cualquier nota antes de enviar.</span>
+                    <textarea id="waCuerpoMensaje" class="form-control font-monospace small" rows="8" placeholder="Escriba su mensaje aquí..." style="resize: vertical;"></textarea>
+                    <div class="d-flex justify-content-between align-items-center mt-2 text-muted small">
+                        <span><i class="bi bi-info-circle me-1"></i> Puedes editar el mensaje directamente antes de abrir WhatsApp.</span>
                         <span id="waContadorCaracteres">0 caracteres</span>
                     </div>
                 </div>
 
-                <div id="waAlertaCopiado" class="alert alert-success py-1 px-2 small mb-0 d-none">
-                    <i class="bi bi-check-circle-fill me-1"></i> ¡Texto copiado al portapapeles!
+                <div id="waAlertaCopiado" class="alert alert-success py-2 px-3 small mb-0 d-none">
+                    <i class="bi bi-check-circle-fill me-1"></i> ¡Texto copiado al portapapeles con éxito!
                 </div>
             </div>
-            <div class="modal-footer d-flex justify-content-between py-2 px-3">
+            <div class="modal-footer d-flex justify-content-between p-3">
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
                     Cancelar
                 </button>
@@ -350,4 +345,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
