@@ -24,6 +24,7 @@ Inventario generado y contrastado con `app.url_map` el 16 de agosto de 2026. `GE
 | GET, POST | `/configuracion/mensualidad` | `configuracion.mensualidad` |
 | GET, POST | `/configuracion/contrasena` | `configuracion.contrasena` |
 | GET | `/configuracion/logo` | `configuracion.logo` |
+| GET, POST | `/configuracion/plantillas-whatsapp` | `configuracion.plantillas_whatsapp` |
 | GET | `/usuarios/` | `usuarios.listar` |
 | POST | `/usuarios/nuevo` | `usuarios.nuevo` |
 | POST | `/usuarios/<id>/actualizar` | `usuarios.actualizar` |

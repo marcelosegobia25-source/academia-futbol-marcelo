@@ -56,6 +56,12 @@ Este manual le ayudará a utilizar todas las funciones del sistema de forma ráp
 **¿Olvidó su contraseña?**
 - Contacte al administrador del sistema para restablecerla
 
+### 2.1.1 Cierre Automático por Inactividad (Seguridad)
+Por seguridad de los datos de la academia, si el sistema no detecta actividad durante **15 minutos**, la sesión se cerrará automáticamente.
+- Si esto ocurre, el sistema le redirigirá a la pantalla de acceso conservando su nombre de usuario.
+- Solo deberá ingresar su contraseña nuevamente para retomar el trabajo.
+- Si la pestaña queda abierta durante horas, al volver a ella el formulario renovará sus credenciales automáticamente sin errores de caducidad.
+
 ### 2.2 Cambiar Contraseña
 
 Para proteger tu cuenta:
@@ -206,6 +212,39 @@ Si un alumno quiere volver:
 2. Selecciona el alumno retirado
 3. Haz clic en **[Reactivar]**
 4. El alumno volverá a "Activo"
+
+### 4.3 Mensajería Directa y Difusión por WhatsApp
+
+El sistema incluye comunicación directa con alumnos y tutores mediante WhatsApp Web o WhatsApp Desktop sin requerir servicios externos de pago.
+
+#### Envío de Mensaje Individual a un Alumno o Tutor
+1. En la lista de **Alumnos** o en la tabla de **Pagos**, ubique al alumno.
+2. Haga clic en el botón verde con el icono de **WhatsApp**.
+3. Se abrirá una ventana emergente donde podrá:
+   - Seleccionar el tipo de mensaje: **Deuda / Vencido**, **Próximo a Vencer**, **Al Día**, **Citación a Entrenamiento/Partido**, **Comunicado General**, **Felicitación de Cumpleaños** o **Mensaje Libre**.
+   - El mensaje se autocompletará con los datos del alumno, tutor, monto y fecha.
+   - Puede editar el texto antes de enviarlo.
+4. Haga clic en **"Abrir WhatsApp"**: se abrirá la conversación directamente con el mensaje listo para enviar.
+
+#### Difusión Masiva para Listas Filtradas
+Si necesita enviar el mismo comunicado o recordatorio a varios alumnos (por ejemplo, a todos los morosos o a una categoría completa):
+1. Aplique los filtros deseados en la tabla de Alumnos o Pagos (ej. Categoría Sub-13 o Estado "Vencido").
+2. Haga clic en el botón superior **"Difusión WhatsApp"**.
+3. El sistema cargará todos los destinatarios filtrados y le permitirá avanzar alumno por alumno con un solo clic secuencial, evitando errores de copia o números incorrectos.
+
+#### Personalización de Plantillas de WhatsApp
+Los administradores pueden editar los textos predeterminados de los 7 tipos de mensajes:
+1. Vaya a **Configuración** → **Plantillas de WhatsApp**.
+2. Modifique el texto de cada plantilla utilizando las etiquetas automáticas:
+   - `{nombre}`: Nombre del alumno.
+   - `{tutor}`: Nombre del tutor o apoderado.
+   - `{monto}`: Monto de la mensualidad o deuda.
+   - `{fecha}`: Fecha de vencimiento o evento.
+   - `{academia}`: Nombre oficial de la academia.
+   - `{categoria}`: Categoría del alumno.
+3. Haga clic en **"Guardar Plantillas"**.
+
+---
 
 ### 4.2 Gestión de Tutores
 

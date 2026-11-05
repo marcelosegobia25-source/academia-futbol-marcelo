@@ -597,7 +597,10 @@ La autorización se evalúa en servidor según blueprint, endpoint y método HTT
 ## 16. Seguridad
 
 - Hash de contraseñas; no se auditan claves.
-- CSRF en POST y HTMX.
+- CSRF en POST y HTMX con recuperación automática ante expiración (`@app.errorhandler(CSRFError)`), evitando pantallas de error 400.
+- `WTF_CSRF_TIME_LIMIT = None` para vincular la validez del token a la sesión activa y no a un reloj rígido.
+- Cierre de sesión automático por inactividad tras 15 minutos (900s) tanto en backend como frontend con listener `visibilitychange`.
+- Protección contra bucles de logout validando destinos locales seguros (`_destino_local`) y reseteo de marcas en `sessionStorage`.
 - Cookies `HttpOnly`, `SameSite=Lax` y nombre específico.
 - CSP restringida a recursos propios; sin objetos ni iframes.
 - `X-Frame-Options: DENY`, `nosniff`, política de permisos y referrer local.
@@ -700,7 +703,7 @@ pip install -r requirements-dev.txt
 python -m pytest -q
 ```
 
-La suite actual contiene 126 pruebas distribuidas en autenticación, seguridad, humo, gestión, descargas, campeonatos/Agenda, información general, integridad, lugares, ciclos, auditoría y mejoras integrales.
+La suite actual contiene 161 pruebas automáticas distribuidas en autenticación, seguridad, humo, gestión, descargas, campeonatos/Agenda, información general, integridad, lugares, ciclos, auditoría, mejoras integrales, mensajería directa por WhatsApp y manejo de expiración CSRF.
 
 Casos críticos cubiertos o que deben conservarse:
 

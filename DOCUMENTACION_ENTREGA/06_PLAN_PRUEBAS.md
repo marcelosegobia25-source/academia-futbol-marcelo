@@ -11,8 +11,8 @@
 
 | Métrica | Resultado |
 |---------|-----------|
-| **Total de Pruebas** | 126 |
-| **Aprobadas** | 126 ✅ |
+| **Total de Pruebas** | 161 |
+| **Aprobadas** | 161 ✅ |
 | **Fallidas** | 0 |
 | **En Suspensión** | 0 |
 | **Tasa de Éxito** | 100% |
@@ -21,6 +21,30 @@
 ---
 
 ## 🧪 PRUEBAS UNITARIAS
+
+### Módulo de Comunicación y Mensajería (WhatsApp)
+
+| ID | Prueba | Resultado | Notas |
+|----|--------|-----------|-------|
+| P-WSP-001 | Generación de enlaces directos WhatsApp | ✅ PASS | URL y formato internacional válidos |
+| P-WSP-002 | Sustitución de etiquetas dinámicas | ✅ PASS | Reemplazo de variables de alumno y monto |
+| P-WSP-003 | Selección de plantillas por estado de deuda | ✅ PASS | Plantilla moroso/al día adecuada |
+| P-WSP-004 | Edición y persistencia de plantillas | ✅ PASS | Guardado en base de datos |
+| P-WSP-005 | Difusión masiva sobre lista filtrada | ✅ PASS | Generación de cola secuencial |
+| P-WSP-006 | Validación de números telefónicos | ✅ PASS | Limpieza y prefijo de país |
+
+**Subtotal Módulo WhatsApp: 6/6 PASS**
+
+### Módulo de Seguridad y Sesión
+
+| ID | Prueba | Resultado | Notas |
+|----|--------|-----------|-------|
+| P-SEC-011 | Cierre de sesión por inactividad (15 min) | ✅ PASS | Expulsión automática y auditoría |
+| P-SEC-012 | Prevención de bucles de logout | ✅ PASS | Destino seguro a panel general |
+| P-SEC-013 | Manejo de expiración CSRF sin error 400 | ✅ PASS | Redirección amigable y nuevo token |
+| P-SEC-014 | Respuesta JSON en fallos CSRF vía AJAX | ✅ PASS | Código 400 estructurado |
+
+**Subtotal Seguridad y Sesión Adicional: 4/4 PASS**
 
 ### Módulo Académico
 

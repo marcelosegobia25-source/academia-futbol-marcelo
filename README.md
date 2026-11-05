@@ -13,6 +13,8 @@ respaldos automáticos continuos y cero requerimientos de instalación local.
 - **Control Financiero Inteligente:** Semáforo de estados de pago, continuidad de cuotas y emisión de recibos oficiales en PDF.
 - **Motor Deportivo Automático:** Generación de fixtures, tablas de posiciones en tiempo real y convocatorias oficiales.
 - **Respaldos Automáticos en la Nube:** Copias de seguridad diarias gestionadas con retención de 30 días.
+- **Mensajería Directa y Difusión WhatsApp:** Notificaciones individuales o masivas con 1 clic usando plantillas dinámicas configurables (deuda, cobranza, citación, felicitación).
+- **Seguridad y Cierre por Inactividad:** Expiración de sesión a los 15 minutos, prevención de bucles de logout y recuperación automática de tokens CSRF sin errores 400.
 
 ## Requisitos de Acceso para Usuarios
 
@@ -183,6 +185,9 @@ academia_futbol/
   de stock mínimo.
 - **Ventas**: uniformes y otros productos, asociación opcional al alumno,
   recibo PDF y restitución de existencias al anular.
+- **Comunicación y WhatsApp**: mensajería directa con 7 tipos de plantillas editables
+  (`{nombre}`, `{tutor}`, `{monto}`, `{fecha}`, `{academia}`), botón de WhatsApp en cada
+  alumno y pago, y panel de **Difusión Masiva** con filtros por categoría o estado.
 
 ## Notas sobre reglas de negocio ya implementadas
 
@@ -209,7 +214,7 @@ academia_futbol/
 - Los formularios POST están protegidos con CSRF y se validan nuevamente en
   el servidor.
 
-Para ejecutar las pruebas:
+Para ejecutar la suite de 161 pruebas automáticas (100% aprobadas):
 
 ```bash
 pip install -r requirements-dev.txt
