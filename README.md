@@ -134,6 +134,7 @@ iniciar una base existente.
 
 ```
 academia_futbol/
+├── docs/                  # Documentación unificada (manuales de usuario, arquitectura, auditorías)
 ├── run.py                 # Punto de entrada (ejecutar esto)
 ├── config.py               # Configuración (rutas, límites de archivo)
 ├── requirements.txt

@@ -6,7 +6,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 def actualizar_01_documento_general():
-    path = BASE_DIR / "DOCUMENTACION_ENTREGA" / "01_DOCUMENTO_GENERAL.md"
+    path = BASE_DIR / "docs" / "01_DOCUMENTO_GENERAL.md"
     if not path.exists():
         return
     content = path.read_text(encoding="utf-8")
@@ -69,7 +69,7 @@ def actualizar_01_documento_general():
     print("Actualizado: 01_DOCUMENTO_GENERAL.md")
 
 def actualizar_02_manual_usuario():
-    path = BASE_DIR / "DOCUMENTACION_ENTREGA" / "02_MANUAL_USUARIO.md"
+    path = BASE_DIR / "docs" / "02_MANUAL_USUARIO.md"
     if not path.exists():
         return
     content = path.read_text(encoding="utf-8")
@@ -107,7 +107,7 @@ R: ¡Totalmente! La plataforma cuenta con un diseño web responsivo de última g
     print("Actualizado: 02_MANUAL_USUARIO.md")
 
 def actualizar_04_requisitos():
-    path = BASE_DIR / "DOCUMENTACION_ENTREGA" / "04_REQUISITOS.md"
+    path = BASE_DIR / "docs" / "04_REQUISITOS.md"
     if not path.exists():
         return
     content = path.read_text(encoding="utf-8")
@@ -134,7 +134,7 @@ def actualizar_04_requisitos():
     print("Actualizado: 04_REQUISITOS.md")
 
 def actualizar_presentacion_10_hojas():
-    path = BASE_DIR / "DOCUMENTACION_ENTREGA" / "PRESENTACION_RESUMEN_10_HOJAS.md"
+    path = BASE_DIR / "docs" / "PRESENTACION_RESUMEN_10_HOJAS.md"
     if not path.exists():
         return
     content = path.read_text(encoding="utf-8")

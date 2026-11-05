@@ -72,7 +72,22 @@
 
 | Documento | Propósito | Audiencia | Tiempo |
 |-----------|-----------|-----------|--------|
-| **06_PLAN_PRUEBAS.md** | Resultados de testing (126/126 ✅) | QA + Técnico | 30 min |
+| **06_PLAN_PRUEBAS.md** | Resultados de testing (161/161 ✅) | QA + Técnico | 30 min |
+
+---
+
+### 6️⃣ DOCUMENTOS DE ARQUITECTURA, AUDITORÍA Y NUBE
+
+| Documento | Propósito | Audiencia | Tiempo |
+|-----------|-----------|-----------|--------|
+| **DOCUMENTACION_TECNICA_COMPLETA.md** | Especificación técnica integral | Desarrolladores | 45 min |
+| **ARQUITECTURA_UML.md** | Diagramas de capas y modelos | Arquitectos/Dev | 25 min |
+| **CATALOGO_RUTAS.md** | Catálogo completo de endpoints HTTP | Desarrolladores | 20 min |
+| **DESPLIEGUE_RENDER.md** | Despliegue en Render y Supabase | DevOps / IT | 15 min |
+| **GUIA_MIGRACION_POSTGRESQL_Y_NUBE.md** | Migración SQLite a PostgreSQL | DevOps / DBA | 20 min |
+| **INFORME_AUDITORIA_COMPLETA.md** | Auditoría de 57 tablas e integridad | Auditor / IT | 30 min |
+| **RESUMEN_EJECUTIVO_AUDITORIA.md** | Resumen gerencial de auditoría | Directivos | 10 min |
+| **POLITICA_ELIMINACION.md** | Política de borrado lógico vs físico | Legal / Admin | 15 min |
 
 ---
 
@@ -81,19 +96,33 @@
 ```
 academia_futbol/
 │
-├── DOCUMENTACION_ENTREGA/          ← TODOS LOS DOCUMENTOS
-│   ├── README.md                   (Inicio)
-│   ├── INDEX.md                    (Este archivo)
-│   ├── 01_DOCUMENTO_GENERAL.md     (Visión general)
-│   ├── 02_MANUAL_USUARIO.md        (Cómo usar)
-│   ├── 03_MANUAL_INSTALACION.md    (Instalación)
-│   ├── 04_REQUISITOS.md            (Especificación)
-│   ├── 05_CASOS_USO.md             (Flujos)
-│   ├── 06_PLAN_PRUEBAS.md          (Pruebas)
-│   ├── 07_MANUAL_BACKUP.md         (Respaldos)
-│   ├── CHANGELOG.md                (Versiones)
-│   ├── LICENSE.txt                 (Legal)
-│   └── ACTA_ENTREGA.md             (Entrega formal)
+├── docs/                           ← TODOS LOS DOCUMENTOS CENTRALIZADOS
+│   ├── README.md                   (Portada de documentación)
+│   ├── INDEX.md                    (Índice maestro de documentos)
+│   ├── 01_DOCUMENTO_GENERAL.md     (Visión general del sistema)
+│   ├── 02_MANUAL_USUARIO.md        (Cómo usar cada módulo y WhatsApp)
+│   ├── 03_MANUAL_INSTALACION.md    (Instalación y despliegue)
+│   ├── 04_REQUISITOS.md            (Especificación de requisitos)
+│   ├── 05_CASOS_USO.md             (Flujos de negocio detallados)
+│   ├── 06_PLAN_PRUEBAS.md          (Pruebas y calidad: 161/161 ✅)
+│   ├── 07_MANUAL_BACKUP.md         (Respaldos y recuperación)
+│   ├── 08_PROPUESTA_COMERCIAL_SAAS.md
+│   ├── 09_PROPUESTA_COMERCIAL_SOFTWARE_NATIVO.md
+│   ├── ACTA_ENTREGA.md             (Entrega formal y conformidad)
+│   ├── CHANGELOG.md                (Historial de versiones hasta v1.3.0)
+│   ├── ARQUITECTURA_UML.md         (Diagramas de arquitectura)
+│   ├── CATALOGO_RUTAS.md           (Catálogo de endpoints y rutas)
+│   ├── DESPLIEGUE_RENDER.md        (Despliegue Render + Supabase)
+│   ├── DOCUMENTACION_TECNICA_COMPLETA.md (Especificación profunda)
+│   ├── GUIA_COMERCIALIZACION_Y_PRODUCCION.md
+│   ├── GUIA_MIGRACION_POSTGRESQL_Y_NUBE.md
+│   ├── INFORME_AUDITORIA_COMPLETA.md (Auditoría técnica de BD)
+│   ├── INFORME_AUDITORIA_FLUJOS.md (Auditoría de flujos de usuario)
+│   ├── RESOLUCION_RUTAS.md         (Validación de endpoints)
+│   ├── RESUMEN_EJECUTIVO_AUDITORIA.md (Resumen de auditoría)
+│   ├── PRESENTACION_RESUMEN_10_HOJAS.md
+│   ├── RESUMEN_CLIENTE_2_HOJAS.md  (Ficha ejecutiva cliente)
+│   └── LICENSE.txt                 (Términos legales y licencia)
 │
 ├── app/                            ← CÓDIGO DE APLICACIÓN
 │   ├── routes/                     (14 módulos)
@@ -102,7 +131,7 @@ academia_futbol/
 │   └── templates/                  (HTML/Jinja2)
 │
 ├── tests/                          ← PRUEBAS AUTOMÁTICAS
-│   └── test_*.py                   (126 pruebas)
+│   └── test_*.py                   (161 pruebas)
 │
 ├── instance/                       ← DATOS
 │   ├── academia.db                 (Base de datos)
@@ -179,7 +208,7 @@ academia_futbol/
 → **01_DOCUMENTO_GENERAL.md** → Sección 14
 
 ### ¿Qué pruebas pasó?
-→ **06_PLAN_PRUEBAS.md** (126/126 ✅)
+→ **06_PLAN_PRUEBAS.md** (161/161 ✅)
 
 ### ¿Cuáles son los términos legales?
 → **LICENSE.txt**
