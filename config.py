@@ -115,7 +115,7 @@ class Config:
     )
     PERMANENT_SESSION_LIFETIME = timedelta(hours=12)
     AUTH_REQUIRED = True
-    WTF_CSRF_TIME_LIMIT = 8 * 60 * 60
+    WTF_CSRF_TIME_LIMIT = None  # Válido durante la vida de la sesión (sin límite de reloj arbitrario)
     ITEMS_PER_PAGE = 40
     AUTO_BACKUP = True
     BACKUP_RETENTION_DAYS = 30

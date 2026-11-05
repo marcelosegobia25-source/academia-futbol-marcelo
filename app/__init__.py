@@ -5,6 +5,7 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask, abort, flash, g, make_response, render_template, redirect, request, session, url_for
 from config import Config
 from app.extensions import db, csrf
+from flask_wtf.csrf import CSRFError
 
 
 def create_app(config_class=Config):
@@ -245,6 +246,50 @@ def create_app(config_class=Config):
             return None
         next_url = request.full_path if request.full_path and not request.path.startswith("/acceso") else None
         return redirect(url_for("autenticacion.login", next=next_url) if next_url else url_for("autenticacion.login"))
+
+    @app.errorhandler(CSRFError)
+    def manejar_error_csrf(error):
+        from app.models import obtener_ip_cliente
+        ip_cliente = obtener_ip_cliente(request) or "local"
+        app.logger.warning(
+            "Expiración o error de CSRF detectado: %s (IP=%s, ruta=%s)",
+            getattr(error, "description", str(error)),
+            ip_cliente,
+            request.path,
+        )
+        if request.is_json or request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return {
+                "error": "El formulario o sesión expiró por tiempo de inactividad. Por favor, recargue la página.",
+                "csrf_expirado": True,
+            }, 400
+
+        import time
+        ahora = time.time()
+        ultimo_acceso = session.get("ultimo_acceso")
+        limite_inactividad = app.config.get("SESSION_INACTIVITY_TIMEOUT", 900)
+        ha_expirado = (
+            not session.get("autenticado")
+            or request.path.startswith("/acceso")
+            or (ultimo_acceso is not None and (ahora - ultimo_acceso > limite_inactividad))
+        )
+        if ha_expirado:
+            session.clear()
+            flash("Su formulario o sesión expiró por inactividad. Por favor, intente nuevamente.", "warning")
+            usuario = request.form.get("nombre_usuario", "").strip()
+            next_url = request.form.get("next") or (
+                request.full_path if request.full_path and not request.path.startswith("/acceso") else None
+            )
+            parametros = {}
+            if usuario:
+                parametros["u"] = usuario
+            if next_url and not next_url.startswith("/acceso"):
+                parametros["next"] = next_url
+            return redirect(url_for("autenticacion.login", **parametros))
+
+        referente = request.referrer
+        if referente and request.host_url and not referente.startswith(request.host_url):
+            referente = None
+        return redirect(referente or url_for("informacion.general"))
 
     @app.errorhandler(404)
     def no_encontrado(error):

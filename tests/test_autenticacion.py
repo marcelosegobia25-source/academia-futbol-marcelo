@@ -212,3 +212,38 @@ def test_logout_con_inactividad_mensaje_adecuado(client, app):
     assert res.status_code == 200
     assert b"Su sesi\xc3\xb3n ha expirado por inactividad" in res.data
     assert b"Sesi\xc3\xb3n cerrada correctamente" not in res.data
+
+def test_csrf_expirado_o_invalido_redirige_a_login_con_mensaje_amigable(client, app):
+    activar_acceso(app)
+    app.config['WTF_CSRF_ENABLED'] = True
+    try:
+        res = client.post('/acceso/', data={'nombre_usuario': 'admin', 'contrasena': '00000', 'csrf_token': 'token_invalido_o_expirado'})
+        assert res.status_code == 302
+        assert '/acceso/' in res.location
+        assert 'u=admin' in res.location
+
+        res_sig = client.get(res.location)
+        assert res_sig.status_code == 200
+        assert 'Su formulario o sesi' in res_sig.data.decode('utf-8')
+        assert 'Bad Request' not in res_sig.data.decode('utf-8')
+        assert 'admin' in res_sig.data.decode('utf-8')
+    finally:
+        app.config['WTF_CSRF_ENABLED'] = False
+
+
+def test_csrf_error_peticion_ajax_retorna_json(client, app):
+    activar_acceso(app)
+    app.config['WTF_CSRF_ENABLED'] = True
+    try:
+        res = client.post(
+            '/acceso/',
+            data={'csrf_token': 'invalido'},
+            headers={'X-Requested-With': 'XMLHttpRequest'}
+        )
+        assert res.status_code == 400
+        datos = res.get_json()
+        assert datos is not None
+        assert datos.get('csrf_expirado') is True
+    finally:
+        app.config['WTF_CSRF_ENABLED'] = False
+

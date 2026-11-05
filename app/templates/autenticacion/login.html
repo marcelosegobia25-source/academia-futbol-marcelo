@@ -44,7 +44,7 @@
                         <label for="nombre_usuario" class="form-label">Usuario</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-person"></i></span>
-                            <input id="nombre_usuario" name="nombre_usuario" class="form-control" maxlength="40" required autofocus autocomplete="off" value="">
+                            <input id="nombre_usuario" name="nombre_usuario" class="form-control" maxlength="40" required autofocus autocomplete="off" value="{{ request.form.get('nombre_usuario', request.args.get('u', '')) }}">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -71,6 +71,22 @@
         try {
             sessionStorage.removeItem('app_ultimo_acceso_ms');
         } catch(e) {}
+
+        // Si la pestaña de login estuvo en segundo plano por más de 15 minutos y no hay datos ingresados,
+        // recargar la página para asegurar un token CSRF de sesión fresco antes de que el usuario escriba.
+        (function() {
+            var tiempoCargaLogin = Date.now();
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    var usuarioInput = document.getElementById('nombre_usuario');
+                    var claveInput = document.getElementById('contrasena');
+                    var estaVacio = (!usuarioInput || !usuarioInput.value) && (!claveInput || !claveInput.value);
+                    if (estaVacio && (Date.now() - tiempoCargaLogin > 15 * 60 * 1000)) {
+                        window.location.reload();
+                    }
+                }
+            });
+        })();
     </script>
 </body>
 </html>
