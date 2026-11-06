@@ -170,6 +170,7 @@ def whatsapp():
             "comunicado": request.form.get("comunicado", "").strip(),
             "cumpleanos": request.form.get("cumpleanos", "").strip(),
             "personalizado": request.form.get("personalizado", "").strip(),
+            "recibo_pago": request.form.get("recibo_pago", "").strip(),
         }
         guardar_plantillas_whatsapp(nuevas)
         db.session.add(Auditoria(

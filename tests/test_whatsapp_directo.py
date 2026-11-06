@@ -26,7 +26,7 @@ def test_formatear_numero_whatsapp():
 
 def test_plantillas_whatsapp_claves():
     plantillas = obtener_plantillas_whatsapp()
-    claves_esperadas = ["prefijo_pais", "deuda", "proximo_vencer", "al_dia", "citacion", "comunicado", "cumpleanos", "personalizado"]
+    claves_esperadas = ["prefijo_pais", "deuda", "proximo_vencer", "al_dia", "citacion", "comunicado", "cumpleanos", "personalizado", "recibo_pago"]
     for clave in claves_esperadas:
         assert clave in plantillas
         assert len(plantillas[clave]) > 0
@@ -157,3 +157,45 @@ def test_difusion_masiva_whatsapp_presente_en_vistas(client, app):
     resp_pagos = client.get("/pagos/")
     assert resp_pagos.status_code == 200
     assert b"abrirDifusionWhatsAppPagos()" in resp_pagos.data
+
+
+def test_comprobante_pago_whatsapp_y_compartir(client, app):
+    with app.app_context():
+        categoria = Categoria.query.first()
+        alumno = Alumno(
+            nombre="Valeria",
+            apellido="Mendoza",
+            fecha_nacimiento=date(2015, 8, 20),
+            ci="77112233",
+            telefono="71234567",
+            tutor="Gabriel Mendoza",
+            categoria=categoria,
+            estado="Activo",
+        )
+        db.session.add(alumno)
+        db.session.commit()
+
+        pago = Pago(
+            id_alumno=alumno.id_alumno,
+            mes_pagado="2026-11",
+            fecha_pago=date(2026, 11, 6),
+            fecha_vencimiento=date(2026, 12, 6),
+            monto=200.0,
+            modo_pago="Efectivo",
+        )
+        db.session.add(pago)
+        db.session.commit()
+        id_pago = pago.id_pago
+
+    # Acceder a la vista del comprobante
+    resp = client.get(f"/pagos/{id_pago}/comprobante")
+    assert resp.status_code == 200
+    # Verificar que están presentes las opciones de compartir y WhatsApp directo
+    assert b"Pago registrado con" in resp.data
+    assert b"enviarWhatsAppDirecto" in resp.data
+    assert b"compartirComprobante" in resp.data
+    assert b"btn-compartir" in resp.data
+    assert b"71234567" in resp.data
+    assert b"Enviar a WhatsApp (71234567)" in resp.data
+    assert b"recibo_pago" in resp.data
+

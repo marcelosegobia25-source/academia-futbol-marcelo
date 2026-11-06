@@ -60,6 +60,22 @@ PLANTILLAS_PREDETERMINADAS = {
         "Le saludamos de la *{academia}*.\n\n"
         "[Escriba aquí su mensaje]"
     ),
+    "recibo_pago": (
+        "🧾 *COMPROBANTE DE PAGO OFICIAL - {academia}*\n\n"
+        "Estimado(a) tutor(a) / familia de *{nombre}*:\n\n"
+        "Confirmamos la recepción y registro exitoso de su pago en el sistema:\n\n"
+        "📋 *Detalle del Comprobante:*\n"
+        "• *N° Recibo:* #{nro_recibo}\n"
+        "• *Alumno:* {nombre}\n"
+        "• *Mes cancelado:* {mes}\n"
+        "• *Fecha de pago:* {fecha_pago}\n"
+        "• *Próximo vencimiento:* {vencimiento}\n"
+        "• *Modo de pago:* {modo_pago}\n"
+        "• *Importe abonado:* {monto} {moneda}\n"
+        "• *Saldo restante:* {saldo} {moneda}\n"
+        "• *Estado de cobertura:* {estado_mensualidad}\n\n"
+        "¡Muchas gracias por su puntualidad y confianza en la formación de su hijo(a)! ⚽👏"
+    ),
 }
 
 

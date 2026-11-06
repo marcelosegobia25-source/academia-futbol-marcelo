@@ -52,6 +52,7 @@
                             <option value="deuda">🔴 Recordatorio de Cuota / Mensualidad Vencida</option>
                             <option value="proximo_vencer">🟡 Mensualidad Próxima a Vencer</option>
                             <option value="al_dia">🟢 Confirmación de Pago / Cuota al Día</option>
+                            <option value="recibo_pago">🧾 Comprobante Oficial de Pago Registrado</option>
                             <option value="citacion">⚽ Citación a Entrenamiento / Partido</option>
                             <option value="comunicado">📢 Comunicado Oficial / Aviso General</option>
                             <option value="cumpleanos">🎂 Felicitación de Cumpleaños</option>
@@ -143,6 +144,7 @@
                             <option value="deuda">🔴 Recordatorio de Cuota / Mensualidad Vencida</option>
                             <option value="proximo_vencer">🟡 Mensualidad Próxima a Vencer</option>
                             <option value="al_dia">🟢 Confirmación de Pago / Cuota al Día</option>
+                            <option value="recibo_pago">🧾 Comprobante Oficial de Pago Registrado</option>
                             <option value="citacion">⚽ Citación a Entrenamiento / Partido</option>
                             <option value="comunicado">📢 Comunicado Oficial / Aviso General</option>
                             <option value="cumpleanos">🎂 Felicitación de Cumpleaños</option>
@@ -256,7 +258,12 @@ function abrirModalWhatsAppAlumno(datos) {
         monto: '{{ marca.monto_mensualidad }}',
         moneda: '{{ marca.moneda }}',
         academia: '{{ marca.nombre_academia|e }}',
-        tipo_sugerido: ''
+        tipo_sugerido: '',
+        nro_recibo: '',
+        fecha_pago: '',
+        modo_pago: '',
+        mes: '',
+        saldo: '0.00'
     }, datos || {});
 
     // 1. Mostrar nombre y datos del alumno
@@ -375,6 +382,11 @@ function waCargarPlantilla(tipo) {
     const moneda = _waDatosActuales.moneda || '{{ marca.moneda }}';
     const academia = _waDatosActuales.academia || '{{ marca.nombre_academia|e }}';
     const turno = _waDatosActuales.turno || 'Habitual';
+    const nroRecibo = _waDatosActuales.nro_recibo || '';
+    const fechaPago = _waDatosActuales.fecha_pago || '';
+    const modoPago = _waDatosActuales.modo_pago || '';
+    const mes = _waDatosActuales.mes || '';
+    const saldo = _waDatosActuales.saldo || '0.00';
 
     let resultado = textoBase
         .replaceAll('{nombre}', nombre)
@@ -384,7 +396,12 @@ function waCargarPlantilla(tipo) {
         .replaceAll('{monto}', monto)
         .replaceAll('{moneda}', moneda)
         .replaceAll('{academia}', academia)
-        .replaceAll('{turno}', turno);
+        .replaceAll('{turno}', turno)
+        .replaceAll('{nro_recibo}', nroRecibo)
+        .replaceAll('{fecha_pago}', fechaPago)
+        .replaceAll('{modo_pago}', modoPago)
+        .replaceAll('{mes}', mes)
+        .replaceAll('{saldo}', saldo);
 
     textarea.value = resultado;
     waActualizarContador();

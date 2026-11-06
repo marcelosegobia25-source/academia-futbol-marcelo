@@ -407,7 +407,45 @@ def crear(id_alumno):
 @bp.route("/<int:id_pago>/comprobante")
 def comprobante(id_pago):
     pago = Pago.query.filter(Pago.eliminado_en.is_(None)).filter_by(id_pago=id_pago).first_or_404()
-    return render_template("pagos/comprobante.html", pago=pago, alumno=pago.alumno)
+    alumno = pago.alumno
+
+    telefonos = []
+    if alumno.telefono and alumno.telefono.strip():
+        telefonos.append({
+            "tipo": "Alumno",
+            "titular": alumno.nombre_completo,
+            "numero": alumno.telefono.strip(),
+            "principal": False,
+        })
+
+    for rel in getattr(alumno, "tutores_rel", []):
+        if rel.tutor and rel.tutor.telefono and rel.tutor.telefono.strip():
+            parentesco = rel.parentesco or "Tutor"
+            titular = rel.tutor.nombre
+            if not any(t["numero"] == rel.tutor.telefono.strip() for t in telefonos):
+                telefonos.append({
+                    "tipo": f"{parentesco} ({titular})",
+                    "titular": titular,
+                    "numero": rel.tutor.telefono.strip(),
+                    "principal": getattr(rel, "principal", False),
+                })
+
+    telefono_destacado = None
+    for t in telefonos:
+        if t.get("principal"):
+            telefono_destacado = t
+            break
+    if not telefono_destacado and telefonos:
+        tutores = [t for t in telefonos if t["tipo"] != "Alumno"]
+        telefono_destacado = tutores[0] if tutores else telefonos[0]
+
+    return render_template(
+        "pagos/comprobante.html",
+        pago=pago,
+        alumno=alumno,
+        telefonos_asociados=telefonos,
+        telefono_destacado=telefono_destacado,
+    )
 
 
 @bp.route("/<int:id_pago>/recibo.pdf")

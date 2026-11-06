@@ -28,6 +28,11 @@
             <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{moneda}</code>: Moneda (BOB, USD)</span>
             <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{academia}</code>: Nombre de la academia</span>
             <span class="badge font-monospace" style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);"><code>{turno}</code>: Turno de entrenamiento</span>
+            <span class="badge font-monospace" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);"><code>{nro_recibo}</code>: N° Comprobante</span>
+            <span class="badge font-monospace" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);"><code>{mes}</code>: Mes pagado</span>
+            <span class="badge font-monospace" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);"><code>{fecha_pago}</code>: Fecha de pago</span>
+            <span class="badge font-monospace" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);"><code>{modo_pago}</code>: Modo de pago</span>
+            <span class="badge font-monospace" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);"><code>{saldo}</code>: Saldo restante</span>
         </div>
     </div>
 </div>
@@ -155,6 +160,21 @@
         <div class="card-body">
             <p class="text-muted small mb-2">Estructura base para cualquier mensaje libre redactado por el usuario.</p>
             <textarea name="personalizado" rows="4" class="form-control font-monospace">{{ plantillas.get('personalizado', '') }}</textarea>
+        </div>
+    </div>
+
+    <!-- 8. Comprobante de Pago Oficial -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-receipt text-success me-2"></i>
+                <strong class="text-white">8. Comprobante Oficial de Pago Registrado</strong>
+            </div>
+            <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">Recibo</span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-2">Mensaje automático para enviar al tutor o alumno inmediatamente después de registrar un cobro.</p>
+            <textarea name="recibo_pago" rows="9" class="form-control font-monospace">{{ plantillas.get('recibo_pago', '') }}</textarea>
         </div>
     </div>
 

@@ -12,29 +12,249 @@
         <h4 class="mt-2 text-white fw-bold">Pago registrado con éxito</h4>
         <p class="text-muted small mb-0">Comprobante oficial emitido por el sistema.</p>
     </div>
-    <table class="table table-sm">
+
+    <!-- Tabla de datos del pago -->
+    <table class="table table-sm mb-3">
         <tr><th>Alumno</th><td>{{ alumno.nombre_completo }}</td></tr>
         <tr><th>Mes pagado</th><td>{{ pago.mes_pagado }}</td></tr>
         <tr><th>Fecha de pago</th><td>{{ pago.fecha_pago.strftime('%d/%m/%Y') }}</td></tr>
         <tr><th>Vencimiento</th><td>{{ pago.fecha_vencimiento.strftime('%d/%m/%Y') }}</td></tr>
         <tr><th>Modo de pago</th><td>{{ 'Beca' if pago.es_beca else pago.modo_pago }}</td></tr>
-        <tr><th>Importe abonado</th><td>{{ '%.2f'|format(pago.monto) }}</td></tr>
-        {% if pago.aplicacion %}<tr><th>Saldo restante</th><td>{{ '%.2f'|format(pago.aplicacion.obligacion.saldo) }}</td></tr>{% endif %}
-        <tr><th>Estado</th><td>{{ pago.estado }}</td></tr>
+        <tr><th>Importe abonado</th><td>{{ '%.2f'|format(pago.monto) }} {{ marca.moneda }}</td></tr>
+        {% if pago.aplicacion %}<tr><th>Saldo restante</th><td>{{ '%.2f'|format(pago.aplicacion.obligacion.saldo) }} {{ marca.moneda }}</td></tr>{% endif %}
+        <tr><th>Estado</th><td><span class="badge {{ 'bg-success' if pago.estado == 'Vigente' else 'bg-warning text-dark' }}">{{ pago.estado }}</span></td></tr>
     </table>
+
+    <!-- Teléfonos asociados detectados -->
+    {% if telefonos_asociados %}
+    <div class="p-2 mb-3 rounded border border-success border-opacity-25" style="background: rgba(16, 185, 129, 0.05);">
+        <div class="d-flex align-items-center justify-content-between mb-1">
+            <small class="text-emerald fw-semibold">
+                <i class="bi bi-telephone-fill me-1"></i> Contacto asociado detectado:
+            </small>
+            {% if telefono_destacado %}
+            <span class="badge bg-success font-monospace">+{{ plantillas_whatsapp.get('prefijo_pais', '591') }} {{ telefono_destacado.numero }}</span>
+            {% endif %}
+        </div>
+        {% if telefonos_asociados|length > 1 %}
+        <div class="d-flex flex-wrap gap-1 mt-1 pt-1 border-top border-secondary border-opacity-25 align-items-center">
+            <small class="text-muted small me-1">Enviar a:</small>
+            {% for t in telefonos_asociados %}
+            <button type="button" class="btn btn-sm {{ 'btn-success' if t == telefono_destacado else 'btn-outline-secondary' }} py-0 px-2 small rounded-pill" onclick="enviarWhatsAppDirecto('{{ t.numero }}')">
+                <i class="bi bi-whatsapp"></i> {{ t.tipo }}: {{ t.numero }}
+            </button>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="alert alert-warning py-2 px-3 small mb-3">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i> No se encontró un número de celular registrado para este alumno/tutor. Puedes abrir WhatsApp para ingresar el número manualmente.
+    </div>
+    {% endif %}
+
+    <!-- Alerta visual de comprobante copiado / compartido -->
+    <div id="alertaCompartido" class="alert alert-success py-2 px-3 small mb-3 d-none text-center shadow-sm">
+        <i class="bi bi-check-circle-fill me-1"></i> <span id="alertaCompartidoTexto">¡Comprobante copiado al portapapeles!</span>
+    </div>
+
+    <!-- Acciones principales -->
     <div class="d-grid gap-2">
-        <a href="{{ url_for('pagos.recibo_pdf', id_pago=pago.id_pago) }}" class="btn btn-success" id="btn-descarga">
-            <i class="bi bi-file-earmark-pdf"></i> Descargar comprobante (PDF)
+        <!-- 1. Enviar comprobante directo a WhatsApp -->
+        <button type="button" class="btn btn-success fw-semibold py-2 shadow-sm" onclick="enviarWhatsAppDirecto('{{ telefono_destacado.numero if telefono_destacado else '' }}')">
+            <i class="bi bi-whatsapp me-2 fs-5 align-middle"></i>
+            {% if telefono_destacado %}
+            Enviar a WhatsApp ({{ telefono_destacado.numero }})
+            {% else %}
+            Enviar comprobante por WhatsApp
+            {% endif %}
+        </button>
+
+        <!-- 2. Compartir comprobante (Web Share API o Portapapeles) -->
+        <button type="button" class="btn btn-outline-info fw-semibold py-2" id="btn-compartir" onclick="compartirComprobante()">
+            <i class="bi bi-share me-2"></i> Compartir comprobante
+        </button>
+
+        <!-- Personalizar mensaje antes de enviar -->
+        <div class="text-center my-1">
+            <button type="button" class="btn btn-link btn-sm text-decoration-none text-muted py-0" onclick="abrirModalReciboWhatsApp('{{ telefono_destacado.numero if telefono_destacado else '' }}')">
+                <i class="bi bi-pencil-square me-1"></i> Personalizar mensaje en el editor antes de enviar
+            </button>
+        </div>
+
+        <hr class="my-2 border-secondary border-opacity-25">
+
+        <!-- 3. Descargar comprobante (PDF) -->
+        <a href="{{ url_for('pagos.recibo_pdf', id_pago=pago.id_pago) }}" class="btn btn-outline-light" id="btn-descarga">
+            <i class="bi bi-file-earmark-pdf me-2"></i> Descargar comprobante (PDF)
         </a>
+
+        <!-- 4. Volver a la ficha del alumno -->
         <a href="{{ url_for('alumnos.detalle', id_alumno=alumno.id_alumno) }}" class="btn btn-outline-secondary">
             Volver a la ficha del alumno
         </a>
     </div>
 </div>
+
 <script>
-    // Descarga automática del comprobante, según requerimiento.
+    // Generar el texto enriquecido del comprobante de pago
+    function generarTextoComprobante() {
+        const plantillas = window.PLANTILLAS_WHATSAPP_SISTEMA || {};
+        let textoBase = plantillas['recibo_pago'] || plantillas['al_dia'] || '';
+        if (!textoBase) {
+            textoBase = "🧾 *COMPROBANTE DE PAGO OFICIAL - {academia}*\n\n" +
+                "Estimado(a) tutor(a) / familia de *{nombre}*:\n\n" +
+                "Confirmamos la recepción y registro exitoso de su pago:\n\n" +
+                "📋 *Detalle del Comprobante:*\n" +
+                "• *N° Recibo:* #{nro_recibo}\n" +
+                "• *Alumno:* {nombre}\n" +
+                "• *Mes cancelado:* {mes}\n" +
+                "• *Fecha de pago:* {fecha_pago}\n" +
+                "• *Próximo vencimiento:* {vencimiento}\n" +
+                "• *Modo de pago:* {modo_pago}\n" +
+                "• *Importe abonado:* {monto} {moneda}\n" +
+                "• *Saldo restante:* {saldo} {moneda}\n" +
+                "• *Estado:* {estado_mensualidad}\n\n" +
+                "¡Muchas gracias por su puntualidad y confianza! ⚽👏";
+        }
+
+        const nombre = {{ alumno.nombre_completo|tojson }};
+        const categoria = {{ (alumno.categoria.nombre if alumno.categoria else 'General')|tojson }};
+        const estado = {{ pago.estado|tojson }};
+        const vencimiento = {{ pago.fecha_vencimiento.strftime('%d/%m/%Y')|tojson }};
+        const monto = {{ ('%.2f'|format(pago.monto))|tojson }};
+        const moneda = {{ marca.moneda|tojson }};
+        const academia = {{ marca.nombre_academia|tojson }};
+        const turno = {{ (alumno.turno or 'Habitual')|tojson }};
+        const nroRecibo = {{ (pago.id_pago|string)|tojson }};
+        const fechaPago = {{ pago.fecha_pago.strftime('%d/%m/%Y')|tojson }};
+        const modoPago = {{ ('Beca' if pago.es_beca else pago.modo_pago)|tojson }};
+        const mes = {{ pago.mes_pagado|tojson }};
+        const saldo = {{ ('%.2f'|format(pago.aplicacion.obligacion.saldo) if pago.aplicacion else '0.00')|tojson }};
+
+        return textoBase
+            .replaceAll('{nombre}', nombre)
+            .replaceAll('{categoria}', categoria)
+            .replaceAll('{estado_mensualidad}', estado)
+            .replaceAll('{vencimiento}', vencimiento)
+            .replaceAll('{monto}', monto)
+            .replaceAll('{moneda}', moneda)
+            .replaceAll('{academia}', academia)
+            .replaceAll('{turno}', turno)
+            .replaceAll('{nro_recibo}', nroRecibo)
+            .replaceAll('{fecha_pago}', fechaPago)
+            .replaceAll('{modo_pago}', modoPago)
+            .replaceAll('{mes}', mes)
+            .replaceAll('{saldo}', saldo);
+    }
+
+    // Enviar directo al WhatsApp del número asociado
+    function enviarWhatsAppDirecto(numero) {
+        const numLimpio = (numero || '').trim().replace(/\D/g, '');
+        if (!numLimpio) {
+            abrirModalReciboWhatsApp('');
+            return;
+        }
+
+        const prefijo = (window.PLANTILLAS_WHATSAPP_SISTEMA && window.PLANTILLAS_WHATSAPP_SISTEMA.prefijo_pais) ?
+            window.PLANTILLAS_WHATSAPP_SISTEMA.prefijo_pais : '591';
+
+        let destino = numLimpio;
+        if (destino.length === 8 && prefijo && !destino.startsWith(prefijo)) {
+            destino = prefijo + destino;
+        }
+
+        const texto = generarTextoComprobante();
+        const url = `https://wa.me/${destino}?text=${encodeURIComponent(texto)}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    // Abrir el modal interactivo de WhatsApp con los datos del comprobante precargados
+    function abrirModalReciboWhatsApp(numeroSugerido) {
+        const datos = {
+            nombre: {{ alumno.nombre_completo|tojson }},
+            telefono: {{ (alumno.telefono or '')|tojson }},
+            tutor: {{ (alumno.tutor or '')|tojson }},
+            tutor_telefono: {{ (telefono_destacado.numero if telefono_destacado and telefono_destacado.tipo != 'Alumno' else '')|tojson }},
+            categoria: {{ (alumno.categoria.nombre if alumno.categoria else 'General')|tojson }},
+            turno: {{ (alumno.turno or 'Habitual')|tojson }},
+            estado_mensualidad: {{ pago.estado|tojson }},
+            vencimiento: {{ pago.fecha_vencimiento.strftime('%d/%m/%Y')|tojson }},
+            monto: {{ ('%.2f'|format(pago.monto))|tojson }},
+            moneda: {{ marca.moneda|tojson }},
+            academia: {{ marca.nombre_academia|tojson }},
+            tipo_sugerido: 'recibo_pago',
+            nro_recibo: {{ (pago.id_pago|string)|tojson }},
+            fecha_pago: {{ pago.fecha_pago.strftime('%d/%m/%Y')|tojson }},
+            modo_pago: {{ ('Beca' if pago.es_beca else pago.modo_pago)|tojson }},
+            mes: {{ pago.mes_pagado|tojson }},
+            saldo: {{ ('%.2f'|format(pago.aplicacion.obligacion.saldo) if pago.aplicacion else '0.00')|tojson }}
+        };
+
+        if (typeof abrirModalWhatsAppAlumno === 'function') {
+            abrirModalWhatsAppAlumno(datos);
+            if (numeroSugerido) {
+                const inp = document.getElementById('waNumeroDestino');
+                if (inp) inp.value = numeroSugerido;
+            }
+        } else {
+            enviarWhatsAppDirecto(numeroSugerido);
+        }
+    }
+
+    // Compartir comprobante mediante Web Share API o copiar al portapapeles
+    async function compartirComprobante() {
+        const texto = generarTextoComprobante();
+        const titulo = 'Comprobante de Pago #' + {{ (pago.id_pago|string)|tojson }} + ' - ' + {{ alumno.nombre_completo|tojson }};
+
+        // Si el navegador soporta Web Share API (ej: celulares Android / iPhone)
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: titulo,
+                    text: texto
+                });
+                mostrarAvisoCompartido('¡Comprobante compartido con éxito!');
+                return;
+            } catch (err) {
+                if (err.name === 'AbortError') return; // Cancelado por el usuario
+            }
+        }
+
+        // Fallback: Copiar al portapapeles en computadoras o navegadores sin share
+        try {
+            await navigator.clipboard.writeText(texto);
+            mostrarAvisoCompartido('¡Comprobante copiado al portapapeles! Ya puedes pegarlo y compartirlo en cualquier aplicación.');
+        } catch (_) {
+            const ta = document.createElement('textarea');
+            ta.value = texto;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            mostrarAvisoCompartido('¡Comprobante copiado al portapapeles!');
+        }
+    }
+
+    function mostrarAvisoCompartido(msg) {
+        const alerta = document.getElementById('alertaCompartido');
+        const txt = document.getElementById('alertaCompartidoTexto');
+        if (alerta && txt) {
+            txt.textContent = msg;
+            alerta.classList.remove('d-none');
+            setTimeout(() => alerta.classList.add('d-none'), 4000);
+        }
+    }
+
+    // Descarga automática en segundo plano mediante iframe sin congelar la ventana
     window.addEventListener('DOMContentLoaded', function () {
-        window.location.href = document.getElementById('btn-descarga').href;
+        const link = document.getElementById('btn-descarga');
+        if (link && link.href) {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = link.href;
+            document.body.appendChild(iframe);
+        }
     });
 </script>
 {% endblock %}
