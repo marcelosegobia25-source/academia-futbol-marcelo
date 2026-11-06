@@ -1,5 +1,6 @@
 """Script profesional para generar el Dossier Ejecutivo en formato Word (.docx)
-con enfoque 100% en la Nube (SaaS) y capturas de pantalla de alta resolución.
+con enfoque 100% en la Nube (SaaS), capturas de pantalla de alta resolución y
+todas las funcionalidades activas del sistema (incluyendo WhatsApp directo, difusión masiva y seguridad avanzada).
 """
 
 import os
@@ -166,7 +167,7 @@ def add_feature_table(doc, headers, rows):
     p_sp.paragraph_format.space_after = Pt(8)
 
 def construir_documento():
-    print("Creando documento Word en la nube (SaaS)...")
+    print("Creando documento Word en la nube (SaaS) con capturas actualizadas...")
     doc = Document()
 
     # Márgenes de página
@@ -189,7 +190,7 @@ def construir_documento():
     # =========================================================================
     p_tag = doc.add_paragraph()
     p_tag.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_tag.paragraph_format.space_before = Pt(36)
+    p_tag.paragraph_format.space_before = Pt(32)
     p_tag.paragraph_format.space_after = Pt(6)
     run_tag = p_tag.add_run("PLATAFORMA WEB EN LA NUBE (SaaS) — DOSSIER EJECUTIVO")
     run_tag.font.name = "Calibri"
@@ -210,37 +211,40 @@ def construir_documento():
     p_sub = doc.add_paragraph()
     p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_sub.paragraph_format.space_before = Pt(4)
-    p_sub.paragraph_format.space_after = Pt(24)
-    run_sub = p_sub.add_run("Solución Cloud Multi-Dispositivo: Control Académico, Deportivo y Financiero 24/7")
+    p_sub.paragraph_format.space_after = Pt(20)
+    run_sub = p_sub.add_run("Solución Cloud Multi-Dispositivo: Control Académico, Deportivo, Financiero y WhatsApp 24/7")
     run_sub.font.name = "Calibri"
-    run_sub.font.size = Pt(13)
+    run_sub.font.size = Pt(12.5)
     run_sub.font.color.rgb = C_MUTED
 
-    # Badges Cloud
-    t_badges = doc.add_table(rows=1, cols=3)
+    # 4 Badges Cloud en tabla 2x2
+    t_badges = doc.add_table(rows=2, cols=2)
     t_badges.alignment = WD_TABLE_ALIGNMENT.CENTER
     badges_info = [
-        ("☁️ 100% EN LA NUBE", "Acceso 24/7 desde cualquier navegador. Cero instalación local ni servidores."),
-        ("📱 MULTI-DISPOSITIVO", "Operatividad simultánea en PC, Laptop, Tablet y Celular desde la cancha u oficina."),
-        ("🔒 MÁXIMA SEGURIDAD", "Base de datos Cloud cifrada, protocolo SSL/HTTPS y respaldos automáticos continuos."),
+        ("☁️ 100% EN LA NUBE", "Acceso 24/7 desde cualquier navegador web. Cero instalación de software ni servidores locales."),
+        ("📱 MULTI-DISPOSITIVO", "Operatividad simultánea en computadoras, laptops, tablets y celulares desde la cancha u oficina."),
+        ("💬 MENSAJERÍA WHATSAPP", "Notificaciones directas 1 a 1 y difusión masiva con 7 plantillas dinámicas y 1 clic por alumno."),
+        ("🔒 MÁXIMA SEGURIDAD", "Base de datos Cloud cifrada, control de inactividad de 15 min, auto-recuperación CSRF y respaldos diarios."),
     ]
-    for i, (b_title, b_desc) in enumerate(badges_info):
-        cell = t_badges.cell(0, i)
-        cell.width = Inches(2.15)
+    for idx, (b_title, b_desc) in enumerate(badges_info):
+        r_idx = idx // 2
+        c_idx = idx % 2
+        cell = t_badges.cell(r_idx, c_idx)
+        cell.width = Inches(3.2)
         set_cell_background(cell, HEX_LIGHT_BG)
-        set_cell_margins(cell, top=140, bottom=140, left=120, right=120)
+        set_cell_margins(cell, top=120, bottom=120, left=140, right=140)
         p = cell.paragraphs[0]
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
         p.paragraph_format.space_before = Pt(0)
         p.paragraph_format.space_after = Pt(2)
         r_bt = p.add_run(b_title)
         r_bt.font.name = "Calibri"
-        r_bt.font.size = Pt(10)
+        r_bt.font.size = Pt(9.5)
         r_bt.font.bold = True
         r_bt.font.color.rgb = C_EMERALD
 
         p_d = cell.add_paragraph()
-        p_d.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_d.alignment = WD_ALIGN_PARAGRAPH.LEFT
         p_d.paragraph_format.space_before = Pt(2)
         p_d.paragraph_format.space_after = Pt(0)
         r_bd = p_d.add_run(b_desc)
@@ -250,7 +254,7 @@ def construir_documento():
 
     # Metadatos institucionales
     p_meta_sp = doc.add_paragraph()
-    p_meta_sp.paragraph_format.space_before = Pt(40)
+    p_meta_sp.paragraph_format.space_before = Pt(30)
     p_meta_sp.paragraph_format.space_after = Pt(4)
 
     t_meta = doc.add_table(rows=4, cols=2)
@@ -259,7 +263,7 @@ def construir_documento():
         ("Destinatarios:", "Directores de Academia, Coordinadores Deportivos, Tesoreros e Inversionistas"),
         ("Modalidad del Servicio:", "Plataforma Web en la Nube (SaaS - Software as a Service)"),
         ("Disponibilidad y Acceso:", "Acceso Universal 24/7 vía Web desde cualquier dispositivo con navegador"),
-        ("Fecha de Publicación:", "Octubre 2026 — Versión Cloud Oficial"),
+        ("Fecha de Publicación:", "Noviembre 2026 — Versión Cloud Oficial v1.3.0"),
     ]
     for idx, (label, val) in enumerate(meta_rows):
         cell_lbl = t_meta.cell(idx, 0)
@@ -297,8 +301,8 @@ def construir_documento():
     doc.add_paragraph(
         "El Sistema Integral de Gestión para Academias Deportivas es una moderna plataforma web alojada en la nube (SaaS), "
         "diseñada específicamente para centralizar y profesionalizar toda la operación académica, deportiva, financiera y "
-        "administrativa de una institución formativa o competitiva. Al estar 100% en la nube, el sistema elimina las limitaciones "
-        "de computadoras físicas fijas, planillas dispersas y cuadernos en papel, permitiendo a todo el equipo trabajar de manera "
+        "de comunicación de una institución formativa o competitiva. Al estar 100% en la nube, el sistema elimina las limitaciones "
+        "de computadoras fijas, planillas dispersas y cuadernos en papel, permitiendo a todo el equipo trabajar de manera "
         "coordinada y en tiempo real desde cualquier lugar del mundo."
     )
 
@@ -308,6 +312,7 @@ def construir_documento():
         [
             "Acceso Inmediato desde Cualquier Lugar: Directores, secretarias y entrenadores acceden desde su computadora, laptop, tablet o teléfono móvil sin importar dónde se encuentren.",
             "Trabajo Colaborativo en Tiempo Real: El profesor registra asistencias en cancha desde su celular, la secretaría cobra mensualidades en recepción y el director supervisa la recaudación desde su hogar simultáneamente.",
+            "Comunicación Instantánea por WhatsApp: Notificación personalizada a tutores sobre cobros, vencimientos, citaciones y felicitaciones con 1 solo clic.",
             "Cero Instalación y Cero Mantenimiento: No requiere instalar programas ni configurar servidores locales. Se accede de inmediato mediante cualquier navegador moderno (Chrome, Safari, Edge, Firefox).",
             "Cero Riesgo de Pérdida de Información: Sus datos no dependen del disco duro de una computadora que pueda dañarse, extraviarse o infectarse con virus; toda la información está respaldada y protegida en la nube.",
             "Actualizaciones Automáticas y Continuas: Nuevas mejoras y funciones se implementan de forma transparente sin interrumpir las operaciones del club."
@@ -324,9 +329,10 @@ def construir_documento():
     comp_rows = [
         ["Acceso y Movilidad", "Atado a una sola computadora en la oficina o a cuadernos físicos.", "Acceso 24/7 desde cualquier dispositivo: PC, tablet o celular en cancha."],
         ["Control de Mensualidades", "Planillas dispersas, olvidos en fechas de corte, morosidad oculta.", "Semáforo automático (Vigente, Por Vencer, Vencido) y recibos oficiales en PDF."],
+        ["Comunicación con Familias", "Llamadas manuales, notas de papel extraviadas o listas de difusión caóticas.", "Mensajería directa 1 a 1 y difusión masiva guiada por WhatsApp con 7 plantillas inteligentes."],
         ["Concurrencia de Usuarios", "Un solo usuario a la vez; riesgo de sobreescribir archivos compartidos.", "Múltiples usuarios simultáneos con roles y permisos específicos."],
         ["Organización de Torneos", "Cálculo manual de goles, puntos y diferencias propenso a reclamos.", "Fixture automático y tabla de posiciones calculada al instante con cada resultado."],
-        ["Seguridad y Respaldo", "Si la computadora de la academia se daña o formatea, se pierden los datos.", "Infraestructura cloud con respaldos automáticos y cifrado SSL de nivel bancario."]
+        ["Seguridad y Respaldo", "Si la computadora de la academia se daña o formatea, se pierden los datos.", "Infraestructura cloud con respaldos automáticos, cierre por inactividad y cifrado SSL."]
     ]
     add_feature_table(doc, comp_headers, comp_rows)
 
@@ -353,6 +359,7 @@ def construir_documento():
         ["Alojamiento Cloud", "Servidores Cloud de Alta Disponibilidad", "Disponibilidad garantizada del 99.9%, accesible los 365 días del año sin caídas."],
         ["Seguridad en Tránsito", "Cifrado SSL / HTTPS de 256 bits", "Toda la información entre su dispositivo y la nube viaja cifrada y protegida contra intrusos."],
         ["Base de Datos Cloud", "Motor Relacional Cloud (PostgreSQL / ACID)", "Consistencia absoluta de datos financieros, sin riesgo de corrupción ni bloqueos."],
+        ["Control de Sesión", "Timeout por inactividad (15 min) y Token CSRF", "Cierre automático ante desatención en cancha o recepción, con renovación transparente de sesión."],
         ["Acceso Multi-Dispositivo", "Diseño Web Adaptativo (Responsive Design)", "Se adapta a pantallas de escritorio, notebooks, iPads, tablets Android y smartphones."],
         ["Respaldos Automatizados", "Copias de Seguridad Diarias en la Nube", "Respaldos automáticos continuos más la opción de descargar un backup completo en ZIP en cualquier momento."]
     ]
@@ -363,6 +370,8 @@ def construir_documento():
         "SEGURIDAD Y PRIVACIDAD DE DATOS DE MENORES Y TUTORES",
         [
             "Aislamiento de Información: Los datos de su academia son estrictamente privados y confidenciales.",
+            "Cierre Automático por Inactividad: Tras 15 minutos sin interacción, el sistema cierra la sesión para proteger la información en dispositivos compartidos.",
+            "Recuperación Inteligente de Formularios: Si el token de seguridad expira, el sistema renueva las credenciales amigablemente sin arrojar pantallas de error.",
             "Cumplimiento de Seguridad: Cuentas individuales protegidas con contraseñas seguras y bloqueo automático ante intentos no autorizados.",
             "Trazabilidad Integral: Cada acción (quién cobró una cuota, quién modificó una ficha o quién registró un marcador) queda asentada con fecha, hora y usuario."
         ],
@@ -384,8 +393,8 @@ def construir_documento():
 
     doc.add_paragraph(
         "A continuación se presenta un recorrido visual completo por todas las funciones de la plataforma web en la nube, "
-        "con capturas reales del sistema en funcionamiento. Cada pantalla refleja la interfaz moderna, oscura y profesional "
-        "diseñada para una experiencia de usuario rápida, fluida e intuitiva."
+        "con capturas reales del sistema en funcionamiento. Cada pantalla refleja la interfaz moderna, oscura (Obsidian Dark) y "
+        "profesional diseñada para una experiencia de usuario rápida, fluida e intuitiva."
     )
 
     # 3.1
@@ -398,7 +407,8 @@ def construir_documento():
 
     doc.add_paragraph(
         "La puerta de acceso a la plataforma web. Cada miembro del equipo ingresa con sus credenciales individuales. "
-        "El sistema cuenta con blindaje activo contra intentos de intrusión que bloquea temporalmente el acceso tras 5 intentos fallidos."
+        "El sistema cuenta con blindaje activo contra intentos de intrusión que bloquea temporalmente el acceso tras 5 intentos fallidos, "
+        "temporizador de inactividad de 15 minutos y renovación automática de sesión sin errores 400."
     )
     add_image_box(doc, "01_login.png", "Pantalla de inicio de sesión web con validación de credenciales, logotipo del club y blindaje de seguridad.")
 
@@ -406,9 +416,10 @@ def construir_documento():
         doc,
         "PUNTOS DESTACADOS DEL ACCESO",
         [
-            "Ingreso limpio y directo sin textos precargados, con foco activo inmediato para ingresar usuario y clave.",
+            "Ingreso limpio y directo con foco activo inmediato para ingresar usuario y clave.",
+            "Retención automática del nombre de usuario si se ingresa una contraseña errónea o si la sesión expira.",
             "Protección contra ataques de fuerza bruta y bloqueo automático de direcciones sospechosas.",
-            "Sesiones seguras con control de inactividad para proteger la privacidad en equipos compartidos."
+            "Sesiones seguras con control de inactividad a los 15 minutos para proteger la privacidad en equipos de recepción o cancha."
         ]
     )
 
@@ -449,9 +460,9 @@ def construir_documento():
 
     doc.add_paragraph(
         "Permite gestionar el historial completo de cada deportista. Cuenta con filtros inteligentes por categoría, estado "
-        "(Activo / Retirado) y búsqueda rápida por nombre o carnet de identidad."
+        "(Activo / Retirado), buscador rápido por nombre o carnet, botón directo de WhatsApp en cada fila y botón de Difusión Masiva en la cabecera."
     )
-    add_image_box(doc, "03_alumnos_listado.png", "Directorio web de alumnos con filtros dinámicos por categoría, estado deportivo y buscador en vivo.")
+    add_image_box(doc, "03_alumnos_listado.png", "Directorio web de alumnos con filtros dinámicos por categoría, botones directos de WhatsApp y buscador en vivo.")
 
     doc.add_paragraph(
         "El formulario de inscripción digital captura la información personal, datos médicos, tutores responsables y "
@@ -461,7 +472,7 @@ def construir_documento():
 
     doc.add_paragraph(
         "La Ficha Técnica Individual consolida el perfil físico (estatura, peso, pierna hábil, posición táctica), "
-        "el historial de los últimos 6 pagos y permite generar con un clic la Ficha Oficial en PDF con foto."
+        "el historial de los últimos 6 pagos, botón de contacto directo por WhatsApp y permite generar con un clic la Ficha Oficial en PDF con foto."
     )
     add_image_box(doc, "05_alumnos_ficha.png", "Ficha técnica integral del deportista con datos de tutores, características físicas y exportación a PDF.")
 
@@ -470,6 +481,7 @@ def construir_documento():
         "BENEFICIOS DE LA FICHA DIGITAL",
         [
             "Categorización Automática: Elimina errores de inscripción de niños en categorías no correspondientes.",
+            "Contacto Inmediato: Botón de WhatsApp integrado en la ficha para hablar directamente con el padre o tutor.",
             "Ficha PDF Imprimible y Compartible: Perfecta para enviar por WhatsApp o correo a padres y ligas deportivas.",
             "Trazabilidad Financiera Integrada: El cuerpo técnico o secretaría visualiza el estado de cuotas dentro del mismo perfil."
         ]
@@ -487,9 +499,10 @@ def construir_documento():
 
     doc.add_paragraph(
         "El módulo financiero resuelve las pérdidas por cuotas olvidadas. Opera con un algoritmo inteligente de continuidad de "
-        "mensualidades que calcula el próximo vencimiento a partir de la fecha base del primer pago, asegurando que no queden meses impagos."
+        "mensualidades que calcula el próximo vencimiento a partir de la fecha base del primer pago. Cada cuota incorpora su propio botón "
+        "de WhatsApp para enviar el aviso de cobro o recibo en 1 clic."
     )
-    add_image_box(doc, "06_pagos_control.png", "Módulo de mensualidades con semáforo preventivo de vencimientos y filtros por periodo.")
+    add_image_box(doc, "06_pagos_control.png", "Módulo de mensualidades con semáforo preventivo de vencimientos, botones de WhatsApp y difusión masiva.")
 
     doc.add_paragraph(
         "Al registrar un cobro, el sistema valida la tarifa base de la academia, aplica becas si corresponde y genera al instante "
@@ -502,17 +515,63 @@ def construir_documento():
         "VENTAJAS DE LA GESTIÓN DE COBRANZAS EN LA NUBE",
         [
             "Semáforo Inteligente: Alerta preventiva de cuotas por vencer (5 días antes) y cuotas vencidas.",
+            "Cobranza por WhatsApp con 1 Clic: Abre el chat del tutor con el monto adeudado y fecha límite ya redactados.",
             "Imposibilidad de Doble Cobro: Validación a nivel de base de datos que impide cobrar dos veces el mismo mes por error.",
-            "Exportación Contable: Descarga de historiales completos a Excel (.xlsx) y balances en PDF para auditoría interna.",
+            "Exportación Contable Configurable: Descarga personalizada de columnas a Excel (.xlsx) y balances en PDF para auditoría.",
             "Recibos Digitales en PDF: Reducción del gasto en talonarios de papel y mayor transparencia hacia las familias."
         ]
     )
 
     doc.add_page_break()
 
-    # 3.5
+    # =========================================================================
+    # NUEVA SECCIÓN 3.5: WHATSAPP DIRECTO Y DIFUSIÓN MASIVA
+    # =========================================================================
     h2 = doc.add_heading(level=2)
-    r = h2.add_run("3.5 Organización de Campeonatos, Fixtures Automáticos y Posiciones")
+    r = h2.add_run("3.5 Módulo de Comunicación Directa y Difusión Masiva por WhatsApp")
+    r.font.name = "Calibri"
+    r.font.size = Pt(13)
+    r.font.bold = True
+    r.font.color.rgb = C_EMERALD
+
+    doc.add_paragraph(
+        "La plataforma integra mensajería directa con WhatsApp Web y WhatsApp Desktop sin requerir la contratación de servicios de pago "
+        "ni APIs de terceros. El sistema automatiza el contacto para 7 situaciones operativas habituales mediante plantillas inteligentes "
+        "con reemplazo dinámico de variables."
+    )
+    add_image_box(doc, "24_whatsapp_modal.png", "Modal de mensajería directa por WhatsApp con 7 plantillas automáticas y sustitución dinámica de datos del deportista.")
+
+    doc.add_paragraph(
+        "Para comunicados generales, avisos de suspensión de entrenamientos o cobranza colectiva, el módulo de Difusión Masiva procesa "
+        "automáticamente a todos los alumnos o pagos filtrados en pantalla. El operador avanza alumno por alumno de forma guiada con un solo "
+        "clic, asegurando entregas efectivas y personalizadas sin riesgo de bloqueos por spam."
+    )
+    add_image_box(doc, "25_whatsapp_difusion.png", "Panel de difusión masiva guiada para enviar comunicados y avisos de cobro de forma secuencial con 1 solo clic.")
+
+    doc.add_paragraph(
+        "La administración cuenta con un panel centralizado de edición de plantillas en Configuración, donde puede adaptar el contenido "
+        "de cada mensaje utilizando etiquetas dinámicas que se completan automáticamente al momento de enviar."
+    )
+    add_image_box(doc, "26_whatsapp_plantillas.png", "Editor central de plantillas de WhatsApp en Configuración con etiquetas dinámicas ({nombre}, {monto}, {fecha}, etc.).")
+
+    add_callout(
+        doc,
+        "VENTAJAS DE LA COMUNICACIÓN INTEGRADA POR WHATSAPP",
+        [
+            "Cobranza Directa en 1 Clic: Notifique cuotas pendientes o por vencer directamente al tutor sin necesidad de registrar su número en la agenda telefónica.",
+            "7 Plantillas Prediseñadas: Deuda / Vencido, Próximo a Vencer, Al Día, Citación a Entrenamiento/Partido, Comunicado General, Felicitación de Cumpleaños y Mensaje Libre.",
+            "Variables Dinámicas Inteligentes: Inserción automática de {nombre}, {tutor}, {monto}, {fecha}, {academia}, {categoria} y {mes}.",
+            "Difusión Guiada y Segura: Envíos masivos secuenciales alumno por alumno que previenen penalizaciones de WhatsApp y garantizan un trato cordial y personalizado."
+        ],
+        hex_bg=HEX_EMERALD_BG,
+        hex_border=HEX_EMERALD
+    )
+
+    doc.add_page_break()
+
+    # 3.6
+    h2 = doc.add_heading(level=2)
+    r = h2.add_run("3.6 Organización de Campeonatos, Fixtures Automáticos y Posiciones")
     r.font.name = "Calibri"
     r.font.size = Pt(13)
     r.font.bold = True
@@ -554,9 +613,9 @@ def construir_documento():
 
     doc.add_page_break()
 
-    # 3.6
+    # 3.7
     h2 = doc.add_heading(level=2)
-    r = h2.add_run("3.6 Programación de Partidos y Planillas de Convocatoria")
+    r = h2.add_run("3.7 Programación de Partidos y Planillas de Convocatoria")
     r.font.name = "Calibri"
     r.font.size = Pt(13)
     r.font.bold = True
@@ -578,9 +637,9 @@ def construir_documento():
         ]
     )
 
-    # 3.7
+    # 3.8
     h2 = doc.add_heading(level=2)
-    r = h2.add_run("3.7 Agenda Cloud, Calendario Interactivo y Entrenamientos")
+    r = h2.add_run("3.8 Agenda Cloud, Calendario Interactivo y Entrenamientos")
     r.font.name = "Calibri"
     r.font.size = Pt(13)
     r.font.bold = True
@@ -605,9 +664,9 @@ def construir_documento():
 
     doc.add_page_break()
 
-    # 3.8
+    # 3.9
     h2 = doc.add_heading(level=2)
-    r = h2.add_run("3.8 Control de Asistencia en Cancha y Cuerpo Técnico")
+    r = h2.add_run("3.9 Control de Asistencia en Cancha y Cuerpo Técnico")
     r.font.name = "Calibri"
     r.font.size = Pt(13)
     r.font.bold = True
@@ -624,9 +683,9 @@ def construir_documento():
     )
     add_image_box(doc, "17_personal_deportivo.png", "Directorio del cuerpo técnico y entrenadores de la academia.")
 
-    # 3.9
+    # 3.10
     h2 = doc.add_heading(level=2)
-    r = h2.add_run("3.9 Estructura Deportiva: Categorías, Equipos y Sedes")
+    r = h2.add_run("3.10 Estructura Deportiva: Categorías, Equipos y Sedes")
     r.font.name = "Calibri"
     r.font.size = Pt(13)
     r.font.bold = True
@@ -649,9 +708,9 @@ def construir_documento():
 
     doc.add_page_break()
 
-    # 3.10
+    # 3.11
     h2 = doc.add_heading(level=2)
-    r = h2.add_run("3.10 Seguridad de Usuarios, Bitácora de Auditoría y Configuración")
+    r = h2.add_run("3.11 Seguridad de Usuarios, Bitácora de Auditoría y Configuración")
     r.font.name = "Calibri"
     r.font.size = Pt(13)
     r.font.bold = True
@@ -670,7 +729,7 @@ def construir_documento():
 
     doc.add_paragraph(
         "Personalice la identidad institucional: suba el logotipo del club (visible en todos los recibos y fichas PDF), defina la "
-        "moneda de cobro y la cuota mensual estándar."
+        "moneda de cobro, la cuota mensual estándar y acceda a la configuración de plantillas de WhatsApp y respaldos."
     )
     add_image_box(doc, "23_configuracion_academia.png", "Panel de personalización institucional para carga de logotipo, monto de cuota y respaldos.")
 
@@ -708,6 +767,7 @@ def construir_documento():
     cloud_rows = [
         ["Requisitos de Hardware", "Exigen computadoras potentes, memoria RAM dedicada y espacio en disco.", "CERO requisitos especiales: funciona en cualquier PC, laptop, tablet o smartphone."],
         ["Instalación y Configuración", "Instalación compleja por computadora, licencias por equipo, instaladores .exe.", "CERO instalación: se abre el navegador (Chrome, Safari, Edge) y se ingresa."],
+        ["Comunicación y Notificaciones", "Llamadas manuales, notas en papel extraviadas o listas de difusión de WhatsApp caóticas.", "Mensajería directa 1 a 1 y difusión masiva guiada por WhatsApp con 7 plantillas inteligentes."],
         ["Compatibilidad de Sistema", "Limitado generalmente a versiones específicas de Windows.", "100% universal: compatible con Windows, Mac (macOS), Android, iOS (iPhone/iPad) y Linux."],
         ["Riesgo de Pérdida de Datos", "Si la computadora se quema, es robada o se formatea, se pierde todo.", "Datos 100% seguros y respaldados continuamente en la nube."],
         ["Mantenimiento y Soporte", "Requiere contratar técnicos para parches, formateos y copias de seguridad.", "Mantenimiento, copias de seguridad y mejoras técnicas 100% gestionadas en la nube."],
@@ -720,7 +780,7 @@ def construir_documento():
         "ACCESO INSTANTÁNEO MULTI-DISPOSITIVO",
         [
             "En la Recepción / Oficina: Computadora o notebook de secretaría para cobro de cuotas, emisión de recibos e inscripciones.",
-            "En el Campo de Juego / Cancha: Tablet o smartphone del profesor para verificar fichas médicas y registrar asistencias en vivo.",
+            "En el Campo de Juego / Cancha: Tablet o smartphone del profesor para verificar fichas médicas, registrar asistencias y enviar citaciones por WhatsApp.",
             "En Casa o de Viaje: Celular o laptop de la directiva para revisar la recaudación y tomar decisiones estratégicas en tiempo real."
         ]
     )
@@ -745,9 +805,10 @@ def construir_documento():
     roi_headers = ["Dimensión de Impacto", "Beneficio Cuantificable", "Resultado Práctico para la Institución"]
     roi_rows = [
         ["Recuperación de Morosidad", "Aumento del 25% al 35% en cobros puntuales", "El semáforo preventivo y el control continuo evitan que alumnos acumulen meses sin pagar."],
-        ["Ahorro en Horas Hombre", "Más de 15 horas semanales ahorradas", "Elimina el llenado de recibos manuales, el armado de tablas en Excel y llamadas de reclamo."],
+        ["Cobranza Ágil por WhatsApp", "Reducción del 40% en tiempos de cobranza", "Notificaciones directas al WhatsApp del tutor con montos exactos y enlaces de pago transparentes."],
+        ["Ahorro en Horas Hombre", "Más de 15 horas semanales ahorradas", "Elimina el llenado de recibos manuales, el armado de tablas en Excel y llamadas telefónicas de cobro."],
         ["Ahorro en Papelería y Talonarios", "Reducción del 90% en costos de impresión", "Emisión digital de recibos de pago en PDF, fichas técnicas y convocatorias deportivas."],
-        ["Prestigio y Retención de Alumnos", "Mayor confianza de los padres de familia", "Comprobantes digitales formales, control disciplinario y organización profesional reducen la deserción."]
+        ["Prestigio y Retención de Alumnos", "Mayor confianza de los padres de familia", "Comprobantes digitales formales, comunicación fluida por WhatsApp y organización profesional reducen la deserción."]
     ]
     add_feature_table(doc, roi_headers, roi_rows)
 

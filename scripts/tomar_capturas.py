@@ -1,4 +1,6 @@
-"""Script para tomar capturas de pantalla de alta resolución de todas las funciones del sistema."""
+"""Script para tomar capturas de pantalla de alta resolución de todas las funciones del sistema,
+incluyendo las nuevas características de WhatsApp y configuración.
+"""
 
 import os
 import subprocess
@@ -42,13 +44,17 @@ PAGES_TO_CAPTURE = [
     ("21_usuarios_roles.png", "http://127.0.0.1:5000/usuarios/", "Administración de Usuarios, Roles y Permisos", "body"),
     ("22_auditoria_sistema.png", "http://127.0.0.1:5000/informacion/auditoria", "Módulo de Auditoría Integral y Trazabilidad", "body"),
     ("23_configuracion_academia.png", "http://127.0.0.1:5000/configuracion/", "Configuración Institucional e Identidad Visual", "body"),
+    ("26_whatsapp_plantillas.png", "http://127.0.0.1:5000/configuracion/plantillas-whatsapp", "Editor de Plantillas de WhatsApp", "body"),
 ]
 
 def main():
-    print("Iniciando servidor local de prueba...")
+    print("Iniciando servidor local con base de datos SQLite...")
+    env = os.environ.copy()
+    env["USE_LOCAL_SQLITE"] = "1"
     servidor = subprocess.Popen(
         [str(PYTHON_EXE), "serve.py"],
         cwd=str(BASE_DIR),
+        env=env,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL
     )
@@ -56,12 +62,11 @@ def main():
 
     try:
         with sync_playwright() as p:
-            print("Lanzando navegador Chromium/Chrome...")
+            print("Lanzando navegador...")
             browser = p.chromium.launch(
                 executable_path=CHROME_PATH,
                 headless=True
             )
-            # Viewport óptimo y nítido para documento formal
             context = browser.new_context(
                 viewport={"width": 1366, "height": 820},
                 device_scale_factor=1.25
@@ -82,17 +87,50 @@ def main():
             page.wait_for_load_state("networkidle")
             page.wait_for_timeout(1000)
 
-            # 3. Capturar el resto de páginas
+            # 3. Capturar el resto de páginas principales
             for filename, url, desc, wait_sel in PAGES_TO_CAPTURE[1:]:
                 print(f"Capturando: {filename} - {desc}")
                 try:
                     page.goto(url, wait_until="networkidle", timeout=15000)
-                    page.wait_for_timeout(800)  # Dejar renderizar animaciones o htmx
+                    page.wait_for_timeout(800)
                     dest_file = OUTPUT_DIR / filename
                     page.screenshot(path=str(dest_file), full_page=False)
                     print(f"  -> Guardado: {dest_file.name} ({dest_file.stat().st_size // 1024} KB)")
                 except Exception as e:
                     print(f"  -> Error al capturar {url}: {e}")
+
+            # 4. Capturar Modal de WhatsApp Individual
+            print("Capturando: 24_whatsapp_modal.png - Modal de Mensajería Directa")
+            try:
+                page.goto("http://127.0.0.1:5000/alumnos/", wait_until="networkidle")
+                page.wait_for_timeout(500)
+                # Clic en el botón verde de WhatsApp de la primera fila
+                btn_wsp = page.locator("button.btn-outline-success[onclick*='abrirModalWhatsApp']").first
+                if btn_wsp.count() > 0:
+                    btn_wsp.click()
+                    page.wait_for_timeout(700)
+                    page.screenshot(path=str(OUTPUT_DIR / "24_whatsapp_modal.png"))
+                    print("  -> Guardado: 24_whatsapp_modal.png")
+                else:
+                    print("  -> No se encontró botón individual de WhatsApp")
+            except Exception as e:
+                print(f"  -> Error capturando modal WhatsApp: {e}")
+
+            # 5. Capturar Modal de Difusión Masiva WhatsApp
+            print("Capturando: 25_whatsapp_difusion.png - Modal de Difusión Masiva")
+            try:
+                page.goto("http://127.0.0.1:5000/alumnos/", wait_until="networkidle")
+                page.wait_for_timeout(500)
+                btn_dif = page.locator("button:has-text('Mensaje Masivo')").first
+                if btn_dif.count() > 0:
+                    btn_dif.click()
+                    page.wait_for_timeout(700)
+                    page.screenshot(path=str(OUTPUT_DIR / "25_whatsapp_difusion.png"))
+                    print("  -> Guardado: 25_whatsapp_difusion.png")
+                else:
+                    print("  -> No se encontró botón de Mensaje Masivo")
+            except Exception as e:
+                print(f"  -> Error capturando difusión masiva: {e}")
 
             browser.close()
             print("\nTodas las capturas se completaron exitosamente.")
