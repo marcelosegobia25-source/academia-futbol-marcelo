@@ -26,6 +26,7 @@ from app.utils.pdf_tablas import generar_tabla_pdf
 from app.utils.excel import exportar_tabla_excel
 from app.utils.ficha_alumno_pdf import generar_ficha_alumno
 from app.utils.personalizacion import configuracion_y_logo
+from app.utils.tiempo import hoy_bolivia
 from app.utils.descargas import enviar_buffer
 from app.utils.autorizacion import tiene_permiso
 from app.utils.validacion import (
@@ -43,7 +44,7 @@ def _usuario_actual_id():
 
 
 def _crear_ciclo_inicial(alumno, equipos, motivo="Registro inicial"):
-    hoy = date.today()
+    hoy = hoy_bolivia()
     config = Configuracion.obtener()
     tarifa = Tarifa.query.filter_by(concepto="Mensualidad", activo=True).order_by(Tarifa.fecha_inicio.desc()).first()
     porcentaje = {"Ninguna": 0, "Media": 50, "Completa": 100}.get(alumno.beca, 0)
@@ -288,7 +289,7 @@ def _filtrar_alumnos(args, paginar=False):
             )
         )
     if edad is not None and edad >= 0:
-        hoy = date.today()
+        hoy = hoy_bolivia()
         nacimiento_maximo = hoy - relativedelta(years=edad)
         nacimiento_minimo = hoy - relativedelta(years=edad + 1) + timedelta(days=1)
         query = query.filter(
@@ -352,7 +353,7 @@ def listar():
 
 @bp.route("/asistencias")
 def asistencias():
-    hoy = date.today()
+    hoy = hoy_bolivia()
     tab = request.args.get("tab")
     if not tab:
         if any(request.args.get(k) for k in ("id_alumno", "estado_asistencia", "periodo", "fecha_desde", "fecha_hasta")):
@@ -527,7 +528,7 @@ def asistencias_guardar():
     try:
         id_categoria = int(request.form.get("id_categoria", 0))
         categoria = Categoria.query.get_or_404(id_categoria)
-        fecha = fecha_iso(request.form.get("fecha") or date.today().isoformat(), "Fecha")
+        fecha = fecha_iso(request.form.get("fecha") or hoy_bolivia().isoformat(), "Fecha")
         hora_texto = (request.form.get("hora") or "16:00").strip()
         try:
             hora_val = datetime.strptime(hora_texto, "%H:%M").time()
@@ -612,7 +613,7 @@ def convocatoria_guardar():
         id_categoria = int(request.form.get("id_categoria", 0))
         categoria = Categoria.query.get_or_404(id_categoria)
         titulo = texto_requerido(request.form.get("titulo"), "Título o Motivo de Convocatoria", 150)
-        fecha = fecha_iso(request.form.get("fecha") or date.today().isoformat(), "Fecha del evento")
+        fecha = fecha_iso(request.form.get("fecha") or hoy_bolivia().isoformat(), "Fecha del evento")
         hora_str = (request.form.get("hora") or "").strip()
         hora = None
         if hora_str:
@@ -867,7 +868,7 @@ def crear():
 @bp.route("/<int:id_alumno>")
 def detalle(id_alumno):
     alumno = Alumno.query.get_or_404(id_alumno)
-    hoy = date.today()
+    hoy = hoy_bolivia()
     try:
         proximo_cumple = alumno.fecha_nacimiento.replace(year=hoy.year)
     except ValueError:
@@ -1005,7 +1006,7 @@ def editar(id_alumno):
             return render_template(
                 "alumnos/form.html", alumno=alumno, categorias=categorias, equipos=equipos,
                 estados=ESTADOS_ALUMNO, posiciones=POSICIONES, piernas=PIERNAS,
-                sexos=SEXOS, becas=BECAS, turnos=TURNOS, hoy=date.today().isoformat(),
+                sexos=SEXOS, becas=BECAS, turnos=TURNOS, hoy=hoy_bolivia().isoformat(),
             )
         categoria_anterior = alumno.id_categoria
         equipos_anteriores = {e.id_equipo for e in alumno.equipos}
@@ -1031,7 +1032,7 @@ def editar(id_alumno):
         alumno.equipos = equipos_seleccionados
         _sincronizar_tutores(alumno)
 
-        hoy = date.today()
+        hoy = hoy_bolivia()
         usuario_id = _usuario_actual_id()
         motivo_historial = motivo_cambio or "Actualización de ficha"
         if alumno.id_categoria != categoria_anterior:
@@ -1068,9 +1069,9 @@ def editar(id_alumno):
             porcentaje = {"Ninguna": 0, "Media": 50, "Completa": 100}[alumno.beca]
             db.session.add(BecaHistorial(
                 id_alumno=alumno.id_alumno, porcentaje=porcentaje,
-                fecha_inicio=date.today(), fecha_fin=alumno.beca_fecha_fin,
+                fecha_inicio=hoy, fecha_fin=alumno.beca_fecha_fin,
                 estado="Activa", id_usuario=usuario_id,
-                motivo=motivo_cambio or "ActualizaciÃ³n de beca",
+                motivo=motivo_cambio or "Actualización de beca",
             ))
             if inscripcion:
                 inscripcion.porcentaje_beca = porcentaje
@@ -1121,7 +1122,7 @@ def editar(id_alumno):
     return render_template(
         "alumnos/form.html", alumno=alumno, categorias=categorias, equipos=equipos,
         estados=ESTADOS_ALUMNO, posiciones=POSICIONES, piernas=PIERNAS,
-        sexos=SEXOS, becas=BECAS, turnos=TURNOS, hoy=date.today().isoformat(),
+        sexos=SEXOS, becas=BECAS, turnos=TURNOS, hoy=hoy_bolivia().isoformat(),
     )
 
 

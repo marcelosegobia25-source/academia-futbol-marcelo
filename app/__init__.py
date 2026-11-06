@@ -289,6 +289,7 @@ def create_app(config_class=Config):
         referente = request.referrer
         if referente and request.host_url and not referente.startswith(request.host_url):
             referente = None
+        flash("El formulario expiró o no se pudo validar la seguridad (CSRF). Por favor, vuelva a intentar.", "warning")
         return redirect(referente or url_for("informacion.general"))
 
     @app.errorhandler(404)

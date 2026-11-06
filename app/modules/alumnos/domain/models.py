@@ -148,6 +148,22 @@ class Alumno(db.Model):
         return [ac.campeonato.nombre for ac in self.campeonatos_habilitados if ac.habilitado]
 
     @property
+    def tutor_telefono_principal(self):
+        for rel in getattr(self, "tutores_rel", []):
+            if rel.principal and rel.tutor and rel.tutor.telefono and rel.tutor.telefono.strip():
+                return rel.tutor.telefono.strip()
+        for rel in getattr(self, "tutores_rel", []):
+            if rel.tutor and rel.tutor.telefono and rel.tutor.telefono.strip():
+                return rel.tutor.telefono.strip()
+        return ""
+
+    @property
+    def telefono_contacto(self):
+        if self.telefono and self.telefono.strip():
+            return self.telefono.strip()
+        return self.tutor_telefono_principal
+
+    @property
     def beca_vigente(self):
         if self.beca_fecha_fin and self.beca_fecha_fin < date.today():
             return "Ninguna"

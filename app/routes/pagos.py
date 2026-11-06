@@ -22,6 +22,7 @@ from app.utils.reglas import (
     siguiente_mes_a_pagar, calcular_vencimiento, ya_existe_pago_mes, calcular_monto_pago
 )
 from app.utils.pdfs import generar_recibo_pago
+from app.utils.tiempo import hoy_bolivia
 from app.utils.personalizacion import configuracion_y_logo
 from app.utils.descargas import enviar_buffer
 from app.utils.pdf_tablas import generar_tabla_pdf
@@ -112,7 +113,7 @@ def _datos_resumen_seis_meses(args):
         ids_coincidentes = {pago.id_alumno for pago in _filtrar_pagos(args)}
         alumnos = [alumno for alumno in alumnos if alumno.id_alumno in ids_coincidentes]
 
-    mes_actual = date.today().replace(day=1)
+    mes_actual = hoy_bolivia().replace(day=1)
     meses = [mes_actual - relativedelta(months=desfase) for desfase in range(5, -1, -1)]
     claves_mes = [mes.strftime("%Y-%m") for mes in meses]
     encabezados = ["N°", "Alumno"] + [f"{MESES_ES[mes.month - 1]} {mes.year}" for mes in meses]
@@ -175,14 +176,14 @@ def _filtrar_pagos(args, paginar=False):
     if fecha_pago:
         query = query.filter(Pago.fecha_pago == datetime.strptime(fecha_pago, "%Y-%m-%d").date())
     if edad is not None and edad >= 0:
-        hoy = date.today()
+        hoy = hoy_bolivia()
         nacimiento_maximo = hoy - relativedelta(years=edad)
         nacimiento_minimo = hoy - relativedelta(years=edad + 1) + timedelta(days=1)
         query = query.filter(Alumno.fecha_nacimiento.between(
             nacimiento_minimo, nacimiento_maximo
         ))
     if estado:
-        hoy = date.today()
+        hoy = hoy_bolivia()
         if estado == "Anulado":
             pass
         elif estado == "Pagado":
@@ -275,13 +276,13 @@ def crear(id_alumno):
                     "Fecha de pago",
                 )
             else:
-                fecha_pago = date.today()
+                fecha_pago = hoy_bolivia()
         except ErrorValidacion as error:
             flash(str(error), "danger")
             return render_template(
                 "pagos/form.html", alumno=alumno, mes_sugerido=mes_sugerido,
                 es_primer_pago=es_primer_pago, modos=MODOS_PAGO,
-                hoy=date.today().isoformat(),
+                hoy=hoy_bolivia().isoformat(),
             )
 
         obligacion = Obligacion.query.filter_by(
@@ -400,7 +401,7 @@ def crear(id_alumno):
 
     return render_template(
         "pagos/form.html", alumno=alumno, mes_sugerido=mes_sugerido,
-        es_primer_pago=es_primer_pago, modos=MODOS_PAGO, hoy=date.today().isoformat(),
+        es_primer_pago=es_primer_pago, modos=MODOS_PAGO, hoy=hoy_bolivia().isoformat(),
     )
 
 

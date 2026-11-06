@@ -101,12 +101,20 @@ def mensualidad():
 @bp.route("/logo")
 def logo():
     config = Configuracion.obtener()
-    if not config.logo:
-        abort(404)
-    ruta = os.path.join(current_app.config["BRAND_FOLDER"], config.logo)
-    if not os.path.isfile(ruta):
-        abort(404)
-    return send_file(ruta, max_age=86400, conditional=True)
+    if config.logo:
+        ruta = os.path.join(current_app.config["BRAND_FOLDER"], config.logo)
+        if os.path.isfile(ruta):
+            return send_file(ruta, max_age=86400, conditional=True)
+    # Servir un escudo SVG oficial por defecto para evitar errores 404 e imágenes rotas en el navegador
+    escudo_svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
+        '<path d="M50 5 L88 22 L88 52 C88 74 50 94 50 94 C50 94 12 74 12 52 L12 22 Z" fill="#0f172a" stroke="#10b981" stroke-width="4"/>'
+        '<circle cx="50" cy="46" r="22" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>'
+        '<path d="M50 32 L58 43 L71 43 L60 51 L64 63 L50 55 L36 63 L40 51 L29 43 L42 43 Z" fill="#10b981"/>'
+        '</svg>'
+    )
+    from flask import Response
+    return Response(escudo_svg, mimetype="image/svg+xml", headers={"Cache-Control": "public, max-age=86400"})
 
 
 @bp.route("/contrasena", methods=["GET", "POST"])

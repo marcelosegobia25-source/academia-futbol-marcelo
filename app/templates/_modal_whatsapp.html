@@ -618,14 +618,15 @@ function difusionRenderizarTabla() {
         const tr = document.createElement('tr');
         tr.id = `difusion-fila-${i}`;
 
-        const telLimpio = (al.telefono || '').replace(/\D/g, '');
+        const numMostrar = al.telefono || al.tutor_telefono || '';
+        const telLimpio = numMostrar.replace(/\D/g, '');
         const tieneTel = telLimpio.length >= 7;
 
         tr.innerHTML = `
             <td><strong>${i + 1}</strong></td>
             <td><strong>${al.nombre}</strong></td>
             <td><span class="badge bg-secondary-subtle text-secondary">${al.categoria || '—'}</span></td>
-            <td>${tieneTel ? `<span class="text-white">${al.telefono}</span>` : `<span class="badge bg-danger-subtle text-danger">Sin número</span>`}</td>
+            <td>${tieneTel ? `<span class="text-white">${numMostrar}</span>` : `<span class="badge bg-danger-subtle text-danger">Sin número</span>`}</td>
             <td><span class="badge ${al.estado_mensualidad === 'Vigente' ? 'bg-success' : (al.estado_mensualidad === 'Próximo a vencer' ? 'bg-warning text-dark' : (al.estado_mensualidad === 'Vencido' ? 'bg-danger' : 'bg-secondary'))}">${al.estado_mensualidad}</span></td>
             <td id="difusion-estado-${i}">
                 ${al.enviado ? `<span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle-fill me-1"></i> Enviado</span>` : `<span class="badge bg-light text-dark">Pendiente</span>`}
@@ -643,8 +644,9 @@ function difusionRenderizarTabla() {
 }
 
 function difusionActualizarAsistente() {
+    const getTel = (a) => ((a.telefono || a.tutor_telefono || '').replace(/\D/g, ''));
     const total = _difusionLista.length;
-    const conTel = _difusionLista.filter(a => !!a.telefono && a.telefono.replace(/\D/g, '').length >= 7);
+    const conTel = _difusionLista.filter(a => getTel(a).length >= 7);
     const enviados = _difusionLista.filter(a => a.enviado).length;
 
     const pct = conTel.length > 0 ? Math.round((enviados / conTel.length) * 100) : 0;
@@ -656,8 +658,8 @@ function difusionActualizarAsistente() {
     if (barra) barra.style.width = `${pct}%`;
     if (textoProgreso) textoProgreso.textContent = `${enviados} de ${conTel.length} enviados (${pct}%)`;
 
-    // Buscar el siguiente pendiente con teléfono
-    const siguiente = _difusionLista.find(a => !a.enviado && !!a.telefono && a.telefono.replace(/\D/g, '').length >= 7);
+    // Buscar el siguiente pendiente con teléfono (propio o de tutor)
+    const siguiente = _difusionLista.find(a => !a.enviado && getTel(a).length >= 7);
 
     if (siguiente) {
         btnSiguiente.disabled = false;
@@ -677,7 +679,8 @@ function difusionActualizarAsistente() {
 }
 
 function difusionEnviarSiguiente() {
-    const siguiente = _difusionLista.find(a => !a.enviado && !!a.telefono && a.telefono.replace(/\D/g, '').length >= 7);
+    const getTel = (a) => ((a.telefono || a.tutor_telefono || '').replace(/\D/g, ''));
+    const siguiente = _difusionLista.find(a => !a.enviado && getTel(a).length >= 7);
     if (!siguiente) {
         alert('Todos los alumnos con teléfono ya han sido completados.');
         return;
@@ -689,7 +692,7 @@ function difusionEnviarIndividual(idx) {
     const alumno = _difusionLista[idx];
     if (!alumno) return;
 
-    const rawNum = alumno.telefono || '';
+    const rawNum = (alumno.telefono || alumno.tutor_telefono || '');
     let digitos = rawNum.replace(/\D/g, '');
     const prefijo = (window.PLANTILLAS_WHATSAPP_SISTEMA && window.PLANTILLAS_WHATSAPP_SISTEMA.prefijo_pais) ? window.PLANTILLAS_WHATSAPP_SISTEMA.prefijo_pais : '591';
 
