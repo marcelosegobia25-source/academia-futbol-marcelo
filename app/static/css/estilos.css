@@ -2991,3 +2991,100 @@ a:hover {
     box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4) !important;
 }
 
+/* ==========================================================================
+   RESUMEN OPERATIVO Y ESTADO DE MENSUALIDADES (INFORMACIÓN GENERAL)
+   ========================================================================== */
+.payment-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+@media (max-width: 768px) {
+    .payment-overview-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+.payment-overview-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1.15rem 0.75rem;
+    border-radius: 12px;
+    text-decoration: none;
+    border: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+    background: var(--surface-card, #131d2e);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.payment-overview-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    filter: brightness(1.1);
+}
+.payment-overview-item i {
+    font-size: 1.65rem;
+    margin-bottom: 0.4rem;
+}
+.payment-overview-item strong {
+    font-size: 1.75rem;
+    font-weight: 850;
+    line-height: 1.1;
+    margin-bottom: 0.25rem;
+}
+.payment-overview-item span {
+    font-size: 0.82rem;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+}
+
+.payment-overview-item.status-current {
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+}
+.payment-overview-item.status-current i,
+.payment-overview-item.status-current strong,
+.payment-overview-item.status-current span {
+    color: #34d399 !important;
+}
+
+.payment-overview-item.status-warning {
+    border-color: rgba(245, 158, 11, 0.4) !important;
+    background: rgba(245, 158, 11, 0.08) !important;
+}
+.payment-overview-item.status-warning i,
+.payment-overview-item.status-warning strong,
+.payment-overview-item.status-warning span {
+    color: #fbbf24 !important;
+}
+
+.payment-overview-item.status-overdue {
+    border-color: rgba(239, 68, 68, 0.4) !important;
+    background: rgba(239, 68, 68, 0.08) !important;
+}
+.payment-overview-item.status-overdue i,
+.payment-overview-item.status-overdue strong,
+.payment-overview-item.status-overdue span {
+    color: #f87171 !important;
+}
+
+.payment-overview-item.status-empty {
+    border-color: rgba(148, 163, 184, 0.35) !important;
+    background: rgba(148, 163, 184, 0.06) !important;
+}
+.payment-overview-item.status-empty i,
+.payment-overview-item.status-empty strong,
+.payment-overview-item.status-empty span {
+    color: #cbd5e1 !important;
+}
+
+.finance-total {
+    font-size: 2rem;
+    font-weight: 850;
+    color: #34d399;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+}
+
+

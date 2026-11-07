@@ -49,13 +49,56 @@
 </div>
 
 <div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center"><div><h5 class="mb-0">Resumen operativo</h5><small class="text-muted">Indicadores deportivos y de mensualidades del mes actual.</small></div></div>
-    <div class="card-body"><div class="row g-3">
-        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('pagos.listar') }}"><div class="p-3 border rounded h-100"><i class="bi bi-receipt text-danger"></i><small class="d-block text-muted">Obligaciones pendientes</small><strong class="fs-4">{{ indicadores.obligaciones_pendientes }}</strong><span class="d-block small">Saldo Bs {{ '%.2f'|format(indicadores.saldo_pendiente) }}</span></div></a></div>
-        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('pagos.listar') }}"><div class="p-3 border rounded h-100"><i class="bi bi-cash-stack text-success"></i><small class="d-block text-muted">Recaudación mensual</small><strong class="fs-4">Bs {{ '%.2f'|format(indicadores.recaudacion_mes) }}</strong><span class="d-block small">{{ indicadores.pagos_mes }} cuotas cobradas</span></div></a></div>
-        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('calendario.personal') }}"><div class="p-3 border rounded h-100"><i class="bi bi-person-workspace text-primary"></i><small class="d-block text-muted">Actividad deportiva</small><strong class="fs-4">{{ indicadores.personal_activo }} profesores</strong><span class="d-block small">Asistencia del mes: {{ indicadores.asistencia_mes }} %</span></div></a></div>
-        <div class="col-sm-6 col-xl-3"><a class="text-decoration-none text-reset" href="{{ url_for('alumnos.listar') }}"><div class="p-3 border rounded h-100"><i class="bi bi-calendar-check text-info"></i><small class="d-block text-muted">Inscripciones {{ hoy.year }}</small><strong class="fs-4">{{ indicadores.inscripciones_activas }}</strong><span class="d-block small">Inscripciones activas</span></div></a></div>
-    </div></div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0 text-white fw-bold"><i class="bi bi-speedometer2 text-emerald me-2"></i>Resumen operativo</h5>
+            <small class="text-muted">Estructura deportiva y compromisos de la academia</small>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-sm-6 col-xl-3">
+                <a class="text-decoration-none text-reset" href="{{ url_for('calendario.personal') }}">
+                    <div class="p-3 border rounded h-100 overview-stat">
+                        <i class="bi bi-person-badge text-primary fs-3 mb-2 d-block"></i>
+                        <small class="d-block text-muted">Cuerpo Técnico</small>
+                        <strong class="fs-4 text-white">{{ indicadores.personal_activo }} entrenadores</strong>
+                        <span class="d-block small text-muted">Personal deportivo activo</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <a class="text-decoration-none text-reset" href="{{ url_for('categorias.listar') }}">
+                    <div class="p-3 border rounded h-100 overview-stat">
+                        <i class="bi bi-diagram-3 text-emerald fs-3 mb-2 d-block"></i>
+                        <small class="d-block text-muted">Categorías formativas</small>
+                        <strong class="fs-4 text-white">{{ indicadores.categorias }} divisiones</strong>
+                        <span class="d-block small text-muted">Rangos de edad oficiales</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <a class="text-decoration-none text-reset" href="{{ url_for('equipos.listar') }}">
+                    <div class="p-3 border rounded h-100 overview-stat">
+                        <i class="bi bi-shield-shaded text-info fs-3 mb-2 d-block"></i>
+                        <small class="d-block text-muted">Equipos y planteles</small>
+                        <strong class="fs-4 text-white">{{ indicadores.equipos }} equipos</strong>
+                        <span class="d-block small text-muted">Planteles de competición</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <a class="text-decoration-none text-reset" href="{{ url_for('agenda.listar') }}">
+                    <div class="p-3 border rounded h-100 overview-stat">
+                        <i class="bi bi-trophy text-warning fs-3 mb-2 d-block"></i>
+                        <small class="d-block text-muted">Agenda deportiva</small>
+                        <strong class="fs-4 text-white">{{ proximos_eventos|length }} programados</strong>
+                        <span class="d-block small text-muted">Partidos y compromisos</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% if proximos_cumpleanos %}<div class="card mb-4"><div class="card-header"><h5 class="mb-0">Próximos cumpleaños y revisión de categoría</h5></div><div class="card-body row g-2">{% for alumno, cumple, dias in proximos_cumpleanos %}<div class="col-md-6 col-xl-4"><a href="{{ url_for('alumnos.detalle', id_alumno=alumno.id_alumno) }}" class="d-flex justify-content-between border rounded p-2 text-decoration-none text-reset"><span><strong>{{ alumno.nombre_completo }}</strong><small class="d-block text-muted">{{ alumno.categoria.nombre_mostrado if alumno.categoria else 'Sin categoría' }}</small></span><span class="badge text-bg-info align-self-center">{{ 'Hoy' if dias==0 else dias|string ~ ' días' }}</span></a></div>{% endfor %}</div></div>{% endif %}
@@ -64,15 +107,36 @@
     <div class="col-xl-7">
         <div class="card h-100">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <div><h5 class="mb-0">Estado de mensualidades</h5><small class="text-muted">Solo alumnos activos; cada alumno se cuenta una vez.</small></div>
-                <a href="{{ url_for('pagos.listar') }}" class="btn btn-sm btn-outline-success">Ver pagos</a>
+                <div>
+                    <h5 class="mb-0 text-white fw-bold"><i class="bi bi-pie-chart text-emerald me-2"></i>Estado de mensualidades</h5>
+                    <small class="text-muted">Solo alumnos activos · Filtra con 1 solo clic</small>
+                </div>
+                <a href="{{ url_for('pagos.listar') }}" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-wallet2 me-1"></i> Ver pagos
+                </a>
             </div>
             <div class="card-body">
                 <div class="payment-overview-grid">
-                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Vigente') }}" class="payment-overview-item status-current"><i class="bi bi-check-circle"></i><strong>{{ indicadores.vigentes }}</strong><span>Vigentes</span></a>
-                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Próximo a vencer') }}" class="payment-overview-item status-warning"><i class="bi bi-clock"></i><strong>{{ indicadores.proximos }}</strong><span>Próximos a vencer</span></a>
-                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Vencido') }}" class="payment-overview-item status-overdue"><i class="bi bi-exclamation-triangle"></i><strong>{{ indicadores.vencidos }}</strong><span>Vencidos</span></a>
-                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Sin pagos') }}" class="payment-overview-item status-empty"><i class="bi bi-dash-circle"></i><strong>{{ indicadores.sin_pagos }}</strong><span>Sin pagos</span></a>
+                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Vigente') }}" class="payment-overview-item status-current">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <strong>{{ indicadores.vigentes }}</strong>
+                        <span>Vigentes</span>
+                    </a>
+                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Próximo a vencer') }}" class="payment-overview-item status-warning">
+                        <i class="bi bi-clock-history"></i>
+                        <strong>{{ indicadores.proximos }}</strong>
+                        <span>Próximos a vencer</span>
+                    </a>
+                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Vencido') }}" class="payment-overview-item status-overdue">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>{{ indicadores.vencidos }}</strong>
+                        <span>Vencidos</span>
+                    </a>
+                    <a href="{{ url_for('alumnos.listar', estado='Activo', estado_mensualidad='Sin pagos') }}" class="payment-overview-item status-empty">
+                        <i class="bi bi-dash-circle-fill"></i>
+                        <strong>{{ indicadores.sin_pagos }}</strong>
+                        <span>Sin pagos</span>
+                    </a>
                 </div>
             </div>
         </div>
