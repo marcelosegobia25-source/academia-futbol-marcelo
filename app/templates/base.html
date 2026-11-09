@@ -37,7 +37,7 @@
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="Cerrar"></button>
         </div>
         <div class="sidebar-inner" style="overflow-y:auto;max-height:100vh;scrollbar-gutter:stable">
-            <a class="sidebar-brand" href="{{ url_for('index') }}">
+            <a class="sidebar-brand" href="{{ url_for('panel') }}">
                 <div class="sidebar-brand-crest-box">
                     {% if marca.logo %}
                     <img src="{{ url_for('configuracion.logo') }}" alt="Logo" class="sidebar-crest">
@@ -56,7 +56,8 @@
                     <input id="moduleSearchInput" class="form-control form-control-sm" type="search" placeholder="Buscar módulo…" autocomplete="off" aria-label="Buscar módulo" aria-expanded="false">
                 </div>
                 <div id="moduleSearchMenu" class="dropdown-menu w-100 shadow" style="max-height:340px;overflow:auto">
-                    <a class="dropdown-item" data-module href="{{ url_for('index') }}"><i class="bi bi-speedometer2 me-2"></i>Inicio / Centro de Mando</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('panel') }}"><i class="bi bi-speedometer2 me-2"></i>Inicio / Centro de Mando</a>
+                    <a class="dropdown-item" data-module href="{{ url_for('landing') }}" target="_blank"><i class="bi bi-globe2 me-2 text-emerald"></i>Sitio Web Público</a>
                     {% if puede('administrar') %}<a class="dropdown-item" data-module href="{{ url_for('informacion.general') }}"><i class="bi bi-grid-1x2 me-2"></i>Información general</a>{% endif %}
                     {% if puede('ver_alumnos') %}<a class="dropdown-item" data-module href="{{ url_for('alumnos.listar') }}"><i class="bi bi-people me-2"></i>Alumnos</a>{% endif %}
                     {% if puede('gestionar_asistencia') or puede('ver_deportivo') %}<a class="dropdown-item" data-module href="{{ url_for('alumnos.asistencias') }}"><i class="bi bi-calendar2-check me-2"></i>Asistencia de jugadores</a>{% endif %}
@@ -77,7 +78,8 @@
                 <span>Operaciones</span> <i class="bi bi-chevron-down toggle-icon"></i>
             </button>
             <nav class="sidebar-nav collapse show" id="menuOperaciones">
-                <a class="sidebar-link {{ 'active' if request.endpoint == 'index' }}" href="{{ url_for('index') }}"><i class="bi bi-speedometer2"></i><span>Inicio</span></a>
+                <a class="sidebar-link {{ 'active' if request.endpoint == 'panel' }}" href="{{ url_for('panel') }}"><i class="bi bi-speedometer2"></i><span>Inicio</span></a>
+                <a class="sidebar-link" href="{{ url_for('landing') }}" target="_blank"><i class="bi bi-globe2 text-emerald"></i><span>Sitio Web Público</span></a>
                 {% if puede('administrar') %}<a class="sidebar-link {{ 'active' if modulo == 'informacion' }}" href="{{ url_for('informacion.general') }}"><i class="bi bi-grid-1x2"></i><span>Información general</span></a>{% endif %}
                 {% if puede('ver_alumnos') %}<a class="sidebar-link {{ 'active' if modulo == 'alumnos' and request.endpoint != 'alumnos.asistencias' }}" href="{{ url_for('alumnos.listar') }}"><i class="bi bi-people"></i><span>Alumnos</span></a>{% endif %}
                 {% if puede('gestionar_asistencia') or puede('ver_deportivo') %}<a class="sidebar-link {{ 'active' if request.endpoint == 'alumnos.asistencias' }}" href="{{ url_for('alumnos.asistencias') }}"><i class="bi bi-calendar2-check"></i><span>Asistencias</span></a>{% endif %}
@@ -186,7 +188,7 @@
 
     <!-- BARRA DE NAVEGACIÓN INFERIOR PARA MÓVILES (Estilo App) -->
     <nav class="mobile-bottom-nav d-lg-none" aria-label="Navegación móvil rápida">
-        <a href="{{ url_for('index') }}" class="mobile-nav-item {{ 'active' if request.endpoint == 'index' }}">
+        <a href="{{ url_for('panel') }}" class="mobile-nav-item {{ 'active' if request.endpoint == 'panel' }}">
             <i class="bi bi-speedometer2"></i>
             <span>Inicio</span>
         </a>

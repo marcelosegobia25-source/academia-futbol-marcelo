@@ -128,7 +128,44 @@ def create_app(config_class=Config):
         }
 
     @app.route("/")
-    def index():
+    @app.route("/landing")
+    def landing():
+        from datetime import date
+        from app.models import Alumno, Campeonato, Categoria, Lugar, Configuracion
+        from app.modules.seguridad.domain.models import Usuario
+        from app.utils.whatsapp import obtener_plantillas_whatsapp
+
+        hoy = date.today()
+        alumnos_activos = Alumno.query.filter_by(estado="Activo").count()
+        total_alumnos = Alumno.query.count()
+        categorias = Categoria.query.order_by(Categoria.edad_min.asc().nullslast(), Categoria.nombre.asc()).all()
+        lugares = Lugar.query.filter_by(activo=True).all()
+        campeonatos_count = Campeonato.query.count()
+        entrenadores_count = Usuario.query.filter_by(activo=True).count()
+
+        plantillas = obtener_plantillas_whatsapp()
+        prefijo = plantillas.get("prefijo_pais", "591")
+        cfg = Configuracion.obtener()
+        raw_tel = "".join(filter(str.isdigit, cfg.telefono or ""))
+        if raw_tel:
+            tel_wa = raw_tel if raw_tel.startswith(prefijo) else f"{prefijo}{raw_tel}"
+        else:
+            tel_wa = None
+
+        return render_template(
+            "landing.html",
+            alumnos_activos=alumnos_activos,
+            total_alumnos=total_alumnos,
+            categorias=categorias,
+            lugares=lugares,
+            campeonatos_count=campeonatos_count,
+            entrenadores_count=entrenadores_count,
+            hoy=hoy,
+            tel_wa=tel_wa,
+        )
+
+    @app.route("/panel")
+    def panel():
         from datetime import date
         from app.models import Alumno, Partido, Campeonato, Categoria
         hoy = date.today()
@@ -144,6 +181,10 @@ def create_app(config_class=Config):
             categorias_count=categorias_count,
             hoy=hoy,
         )
+
+    @app.route("/index")
+    def index():
+        return redirect(url_for("panel"))
 
     @app.before_request
     def asegurar_respaldo_del_dia():
@@ -200,9 +241,14 @@ def create_app(config_class=Config):
             return None
         path = (request.path or "").strip()
         path_limpio = path.rstrip("/")
-        if path_limpio in {"/ping", "/health"} or path.startswith(("/ping", "/health")) or request.endpoint in {
-            "static", "autenticacion.login", "autenticacion.logout", "health", "ping"
-        }:
+        if (
+            path_limpio in {"/ping", "/health", "", "/landing"}
+            or path.startswith(("/ping", "/health"))
+            or request.endpoint in {
+                "static", "autenticacion.login", "autenticacion.logout",
+                "health", "ping", "landing", "configuracion.logo"
+            }
+        ):
             return None
         if session.get("autenticado"):
             import time

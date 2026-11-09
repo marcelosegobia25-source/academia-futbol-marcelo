@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ marca.nombre_academia }} - Formación Deportiva & Pasión por el Fútbol</title>
+    <meta name="description" content="Academia de Fútbol {{ marca.nombre_academia }}. Formación deportiva integral, categorías infantiles, juveniles y femenino. Horarios y sedes en Bolivia.">
+
+    <!-- CSS Vendor local (carga instantánea) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+
+    <!-- Tipografía Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;850&display=swap" rel="stylesheet">
+</head>
+
+{% set tel_destino = tel_wa or '59170000000' %}
+{% set wa_msg_general = ('¡Hola! Deseo recibir información sobre inscripciones, categorías y horarios en la ' ~ marca.nombre_academia ~ '.')|urlencode %}
+{% set wa_url_general = 'https://wa.me/' ~ tel_destino ~ '?text=' ~ wa_msg_general %}
+
+<body class="landing-body">
+    <div class="landing-content-wrap">
+
+        <!-- ================= NAVBAR ================= -->
+        <nav class="navbar navbar-expand-lg lp-navbar sticky-top" id="mainNavbar">
+            <div class="container">
+                <a class="lp-brand" href="#inicio">
+                    {% if marca.logo %}
+                        <img src="{{ url_for('configuracion.logo') }}" alt="Logo {{ marca.nombre_academia }}" class="lp-brand-logo">
+                    {% else %}
+                        <div class="lp-brand-placeholder">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <span class="lp-brand-title">{{ marca.nombre_academia }}</span>
+                        <span class="lp-brand-subtitle">Academia de Fútbol</span>
+                    </div>
+                </a>
+
+                <button class="navbar-toggler border-0 text-white p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navContent" aria-controls="navContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="bi bi-list fs-2 text-emerald-light"></i>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navContent">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2 my-3 my-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link lp-nav-link" href="#inicio">Inicio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link lp-nav-link" href="#categorias">Categorías</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link lp-nav-link" href="#horarios">Horarios</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link lp-nav-link" href="#metodologia">Metodología</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link lp-nav-link" href="#sedes">Sedes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link lp-nav-link" href="#faq">Preguntas</a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex flex-wrap gap-2 ms-lg-3 align-items-center">
+                        <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-lp-primary py-2 px-3">
+                            <i class="bi bi-whatsapp"></i> Inscribirme
+                        </a>
+
+                        {% if usuario_actual %}
+                            <a href="{{ url_for('panel') }}" class="btn btn-sm btn-outline-info py-2 px-3" title="Panel de Gestión">
+                                <i class="bi bi-speedometer2 me-1"></i> Panel ({{ usuario_actual.nombre_usuario }})
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('autenticacion.login') }}" class="btn btn-sm btn-outline-secondary py-2 px-3 text-white" title="Acceso al sistema administrativo">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Acceso
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ================= HERO ================= -->
+        <header class="lp-hero" id="inicio">
+            <div class="container">
+                <div class="lp-badge-tag">
+                    <i class="bi bi-patch-check-fill text-emerald-light"></i>
+                    <span>Inscripciones Abiertas · Gestión {{ hoy.year }}</span>
+                </div>
+
+                <h1 class="lp-hero-title">
+                    Pasión, Disciplina &amp; <br>
+                    <span class="lp-hero-gradient">Formación Deportiva de Alto Nivel</span>
+                </h1>
+
+                <p class="lp-hero-subtitle">
+                    {{ marca.eslogan or 'Formamos a niños y jóvenes mediante una metodología integral que potencia su técnica, capacidad táctica y valores fundamentales dentro y fuera del campo de juego.' }}
+                </p>
+
+                <div class="lp-hero-actions">
+                    <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn-lp-primary">
+                        <i class="bi bi-whatsapp fs-5"></i>
+                        <span>Contactar por WhatsApp</span>
+                    </a>
+                    <a href="#categorias" class="btn-lp-secondary">
+                        <i class="bi bi-grid-3x3-gap-fill text-emerald-light"></i>
+                        <span>Ver Categorías &amp; Horarios</span>
+                    </a>
+                </div>
+
+                <!-- Barra de Estadísticas y Social Proof -->
+                <div class="lp-stats-grid">
+                    <div class="lp-stat-card">
+                        <span class="lp-stat-number">+100</span>
+                        <span class="lp-stat-label">Alumnos Formados</span>
+                    </div>
+                    <div class="lp-stat-card">
+                        <span class="lp-stat-number">{{ categorias|length or 9 }}</span>
+                        <span class="lp-stat-label">Categorías Activas</span>
+                    </div>
+                    <div class="lp-stat-card">
+                        <span class="lp-stat-number">{{ lugares|length or 3 }}</span>
+                        <span class="lp-stat-label">Canchas &amp; Sedes</span>
+                    </div>
+                    <div class="lp-stat-card">
+                        <span class="lp-stat-number">100%</span>
+                        <span class="lp-stat-label">Cuerpo Técnico Dedicado</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ================= CATEGORÍAS ================= -->
+        <section class="lp-section" id="categorias">
+            <div class="container">
+                <div class="lp-section-header">
+                    <span class="lp-eyebrow"><i class="bi bi-diagram-3 me-1"></i> Formación por Edades</span>
+                    <h2 class="lp-section-title">Categorías Disponibles</h2>
+                    <p class="lp-section-desc">
+                        Cada etapa del desarrollo de un futbolista es única. Agrupamos a nuestros jugadores por edades para garantizar un aprendizaje progresivo y seguro.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    {% if categorias %}
+                        {% for cat in categorias %}
+                            {% set wa_msg_cat = ('¡Hola! Quisiera consultar disponibilidad de cupos e inscripción para la categoría ' ~ cat.nombre_mostrado ~ ' en ' ~ marca.nombre_academia ~ '.')|urlencode %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="lp-cat-card">
+                                    <div>
+                                        <div class="lp-cat-badge">
+                                            <i class="bi bi-shield-shaded"></i>
+                                            <span>
+                                                {% if cat.edad_min and cat.edad_max %}
+                                                    {{ cat.edad_min }} a {{ cat.edad_max }} años
+                                                {% elif cat.edad_min %}
+                                                    A partir de {{ cat.edad_min }} años
+                                                {% else %}
+                                                    Categoría Especial
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <h3 class="lp-cat-name">{{ cat.nombre_mostrado }}</h3>
+                                        <div class="lp-cat-age">
+                                            {% if cat.edad_min and cat.edad_max %}
+                                                Edades: {{ cat.edad_min }} - {{ cat.edad_max }} años
+                                            {% else %}
+                                                Plantel Formativo &amp; Competitivo
+                                            {% endif %}
+                                        </div>
+                                        <p class="lp-cat-desc">
+                                            {% if cat.edad_min and cat.edad_max and cat.edad_max <= 7 %}
+                                                Iniciación psicomotriz, adaptación al balón, juegos cooperativos y diversión sana en equipo.
+                                            {% elif cat.edad_min and cat.edad_max and cat.edad_max <= 11 %}
+                                                Fundamentos técnicos individuales (pase, recepción, regate, remate) y coordinación motriz.
+                                            {% elif cat.edad_min and cat.edad_max and cat.edad_max <= 15 %}
+                                                Desarrollo táctico en espacio reducido, posicionamiento, toma de decisiones y competencia oficial.
+                                            {% else %}
+                                                Preparación competitiva integral, táctica avanzada, ritmo físico de partido y torneos oficiales.
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <a href="https://wa.me/{{ tel_destino }}?text={{ wa_msg_cat }}" target="_blank" rel="noopener noreferrer" class="lp-cat-btn">
+                                            <i class="bi bi-whatsapp text-success"></i>
+                                            <span>Consultar cupos para {{ cat.nombre_mostrado }}</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Fallback si la BD aún no tiene categorías registradas -->
+                        <div class="col-md-4">
+                            <div class="lp-cat-card">
+                                <div class="lp-cat-badge"><i class="bi bi-star"></i> 5 a 8 años</div>
+                                <h3 class="lp-cat-name">Iniciación (Sub-7 &amp; Sub-8)</h3>
+                                <p class="lp-cat-desc">Psicomotricidad, diversión y primeros toques con el balón.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="lp-cat-card">
+                                <div class="lp-cat-badge"><i class="bi bi-lightning-charge"></i> 9 a 12 años</div>
+                                <h3 class="lp-cat-name">Intermedia (Sub-10 &amp; Sub-12)</h3>
+                                <p class="lp-cat-desc">Técnica individual, pases, control y comprensión de juego.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="lp-cat-card">
+                                <div class="lp-cat-badge"><i class="bi bi-trophy"></i> 13 a 17 años</div>
+                                <h3 class="lp-cat-name">Competitiva (Sub-14 a Sub-17)</h3>
+                                <p class="lp-cat-desc">Táctica de equipo, preparación física y torneos de liga.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= HORARIOS & TURNOS ================= -->
+        <section class="lp-section" id="horarios" style="background: rgba(15, 23, 42, 0.45); border-top: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <div class="container">
+                <div class="lp-section-header">
+                    <span class="lp-eyebrow"><i class="bi bi-clock-history me-1"></i> Planificación Semanal</span>
+                    <h2 class="lp-section-title">Horarios de Entrenamiento</h2>
+                    <p class="lp-section-desc">
+                        Pensados para adaptarse al ritmo escolar de cada familia, con turnos flexibles tanto en la mañana como en la tarde y fines de semana.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Turno Mañana -->
+                    <div class="col-lg-4">
+                        <div class="lp-schedule-card">
+                            <div class="lp-schedule-icon">
+                                <i class="bi bi-sun-fill"></i>
+                            </div>
+                            <h3 class="lp-schedule-title">Turno Mañana</h3>
+                            <span class="lp-schedule-time">08:30 a 10:30</span>
+                            <ul class="lp-schedule-list">
+                                <li><i class="bi bi-check2-circle"></i> Martes, Jueves y Sábados</li>
+                                <li><i class="bi bi-check2-circle"></i> Ideal para escolares del turno tarde</li>
+                                <li><i class="bi bi-check2-circle"></i> Preparación física matutina fresca</li>
+                                <li><i class="bi bi-check2-circle"></i> Fundamentos y psicomotricidad</li>
+                            </ul>
+                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light w-100 py-2 rounded-3 fw-semibold">
+                                <i class="bi bi-whatsapp text-success me-1"></i> Consultar Turno Mañana
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Turno Tarde -->
+                    <div class="col-lg-4">
+                        <div class="lp-schedule-card" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(15, 23, 42, 0.85); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);">
+                            <div class="lp-schedule-icon">
+                                <i class="bi bi-sunset-fill"></i>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <h3 class="lp-schedule-title mb-0">Turno Tarde</h3>
+                                <span class="badge bg-success-subtle text-emerald-light border border-success border-opacity-25 px-2 py-1 small">Más Solicitado</span>
+                            </div>
+                            <span class="lp-schedule-time">15:30 a 17:30 / 17:30 a 19:00</span>
+                            <ul class="lp-schedule-list">
+                                <li><i class="bi bi-check2-circle"></i> Lunes, Miércoles y Viernes</li>
+                                <li><i class="bi bi-check2-circle"></i> Ideal para escolares del turno mañana</li>
+                                <li><i class="bi bi-check2-circle"></i> Táctica colectiva y fútbol reducido</li>
+                                <li><i class="bi bi-check2-circle"></i> Clases distribuidas por categorías</li>
+                            </ul>
+                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn-lp-primary w-100 py-2 justify-content-center text-center">
+                                <i class="bi bi-whatsapp me-1"></i> Consultar Turno Tarde
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Turno Especial Fin de Semana -->
+                    <div class="col-lg-4">
+                        <div class="lp-schedule-card">
+                            <div class="lp-schedule-icon">
+                                <i class="bi bi-trophy-fill"></i>
+                            </div>
+                            <h3 class="lp-schedule-title">Sábados de Competencia</h3>
+                            <span class="lp-schedule-time">08:00 a 12:30</span>
+                            <ul class="lp-schedule-list">
+                                <li><i class="bi bi-check2-circle"></i> Partidos de ligas locales y amistosos</li>
+                                <li><i class="bi bi-check2-circle"></i> Clínica especializada de arqueros</li>
+                                <li><i class="bi bi-check2-circle"></i> Refuerzo técnico individualizado</li>
+                                <li><i class="bi bi-check2-circle"></i> Integración con padres y familias</li>
+                            </ul>
+                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light w-100 py-2 rounded-3 fw-semibold">
+                                <i class="bi bi-whatsapp text-success me-1"></i> Consultar Sábados
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= METODOLOGÍA & VALORES ================= -->
+        <section class="lp-section" id="metodologia">
+            <div class="container">
+                <div class="lp-section-header">
+                    <span class="lp-eyebrow"><i class="bi bi-gem me-1"></i> Modelo Pedagógico</span>
+                    <h2 class="lp-section-title">Nuestra Metodología</h2>
+                    <p class="lp-section-desc">
+                        No solo formamos futbolistas competitivos: educamos personas íntegras, con autoconfianza, hábitos saludables y disciplina para la vida.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="lp-pillar-card">
+                            <i class="bi bi-dribbble lp-pillar-icon"></i>
+                            <h4 class="lp-pillar-title">Técnica Individual</h4>
+                            <p class="lp-pillar-desc">
+                                Dominio de balón con ambas piernas, control orientado, conducción en velocidad, regate y definición precisa.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="lp-pillar-card">
+                            <i class="bi bi-compass-fill lp-pillar-icon"></i>
+                            <h4 class="lp-pillar-title">Inteligencia Táctica</h4>
+                            <p class="lp-pillar-desc">
+                                Comprensión del juego, desmarques, ocupación de espacios, presión organizada y rápida toma de decisiones.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="lp-pillar-card">
+                            <i class="bi bi-lightning-charge-fill lp-pillar-icon"></i>
+                            <h4 class="lp-pillar-title">Preparación Física</h4>
+                            <p class="lp-pillar-desc">
+                                Coordinación motora, agilidad, velocidad de reacción, resistencia aeróbica y prevención de lesiones deportivas.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="lp-pillar-card">
+                            <i class="bi bi-heart-fill lp-pillar-icon"></i>
+                            <h4 class="lp-pillar-title">Valores &amp; Fair Play</h4>
+                            <p class="lp-pillar-desc">
+                                Respeto a los compañeros, rivales y árbitros. Fomento de la perseverancia, puntualidad y trabajo en equipo.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= NUESTRAS SEDES ================= -->
+        <section class="lp-section" id="sedes" style="background: rgba(15, 23, 42, 0.45); border-top: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <div class="container">
+                <div class="lp-section-header">
+                    <span class="lp-eyebrow"><i class="bi bi-geo-alt-fill me-1"></i> Instalaciones de Calidad</span>
+                    <h2 class="lp-section-title">Nuestras Sedes &amp; Canchas</h2>
+                    <p class="lp-section-desc">
+                        Campos deportivos seguros y equipados para el máximo rendimiento de los deportistas y la comodidad de las familias.
+                    </p>
+                </div>
+
+                <div class="row g-4 justify-content-center">
+                    {% if lugares %}
+                        {% for l in lugares %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="lp-venue-card">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span class="lp-venue-badge">
+                                                <i class="bi bi-flag-fill me-1"></i> {{ l.tipo or 'Cancha Deportiva' }}
+                                            </span>
+                                            {% if l.superficie %}
+                                                <small class="text-emerald-light fw-bold">{{ l.superficie }}</small>
+                                            {% endif %}
+                                        </div>
+                                        <h3 class="lp-venue-title">{{ l.nombre }}</h3>
+                                        <p class="text-muted small mb-3">
+                                            <i class="bi bi-geo-alt text-danger me-1"></i> {{ l.direccion or 'Dirección principal de la sede' }}
+                                        </p>
+                                    </div>
+
+                                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                                        {% if l.google_maps_url %}
+                                            <a href="{{ l.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-map-fill me-1"></i> Ver en Google Maps
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted small"><i class="bi bi-shield-check text-success me-1"></i> Sede Oficial Habilitada</span>
+                                        {% endif %}
+                                        <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-whatsapp"></i> Visitar
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="lp-venue-card">
+                                <div>
+                                    <span class="lp-venue-badge">Cancha Principal</span>
+                                    <h3 class="lp-venue-title">Complejo Deportivo Central</h3>
+                                    <p class="text-muted small mb-3">
+                                        <i class="bi bi-geo-alt text-danger me-1"></i> Césped sintético de alta densidad con iluminación nocturna.
+                                    </p>
+                                </div>
+                                <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-whatsapp"></i> Consultar Ubicación
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PROCESO DE INSCRIPCIÓN (3 PASOS) ================= -->
+        <section class="lp-section" id="inscripcion">
+            <div class="container">
+                <div class="lp-section-header">
+                    <span class="lp-eyebrow"><i class="bi bi-card-checklist me-1"></i> Fácil y Rápido</span>
+                    <h2 class="lp-section-title">¿Cómo Inscribirte?</h2>
+                    <p class="lp-section-desc">
+                        Sigue estos 3 sencillos pasos para formar parte de la familia de {{ marca.nombre_academia }}.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="lp-step-card">
+                            <div class="lp-step-num">1</div>
+                            <h4 class="lp-step-title">Escríbenos por WhatsApp</h4>
+                            <p class="lp-step-desc">
+                                Envíanos un mensaje con el nombre y fecha de nacimiento de tu hijo(a) para coordinar su primera clase de prueba sin compromiso.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="lp-step-card">
+                            <div class="lp-step-num">2</div>
+                            <h4 class="lp-step-title">Clase de Diagnóstico</h4>
+                            <p class="lp-step-desc">
+                                Asiste al campo de entrenamiento con ropa deportiva. El entrenador evaluará su nivel técnico para asignarlo a la categoría ideal.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="lp-step-card">
+                            <div class="lp-step-num">3</div>
+                            <h4 class="lp-step-title">Ficha Oficial &amp; Uniforme</h4>
+                            <p class="lp-step-desc">
+                                Registramos al alumno en el sistema digital oficial, te enviamos el comprobante de mensualidad y ¡listo para jugar y competir!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PREGUNTAS FRECUENTES (FAQ) ================= -->
+        <section class="lp-section" id="faq" style="background: rgba(15, 23, 42, 0.45); border-top: 1px solid rgba(255, 255, 255, 0.05);">
+            <div class="container" style="max-width: 860px;">
+                <div class="lp-section-header">
+                    <span class="lp-eyebrow"><i class="bi bi-question-circle me-1"></i> Respuestas Claras</span>
+                    <h2 class="lp-section-title">Preguntas Frecuentes</h2>
+                    <p class="lp-section-desc">
+                        Resolvemos las principales dudas de los padres antes de inscribir a sus hijos.
+                    </p>
+                </div>
+
+                <div class="accordion lp-accordion" id="accordionFaq">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                ¿A partir de qué edad pueden ingresar los niños a la academia?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionFaq">
+                            <div class="accordion-body">
+                                Aceptamos alumnos desde los <strong>5 años de edad</strong> en la categoría de iniciación (Sub-7) hasta los <strong>18-19 años</strong> en categorías juveniles y de ascenso. Cada grupo trabaja con entrenamientos diseñados exclusivamente para su etapa de crecimiento.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                ¿Se requiere experiencia futbolística previa para entrar?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionFaq">
+                            <div class="accordion-body">
+                                <strong>No es necesaria ninguna experiencia previa.</strong> Contamos con niveles formativos donde enseñamos desde cero los fundamentos del deporte, así como planteles competitivos para alumnos con mayor experiencia que participan en torneos y ligas oficiales.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                ¿Qué indumentaria deben llevar a su primera clase de prueba?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionFaq">
+                            <div class="accordion-body">
+                                Para la primera sesión, solo necesitan acudir con ropa deportiva cómoda (polera y short), zapatillas de fútbol (chutes o tenis según el tipo de cancha) y su botella personal de agua para hidratación. Al completar la inscripción formal se gestiona el uniforme oficial de la academia.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                ¿Cuáles son las formas de pago de las mensualidades?
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionFaq">
+                            <div class="accordion-body">
+                                Aceptamos pagos en <strong>efectivo directo en cancha</strong> y transferencias mediante <strong>código QR bancario</strong>. Todo pago genera de inmediato un comprobante digital oficial emitido por nuestro sistema que puede ser enviado directamente a su WhatsApp.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFive">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                ¿Pueden los padres de familia presenciar los entrenamientos?
+                            </button>
+                        </h2>
+                        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionFaq">
+                            <div class="accordion-body">
+                                <strong>¡Totalmente!</strong> Nuestras sedes disponen de graderías y áreas cómodas para que los padres puedan acompañar y motivar a sus hijos durante cada práctica de forma segura.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= CTA FINAL BANNER ================= -->
+        <section class="lp-section py-5">
+            <div class="container">
+                <div class="lp-cta-banner">
+                    <h2 class="lp-cta-title">¡El futuro de tu hijo en el fútbol comienza hoy!</h2>
+                    <p class="lp-cta-desc">
+                        Cupos limitados por categoría para garantizar atención personalizada y máxima calidad de entrenamiento. Escríbenos directamente y asegura su lugar.
+                    </p>
+                    <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn-lp-primary btn-lg">
+                        <i class="bi bi-whatsapp fs-4"></i>
+                        <span>Inscribir ahora por WhatsApp</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= FOOTER ================= -->
+        <footer class="lp-footer">
+            <div class="container">
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-6 text-center text-md-start">
+                        <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-2">
+                            {% if marca.logo %}
+                                <img src="{{ url_for('configuracion.logo') }}" alt="Logo" style="width: 30px; height: 30px; object-fit: contain;">
+                            {% else %}
+                                <i class="bi bi-shield-check text-emerald-light fs-5"></i>
+                            {% endif %}
+                            <strong class="text-white fs-5">{{ marca.nombre_academia }}</strong>
+                        </div>
+                        <p class="text-muted small mb-0">
+                            {{ marca.eslogan or 'Formación integral deportiva, técnica y en valores para el fútbol infantil y juvenil.' }}
+                        </p>
+                    </div>
+
+                    <div class="col-md-6 text-center text-md-end">
+                        <div class="d-flex flex-wrap justify-content-center justify-content-md-end gap-3 mb-2">
+                            <a href="#inicio" class="lp-footer-link">Inicio</a>
+                            <a href="#categorias" class="lp-footer-link">Categorías</a>
+                            <a href="#horarios" class="lp-footer-link">Horarios</a>
+                            <a href="#sedes" class="lp-footer-link">Sedes</a>
+                            <a href="{{ url_for('autenticacion.login') }}" class="lp-footer-link text-emerald-light">
+                                <i class="bi bi-lock-fill me-1"></i> Acceso Administrativo
+                            </a>
+                        </div>
+                        <small class="text-muted">
+                            &copy; {{ hoy.year }} {{ marca.nombre_academia }}. Todos los derechos reservados.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- ================= BOTÓN FLOTANTE DE WHATSAPP ================= -->
+        <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="lp-floating-wa" title="Escríbenos a WhatsApp">
+            <i class="bi bi-whatsapp"></i>
+        </a>
+
+    </div>
+
+    <!-- JavaScript Vendor local -->
+    <script src="{{ url_for('static', filename='vendor/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('mainNavbar');
+            if (window.scrollY > 40) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scroll para anclas
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // Cerrar el menú móvil si está abierto
+                    const navContent = document.getElementById('navContent');
+                    if (navContent && navContent.classList.contains('show')) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navContent);
+                        if (bsCollapse) bsCollapse.hide();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

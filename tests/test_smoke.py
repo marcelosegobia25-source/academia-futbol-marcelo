@@ -1,6 +1,6 @@
 def test_pantallas_principales(client):
     rutas = [
-        "/", "/informacion/", "/alumnos/", "/pagos/", "/categorias/", "/equipos/",
+        "/", "/panel", "/informacion/", "/alumnos/", "/pagos/", "/categorias/", "/equipos/",
         "/partidos/", "/agenda/", "/calendario/",
         "/calendario/entrenamientos", "/campeonatos/",
         "/campeonatos/rivales", "/lugares/", "/lugares/nuevo",
