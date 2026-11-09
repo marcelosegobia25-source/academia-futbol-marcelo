@@ -16,7 +16,7 @@ class Configuracion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     monto_mensualidad = db.Column(db.Numeric(10, 2), nullable=False, default=0)
     nombre_academia = db.Column(db.String(150), nullable=False, default="Mi Academia Deportiva")
-    telefono = db.Column(db.String(50), nullable=True)
+    telefono = db.Column(db.String(50), nullable=True, default="71054702")
     direccion = db.Column(db.String(255), nullable=True)
     moneda = db.Column(db.String(10), nullable=False, default="BOB")
     dias_proximo_vencimiento = db.Column(db.Integer, nullable=False, default=5)
@@ -53,8 +53,11 @@ class Configuracion(db.Model):
 
         config = Configuracion.query.first()
         if config is None:
-            config = Configuracion(monto_mensualidad=0)
+            config = Configuracion(monto_mensualidad=0, telefono="71054702")
             db.session.add(config)
+            db.session.commit()
+        if not config.telefono:
+            config.telefono = "71054702"
             db.session.commit()
         if not config.contrasena_hash:
             config.establecer_contrasena("00000")

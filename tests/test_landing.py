@@ -18,6 +18,7 @@ def test_landing_page_publica(client):
     assert "lp-schedule-card" in contenido
     assert "lp-cat-top-bar" in contenido
     assert "bg-success-subtle" not in contenido
+    assert "59171054702" in contenido
 
 
 def test_landing_page_ruta_alternativa(client):

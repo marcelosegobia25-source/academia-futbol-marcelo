@@ -146,11 +146,11 @@ def create_app(config_class=Config):
         plantillas = obtener_plantillas_whatsapp()
         prefijo = plantillas.get("prefijo_pais", "591")
         cfg = Configuracion.obtener()
-        raw_tel = "".join(filter(str.isdigit, cfg.telefono or ""))
+        raw_tel = "".join(filter(str.isdigit, cfg.telefono or "71054702"))
         if raw_tel:
             tel_wa = raw_tel if raw_tel.startswith(prefijo) else f"{prefijo}{raw_tel}"
         else:
-            tel_wa = None
+            tel_wa = f"{prefijo}71054702"
 
         return render_template(
             "landing.html",

@@ -17,7 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 
-{% set tel_destino = tel_wa or '59170000000' %}
+{% set tel_destino = tel_wa or '59171054702' %}
 {% set wa_msg_general = ('¡Hola! Deseo recibir información sobre inscripciones, categorías y horarios en la ' ~ marca.nombre_academia ~ '.')|urlencode %}
 {% set wa_url_general = 'https://wa.me/' ~ tel_destino ~ '?text=' ~ wa_msg_general %}
 
@@ -665,6 +665,11 @@
                         <p class="text-secondary small mb-0">
                             {{ marca.eslogan or 'Formación integral deportiva, técnica y en valores para el fútbol infantil y juvenil.' }}
                         </p>
+                        <p class="small mt-2 mb-0">
+                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="text-emerald-light text-decoration-none fw-bold">
+                                <i class="bi bi-whatsapp me-1"></i> WhatsApp: +591 71054702
+                            </a>
+                        </p>
                     </div>
 
                     <div class="col-md-6 text-center text-md-end">
@@ -673,7 +678,10 @@
                             <a href="#categorias" class="lp-footer-link">Categorías</a>
                             <a href="#horarios" class="lp-footer-link">Horarios</a>
                             <a href="#sedes" class="lp-footer-link">Sedes</a>
-                            <a href="{{ url_for('autenticacion.login') }}" class="lp-footer-link text-emerald-light">
+                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="lp-footer-link text-emerald-light">
+                                <i class="bi bi-whatsapp me-1"></i> 71054702
+                            </a>
+                            <a href="{{ url_for('autenticacion.login') }}" class="lp-footer-link text-info">
                                 <i class="bi bi-lock-fill me-1"></i> Acceso Administrativo
                             </a>
                         </div>
