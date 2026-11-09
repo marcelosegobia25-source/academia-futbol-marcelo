@@ -35,3 +35,4 @@ def test_landing_es_publica_cuando_auth_requerido(app):
         resp_panel = c.get("/panel")
         assert resp_panel.status_code == 302
         assert "/acceso" in resp_panel.headers["Location"]
+
