@@ -177,83 +177,74 @@
                             {% set wa_msg_cat = ('¡Hola! Quisiera consultar disponibilidad de cupos e inscripción para la categoría ' ~ cat.nombre_mostrado ~ ' en ' ~ marca.nombre_academia ~ '.')|urlencode %}
                             {% set edad_m = cat.edad_max or 99 %}
                             
-                            {# Asignación de paleta de color e imagen de fútbol según categoría #}
+                            {# Asignación de paleta de color vibrante según categoría #}
                             {% if edad_m <= 8 %}
                                 {% set border_cls = 'cat-border-cyan' %}
                                 {% set badge_cls = 'badge-cyan' %}
                                 {% set icon_cls = 'bi-stars' %}
                                 {% set color_txt = 'text-cyan-light' %}
                                 {% set etapa = 'Iniciación & Psicomotricidad' %}
-                                {% set cat_img = 'nino_futbolista.jpg' %}
                             {% elif edad_m <= 12 %}
                                 {% set border_cls = 'cat-border-emerald' %}
                                 {% set badge_cls = 'badge-emerald' %}
                                 {% set icon_cls = 'bi-dribbble' %}
                                 {% set color_txt = 'text-emerald-light' %}
                                 {% set etapa = 'Fundamentos & Técnica' %}
-                                {% set cat_img = 'entrenamiento_conos.jpg' %}
                             {% elif edad_m <= 16 %}
                                 {% set border_cls = 'cat-border-purple' %}
                                 {% set badge_cls = 'badge-purple' %}
                                 {% set icon_cls = 'bi-lightning-charge-fill' %}
                                 {% set color_txt = 'text-purple-light' %}
                                 {% set etapa = 'Desarrollo Táctico' %}
-                                {% set cat_img = 'tiro_potencia.jpg' %}
                             {% else %}
                                 {% set border_cls = 'cat-border-amber' %}
                                 {% set badge_cls = 'badge-amber' %}
                                 {% set icon_cls = 'bi-trophy-fill' %}
                                 {% set color_txt = 'text-amber-light' %}
                                 {% set etapa = 'Alta Competencia & Liga' %}
-                                {% set cat_img = 'gol_red.jpg' %}
                             {% endif %}
 
                             <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
                                 <div class="lp-cat-card {{ border_cls }}">
-                                    <div class="lp-card-img-wrap">
-                                        <img src="{{ url_for('static', filename='img/landing/' ~ cat_img) }}" alt="{{ cat.nombre_mostrado }}" class="lp-card-img-top" loading="lazy">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <div class="lp-cat-badge {{ badge_cls }} mb-0">
+                                                <i class="bi {{ icon_cls }}"></i>
+                                                <span>{{ etapa }}</span>
+                                            </div>
+                                            {% if cat.edad_min and cat.edad_max %}
+                                                <small class="{{ color_txt }} fw-bold font-monospace">{{ cat.edad_min }}-{{ cat.edad_max }} años</small>
+                                            {% endif %}
+                                        </div>
+
+                                        <h3 class="lp-cat-name mt-2">{{ cat.nombre_mostrado }}</h3>
+
+                                        <div class="lp-cat-age {{ color_txt }}">
+                                            {% if cat.edad_min and cat.edad_max %}
+                                                Rango Oficial: {{ cat.edad_min }} a {{ cat.edad_max }} años
+                                            {% else %}
+                                                Plantel Formativo &amp; Competitivo
+                                            {% endif %}
+                                        </div>
+
+                                        <p class="lp-cat-desc">
+                                            {% if cat.edad_min and cat.edad_max and cat.edad_max <= 7 %}
+                                                Familiarización con el balón, juegos cooperativos, psicomotricidad y disfrute pleno del deporte.
+                                            {% elif cat.edad_min and cat.edad_max and cat.edad_max <= 11 %}
+                                                Pase, control orientado, conducción en velocidad, regate, remate y posicionamiento en cancha.
+                                            {% elif cat.edad_min and cat.edad_max and cat.edad_max <= 15 %}
+                                                Táctica colectiva, fútbol reducido, velocidad de transición, toma de decisiones y competencia oficial.
+                                            {% else %}
+                                                Ritmo de juego de alto rendimiento, táctica avanzada, preparación física y torneos departamentales.
+                                            {% endif %}
+                                        </p>
                                     </div>
-                                    <div class="lp-cat-card-body">
-                                        <div>
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <div class="lp-cat-badge {{ badge_cls }} mb-0">
-                                                    <i class="bi {{ icon_cls }}"></i>
-                                                    <span>{{ etapa }}</span>
-                                                </div>
-                                                {% if cat.edad_min and cat.edad_max %}
-                                                    <small class="{{ color_txt }} fw-bold font-monospace">{{ cat.edad_min }}-{{ cat.edad_max }} años</small>
-                                                {% endif %}
-                                            </div>
 
-                                            <h3 class="lp-cat-name mt-2">{{ cat.nombre_mostrado }}</h3>
-
-                                            <div class="lp-cat-age {{ color_txt }}">
-                                                {% if cat.edad_min and cat.edad_max %}
-                                                    Rango Oficial: {{ cat.edad_min }} a {{ cat.edad_max }} años
-                                                {% else %}
-                                                    Plantel Formativo &amp; Competitivo
-                                                {% endif %}
-                                            </div>
-
-                                            <p class="lp-cat-desc">
-                                                {% if cat.edad_min and cat.edad_max and cat.edad_max <= 7 %}
-                                                    Familiarización con el balón, juegos cooperativos, psicomotricidad y disfrute pleno del deporte.
-                                                {% elif cat.edad_min and cat.edad_max and cat.edad_max <= 11 %}
-                                                    Pase, control orientado, conducción en velocidad, regate, remate y posicionamiento en cancha.
-                                                {% elif cat.edad_min and cat.edad_max and cat.edad_max <= 15 %}
-                                                    Táctica colectiva, fútbol reducido, velocidad de transición, toma de decisiones y competencia oficial.
-                                                {% else %}
-                                                    Ritmo de juego de alto rendimiento, táctica avanzada, preparación física y torneos departamentales.
-                                                {% endif %}
-                                            </p>
-                                        </div>
-
-                                        <div>
-                                            <a href="https://wa.me/{{ tel_destino }}?text={{ wa_msg_cat }}" target="_blank" rel="noopener noreferrer" class="lp-cat-btn">
-                                                <i class="bi bi-whatsapp text-success"></i>
-                                                <span>Consultar cupos</span>
-                                            </a>
-                                        </div>
+                                    <div>
+                                        <a href="https://wa.me/{{ tel_destino }}?text={{ wa_msg_cat }}" target="_blank" rel="noopener noreferrer" class="lp-cat-btn">
+                                            <i class="bi bi-whatsapp text-success"></i>
+                                            <span>Consultar cupos para {{ cat.nombre_mostrado }}</span>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -261,38 +252,23 @@
                     {% else %}
                         <div class="col-md-4">
                             <div class="lp-cat-card cat-border-cyan">
-                                <div class="lp-card-img-wrap">
-                                    <img src="{{ url_for('static', filename='img/landing/nino_futbolista.jpg') }}" alt="Iniciación" class="lp-card-img-top" loading="lazy">
-                                </div>
-                                <div class="lp-cat-card-body">
-                                    <div class="lp-cat-badge badge-cyan"><i class="bi bi-star"></i> 5 a 8 años</div>
-                                    <h3 class="lp-cat-name">Iniciación (Sub-7 &amp; Sub-8)</h3>
-                                    <p class="lp-cat-desc">Psicomotricidad, diversión y primeros toques con el balón.</p>
-                                </div>
+                                <div class="lp-cat-badge badge-cyan"><i class="bi bi-star"></i> 5 a 8 años</div>
+                                <h3 class="lp-cat-name">Iniciación (Sub-7 &amp; Sub-8)</h3>
+                                <p class="lp-cat-desc">Psicomotricidad, diversión y primeros toques con el balón.</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="lp-cat-card cat-border-emerald">
-                                <div class="lp-card-img-wrap">
-                                    <img src="{{ url_for('static', filename='img/landing/entrenamiento_conos.jpg') }}" alt="Intermedia" class="lp-card-img-top" loading="lazy">
-                                </div>
-                                <div class="lp-cat-card-body">
-                                    <div class="lp-cat-badge badge-emerald"><i class="bi bi-dribbble"></i> 9 a 12 años</div>
-                                    <h3 class="lp-cat-name">Intermedia (Sub-10 &amp; Sub-12)</h3>
-                                    <p class="lp-cat-desc">Técnica individual, pases, control y comprensión de juego.</p>
-                                </div>
+                                <div class="lp-cat-badge badge-emerald"><i class="bi bi-dribbble"></i> 9 a 12 años</div>
+                                <h3 class="lp-cat-name">Intermedia (Sub-10 &amp; Sub-12)</h3>
+                                <p class="lp-cat-desc">Técnica individual, pases, control y comprensión de juego.</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="lp-cat-card cat-border-amber">
-                                <div class="lp-card-img-wrap">
-                                    <img src="{{ url_for('static', filename='img/landing/gol_red.jpg') }}" alt="Competitiva" class="lp-card-img-top" loading="lazy">
-                                </div>
-                                <div class="lp-cat-card-body">
-                                    <div class="lp-cat-badge badge-amber"><i class="bi bi-trophy"></i> 13 a 17 años</div>
-                                    <h3 class="lp-cat-name">Competitiva (Sub-14 a Sub-17)</h3>
-                                    <p class="lp-cat-desc">Táctica de equipo, preparación física y torneos de liga.</p>
-                                </div>
+                                <div class="lp-cat-badge badge-amber"><i class="bi bi-trophy"></i> 13 a 17 años</div>
+                                <h3 class="lp-cat-name">Competitiva (Sub-14 a Sub-17)</h3>
+                                <p class="lp-cat-desc">Táctica de equipo, preparación física y torneos de liga.</p>
                             </div>
                         </div>
                     {% endif %}
@@ -315,84 +291,69 @@
                     <!-- Turno Mañana -->
                     <div class="col-md-6 col-lg-4">
                         <div class="lp-schedule-card schedule-morning">
-                            <div class="lp-schedule-img-wrap">
-                                <img src="{{ url_for('static', filename='img/landing/balon_cancha.jpg') }}" alt="Turno Mañana Fútbol" class="lp-schedule-img" loading="lazy">
-                            </div>
-                            <div class="lp-schedule-body">
-                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <div class="lp-schedule-icon stat-icon-amber mb-0">
-                                        <i class="bi bi-sun-fill text-amber-light"></i>
-                                    </div>
-                                    <span class="badge-morning-solid">Amanecer Deportivo</span>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="lp-schedule-icon stat-icon-amber mb-0">
+                                    <i class="bi bi-sun-fill text-amber-light"></i>
                                 </div>
-                                <h3 class="lp-schedule-title mb-1">Turno Mañana</h3>
-                                <span class="lp-schedule-time text-amber-light">08:30 a 10:30</span>
-                                <ul class="lp-schedule-list">
-                                    <li><i class="bi bi-check-circle-fill text-amber-light"></i> Martes, Jueves y Sábados</li>
-                                    <li><i class="bi bi-check-circle-fill text-amber-light"></i> Ideal para alumnos con colegio en la tarde</li>
-                                    <li><i class="bi bi-check-circle-fill text-amber-light"></i> Temperatura óptima y césped fresco</li>
-                                    <li><i class="bi bi-check-circle-fill text-amber-light"></i> Psicomotricidad y técnica individual</li>
-                                </ul>
-                                <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light w-100 py-2 rounded-3 fw-semibold">
-                                    <i class="bi bi-whatsapp text-success me-1"></i> Consultar Turno Mañana
-                                </a>
+                                <span class="badge-morning-solid">Amanecer Deportivo</span>
                             </div>
+                            <h3 class="lp-schedule-title mb-1">Turno Mañana</h3>
+                            <span class="lp-schedule-time text-amber-light">08:30 a 10:30</span>
+                            <ul class="lp-schedule-list">
+                                <li><i class="bi bi-check-circle-fill text-amber-light"></i> Martes, Jueves y Sábados</li>
+                                <li><i class="bi bi-check-circle-fill text-amber-light"></i> Ideal para alumnos con colegio en la tarde</li>
+                                <li><i class="bi bi-check-circle-fill text-amber-light"></i> Temperatura óptima y césped fresco</li>
+                                <li><i class="bi bi-check-circle-fill text-amber-light"></i> Psicomotricidad y técnica individual</li>
+                            </ul>
+                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light w-100 py-2 rounded-3 fw-semibold">
+                                <i class="bi bi-whatsapp text-success me-1"></i> Consultar Turno Mañana
+                            </a>
                         </div>
                     </div>
 
                     <!-- Turno Tarde -->
                     <div class="col-md-6 col-lg-4">
                         <div class="lp-schedule-card schedule-afternoon" style="box-shadow: 0 15px 40px rgba(16, 185, 129, 0.25);">
-                            <div class="lp-schedule-img-wrap">
-                                <img src="{{ url_for('static', filename='img/landing/tiro_potencia.jpg') }}" alt="Turno Tarde Fútbol" class="lp-schedule-img" loading="lazy">
-                            </div>
-                            <div class="lp-schedule-body">
-                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <div class="lp-schedule-icon stat-icon-emerald mb-0">
-                                        <i class="bi bi-sunset-fill text-emerald-light"></i>
-                                    </div>
-                                    <span class="badge-afternoon-solid">Más Solicitado</span>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="lp-schedule-icon stat-icon-emerald mb-0">
+                                    <i class="bi bi-sunset-fill text-emerald-light"></i>
                                 </div>
-                                <h3 class="lp-schedule-title mb-1">Turno Tarde</h3>
-                                <span class="lp-schedule-time text-emerald-light">15:30 a 17:30 / 17:30 a 19:00</span>
-                                <ul class="lp-schedule-list">
-                                    <li><i class="bi bi-check-circle-fill text-emerald-light"></i> Lunes, Miércoles y Viernes</li>
-                                    <li><i class="bi bi-check-circle-fill text-emerald-light"></i> Ideal para alumnos con colegio en la mañana</li>
-                                    <li><i class="bi bi-check-circle-fill text-emerald-light"></i> Táctica colectiva y fútbol reducido</li>
-                                    <li><i class="bi bi-check-circle-fill text-emerald-light"></i> División por categorías y grupos de nivel</li>
-                                </ul>
-                                <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn-lp-primary w-100 py-2 justify-content-center text-center">
-                                    <i class="bi bi-whatsapp me-1"></i> Consultar Turno Tarde
-                                </a>
+                                <span class="badge-afternoon-solid">Más Solicitado</span>
                             </div>
+                            <h3 class="lp-schedule-title mb-1">Turno Tarde</h3>
+                            <span class="lp-schedule-time text-emerald-light">15:30 a 17:30 / 17:30 a 19:00</span>
+                            <ul class="lp-schedule-list">
+                                <li><i class="bi bi-check-circle-fill text-emerald-light"></i> Lunes, Miércoles y Viernes</li>
+                                <li><i class="bi bi-check-circle-fill text-emerald-light"></i> Ideal para alumnos con colegio en la mañana</li>
+                                <li><i class="bi bi-check-circle-fill text-emerald-light"></i> Táctica colectiva y fútbol reducido</li>
+                                <li><i class="bi bi-check-circle-fill text-emerald-light"></i> División por categorías y grupos de nivel</li>
+                            </ul>
+                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn-lp-primary w-100 py-2 justify-content-center text-center">
+                                <i class="bi bi-whatsapp me-1"></i> Consultar Turno Tarde
+                            </a>
                         </div>
                     </div>
 
                     <!-- Turno Especial Fin de Semana -->
                     <div class="col-md-6 col-lg-4">
                         <div class="lp-schedule-card schedule-weekend">
-                            <div class="lp-schedule-img-wrap">
-                                <img src="{{ url_for('static', filename='img/landing/jugadores_partido.jpg') }}" alt="Sábados de Liga Fútbol" class="lp-schedule-img" loading="lazy">
-                            </div>
-                            <div class="lp-schedule-body">
-                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <div class="lp-schedule-icon stat-icon-purple mb-0">
-                                        <i class="bi bi-trophy-fill text-purple-light"></i>
-                                    </div>
-                                    <span class="badge-weekend-solid">Competencia Oficial</span>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="lp-schedule-icon stat-icon-purple mb-0">
+                                    <i class="bi bi-trophy-fill text-purple-light"></i>
                                 </div>
-                                <h3 class="lp-schedule-title mb-1">Sábados de Liga</h3>
-                                <span class="lp-schedule-time text-purple-light">08:00 a 12:30</span>
-                                <ul class="lp-schedule-list">
-                                    <li><i class="bi bi-check-circle-fill text-purple-light"></i> Partidos de ligas locales y amistosos</li>
-                                    <li><i class="bi bi-check-circle-fill text-purple-light"></i> Entrenamiento específico para arqueros</li>
-                                    <li><i class="bi bi-check-circle-fill text-purple-light"></i> Refuerzo y clínicas de perfeccionamiento</li>
-                                    <li><i class="bi bi-check-circle-fill text-purple-light"></i> Ambiente familiar con graderías abiertas</li>
-                                </ul>
-                                <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light w-100 py-2 rounded-3 fw-semibold">
-                                    <i class="bi bi-whatsapp text-success me-1"></i> Consultar Sábados
-                                </a>
+                                <span class="badge-weekend-solid">Competencia Oficial</span>
                             </div>
+                            <h3 class="lp-schedule-title mb-1">Sábados de Liga</h3>
+                            <span class="lp-schedule-time text-purple-light">08:00 a 12:30</span>
+                            <ul class="lp-schedule-list">
+                                <li><i class="bi bi-check-circle-fill text-purple-light"></i> Partidos de ligas locales y amistosos</li>
+                                <li><i class="bi bi-check-circle-fill text-purple-light"></i> Entrenamiento específico para arqueros</li>
+                                <li><i class="bi bi-check-circle-fill text-purple-light"></i> Refuerzo y clínicas de perfeccionamiento</li>
+                                <li><i class="bi bi-check-circle-fill text-purple-light"></i> Ambiente familiar con graderías abiertas</li>
+                            </ul>
+                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light w-100 py-2 rounded-3 fw-semibold">
+                                <i class="bi bi-whatsapp text-success me-1"></i> Consultar Sábados
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -413,69 +374,49 @@
                 <div class="row g-4">
                     <div class="col-md-6 col-lg-3">
                         <div class="lp-pillar-card">
-                            <div class="lp-card-img-wrap" style="height: 130px;">
-                                <img src="{{ url_for('static', filename='img/landing/balon_cancha.jpg') }}" alt="Técnica Individual" class="lp-card-img-top" loading="lazy">
+                            <div class="lp-stat-icon-wrap stat-icon-cyan mb-3">
+                                <i class="bi bi-dribbble text-cyan-light"></i>
                             </div>
-                            <div class="lp-pillar-body">
-                                <div class="lp-stat-icon-wrap stat-icon-cyan mb-2">
-                                    <i class="bi bi-dribbble text-cyan-light"></i>
-                                </div>
-                                <h4 class="lp-pillar-title">Técnica Individual</h4>
-                                <p class="lp-pillar-desc">
-                                    Dominio y control de balón con ambas piernas, pase orientado, conducción en velocidad, regate y definición precisa.
-                                </p>
-                            </div>
+                            <h4 class="lp-pillar-title">Técnica Individual</h4>
+                            <p class="lp-pillar-desc">
+                                Dominio y control de balón con ambas piernas, pase orientado, conducción en velocidad, regate y definición precisa.
+                            </p>
                         </div>
                     </div>
 
                     <div class="col-md-6 col-lg-3">
                         <div class="lp-pillar-card">
-                            <div class="lp-card-img-wrap" style="height: 130px;">
-                                <img src="{{ url_for('static', filename='img/landing/equipo_tactica.jpg') }}" alt="Inteligencia Táctica y Tablero" class="lp-card-img-top" loading="lazy">
+                            <div class="lp-stat-icon-wrap stat-icon-emerald mb-3">
+                                <i class="bi bi-compass-fill text-emerald-light"></i>
                             </div>
-                            <div class="lp-pillar-body">
-                                <div class="lp-stat-icon-wrap stat-icon-emerald mb-2">
-                                    <i class="bi bi-compass-fill text-emerald-light"></i>
-                                </div>
-                                <h4 class="lp-pillar-title">Inteligencia Táctica</h4>
-                                <p class="lp-pillar-desc">
-                                    Pizarra táctica, comprensión del juego, desmarques, ocupación del espacio, presión organizada y toma de decisiones.
-                                </p>
-                            </div>
+                            <h4 class="lp-pillar-title">Inteligencia Táctica</h4>
+                            <p class="lp-pillar-desc">
+                                Pizarra táctica, comprensión del juego, desmarques, ocupación del espacio, presión organizada y rápida toma de decisiones.
+                            </p>
                         </div>
                     </div>
 
                     <div class="col-md-6 col-lg-3">
                         <div class="lp-pillar-card">
-                            <div class="lp-card-img-wrap" style="height: 130px;">
-                                <img src="{{ url_for('static', filename='img/landing/entrenamiento_conos.jpg') }}" alt="Preparación Física y Conos" class="lp-card-img-top" loading="lazy">
+                            <div class="lp-stat-icon-wrap stat-icon-amber mb-3">
+                                <i class="bi bi-lightning-charge-fill text-amber-light"></i>
                             </div>
-                            <div class="lp-pillar-body">
-                                <div class="lp-stat-icon-wrap stat-icon-amber mb-2">
-                                    <i class="bi bi-lightning-charge-fill text-amber-light"></i>
-                                </div>
-                                <h4 class="lp-pillar-title">Preparación Física</h4>
-                                <p class="lp-pillar-desc">
-                                    Circuitos con conos, coordinación motora, agilidad, velocidad de reacción, resistencia aeróbica y prevención de lesiones.
-                                </p>
-                            </div>
+                            <h4 class="lp-pillar-title">Preparación Física</h4>
+                            <p class="lp-pillar-desc">
+                                Circuitos con conos, coordinación motora, agilidad, velocidad de reacción, resistencia aeróbica y prevención de lesiones.
+                            </p>
                         </div>
                     </div>
 
                     <div class="col-md-6 col-lg-3">
                         <div class="lp-pillar-card">
-                            <div class="lp-card-img-wrap" style="height: 130px;">
-                                <img src="{{ url_for('static', filename='img/landing/gol_red.jpg') }}" alt="Valores y Celebración" class="lp-card-img-top" loading="lazy">
+                            <div class="lp-stat-icon-wrap stat-icon-purple mb-3">
+                                <i class="bi bi-heart-fill text-purple-light"></i>
                             </div>
-                            <div class="lp-pillar-body">
-                                <div class="lp-stat-icon-wrap stat-icon-purple mb-2">
-                                    <i class="bi bi-heart-fill text-purple-light"></i>
-                                </div>
-                                <h4 class="lp-pillar-title">Valores &amp; Fair Play</h4>
-                                <p class="lp-pillar-desc">
-                                    Respeto a los compañeros, rivales y árbitros. Fomento de la perseverancia, puntualidad, resiliencia y trabajo en equipo.
-                                </p>
-                            </div>
+                            <h4 class="lp-pillar-title">Valores &amp; Fair Play</h4>
+                            <p class="lp-pillar-desc">
+                                Respeto a los compañeros, rivales y árbitros. Fomento de la perseverancia, puntualidad, resiliencia y trabajo en equipo.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -496,42 +437,36 @@
                 <div class="row g-4 justify-content-center">
                     {% if lugares %}
                         {% for l in lugares %}
-                            {% set sede_foto = 'sede_estadio.jpg' if loop.index0 % 3 == 0 else ('cancha_arcos.jpg' if loop.index0 % 3 == 1 else 'hero_stadium.jpg') %}
                             <div class="col-md-6 col-lg-4">
                                 <div class="lp-venue-card">
-                                    <div class="lp-venue-img-wrap">
-                                        <img src="{{ url_for('static', filename='img/landing/' ~ sede_foto) }}" alt="{{ l.nombre }}" class="lp-venue-img" loading="lazy">
-                                    </div>
-                                    <div class="lp-venue-body">
-                                        <div>
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <span class="lp-venue-badge mb-0">
-                                                    <i class="bi bi-flag-fill me-1"></i> {{ l.tipo or 'Cancha Deportiva' }}
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="lp-venue-badge">
+                                                <i class="bi bi-flag-fill me-1"></i> {{ l.tipo or 'Cancha Deportiva' }}
+                                            </span>
+                                            {% if l.superficie %}
+                                                <span class="badge bg-success-subtle text-emerald-light border border-success border-opacity-30 small">
+                                                    <i class="bi bi-check2 me-1"></i>{{ l.superficie }}
                                                 </span>
-                                                {% if l.superficie %}
-                                                    <span class="badge bg-success-subtle text-emerald-light border border-success border-opacity-30 small">
-                                                        <i class="bi bi-check2 me-1"></i>{{ l.superficie }}
-                                                    </span>
-                                                {% endif %}
-                                            </div>
-                                            <h3 class="lp-venue-title mt-2">{{ l.nombre }}</h3>
-                                            <p class="text-secondary small mb-3">
-                                                <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ l.direccion or 'Sede oficial de entrenamiento de la academia' }}
-                                            </p>
-                                        </div>
-
-                                        <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center gap-2">
-                                            {% if l.google_maps_url %}
-                                                <a href="{{ l.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-info flex-grow-1">
-                                                    <i class="bi bi-map-fill me-1"></i> Ver en Maps
-                                                </a>
-                                            {% else %}
-                                                <span class="text-muted small"><i class="bi bi-shield-check text-success me-1"></i> Sede Oficial Habilitada</span>
                                             {% endif %}
-                                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success">
-                                                <i class="bi bi-whatsapp me-1"></i> Visitar
-                                            </a>
                                         </div>
+                                        <h3 class="lp-venue-title">{{ l.nombre }}</h3>
+                                        <p class="text-secondary small mb-3">
+                                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ l.direccion or 'Sede oficial de entrenamiento de la academia' }}
+                                        </p>
+                                    </div>
+
+                                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center gap-2">
+                                        {% if l.google_maps_url %}
+                                            <a href="{{ l.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-info flex-grow-1">
+                                                <i class="bi bi-map-fill me-1"></i> Ver en Maps
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted small"><i class="bi bi-shield-check text-success me-1"></i> Sede Oficial Habilitada</span>
+                                        {% endif %}
+                                        <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-whatsapp me-1"></i> Visitar
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -539,21 +474,16 @@
                     {% else %}
                         <div class="col-md-6 col-lg-4">
                             <div class="lp-venue-card">
-                                <div class="lp-venue-img-wrap">
-                                    <img src="{{ url_for('static', filename='img/landing/cancha_arcos.jpg') }}" alt="Cancha Principal" class="lp-venue-img" loading="lazy">
+                                <div>
+                                    <span class="lp-venue-badge">Cancha Principal</span>
+                                    <h3 class="lp-venue-title">Complejo Deportivo Central</h3>
+                                    <p class="text-secondary small mb-3">
+                                        <i class="bi bi-geo-alt text-danger me-1"></i> Césped sintético de alta densidad con iluminación nocturna.
+                                    </p>
                                 </div>
-                                <div class="lp-venue-body">
-                                    <div>
-                                        <span class="lp-venue-badge mb-2">Cancha Principal</span>
-                                        <h3 class="lp-venue-title">Complejo Deportivo Central</h3>
-                                        <p class="text-secondary small mb-3">
-                                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> Césped sintético de alta densidad con arcos reglamentarios e iluminación nocturna.
-                                        </p>
-                                    </div>
-                                    <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success">
-                                        <i class="bi bi-whatsapp me-1"></i> Consultar Ubicación
-                                    </a>
-                                </div>
+                                <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-whatsapp"></i> Consultar Ubicación
+                                </a>
                             </div>
                         </div>
                     {% endif %}
