@@ -83,27 +83,39 @@ body.landing-body {
     width: 100%;
 }
 
-/* Contenedores verdaderamente expansivos (Full-width fluido en cualquier monitor) */
+/* Contenedores equilibrados: fluido en móviles y centrado óptimo en desktop */
 .lp-container-fluid {
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: clamp(1.25rem, 3.8vw, 4.5rem) !important;
-    padding-right: clamp(1.25rem, 3.8vw, 4.5rem) !important;
+    padding-left: clamp(1.25rem, 3.5vw, 2.75rem);
+    padding-right: clamp(1.25rem, 3.5vw, 2.75rem);
+}
+
+@media (min-width: 1200px) {
+    .lp-container-fluid {
+        max-width: 1360px;
+    }
+}
+
+@media (min-width: 1600px) {
+    .lp-container-fluid {
+        max-width: 1440px;
+    }
 }
 
 /* ==========================================================================
    NAVBAR
    ========================================================================== */
 .lp-navbar {
-    background: rgba(6, 11, 20, 0.92);
+    background: rgba(6, 11, 20, 0.94);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     transition: all 0.3s ease;
     padding: 0.95rem 0;
     box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+    z-index: 1030;
 }
 
 .lp-navbar.scrolled {
@@ -111,6 +123,14 @@ body.landing-body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
     padding: 0.75rem 0;
     border-bottom-color: rgba(16, 185, 129, 0.35);
+}
+
+.lp-navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    width: 100%;
 }
 
 .lp-brand {
@@ -175,6 +195,63 @@ body.landing-body {
     background: rgba(255, 255, 255, 0.08);
 }
 
+.lp-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+/* Menú colapsable en móviles: abre abajo limpio, centrado y sin descuadre */
+@media (max-width: 991.98px) {
+    .lp-navbar .lp-brand {
+        order: 1;
+    }
+    .lp-navbar .navbar-toggler {
+        order: 2;
+    }
+    .lp-navbar .navbar-collapse {
+        order: 3;
+        flex-basis: 100%;
+        width: 100%;
+        margin-top: 1rem;
+        background: rgba(8, 14, 26, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        padding: 1.25rem 1rem;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(16, 185, 129, 0.18);
+        backdrop-filter: blur(20px);
+    }
+    .lp-navbar .navbar-nav {
+        text-align: center;
+        gap: 0.35rem;
+    }
+    .lp-navbar .navbar-nav .nav-link {
+        padding: 0.65rem 1rem !important;
+        font-size: 1.05rem;
+        border-radius: 10px;
+    }
+    .lp-navbar .navbar-nav .nav-link:hover,
+    .lp-navbar .navbar-nav .nav-link:active {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--lp-emerald-light) !important;
+    }
+    .lp-navbar .lp-nav-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .lp-navbar .lp-nav-actions .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem 1.25rem !important;
+        font-size: 1rem;
+        font-weight: 750;
+    }
+}
+
 /* ==========================================================================
    HERO SECTION - IMPACTANTE CON IMAGEN DE FONDO & STATS
    ========================================================================== */
@@ -190,7 +267,7 @@ body.landing-body {
     width: 100%;
 }
 
-/* Imagen de fondo de estadio con jugador en acción y corte diagonal oscuro (estilo deportivo) */
+/* Imagen de fondo de estadio con jugador en acción y corte deportivo iluminado */
 .lp-hero-bg-media {
     position: absolute;
     top: 0;
@@ -198,22 +275,23 @@ body.landing-body {
     right: 0;
     bottom: 0;
     background: 
-        linear-gradient(110deg, rgba(4, 8, 16, 0.42) 0%, rgba(4, 8, 16, 0.76) 42%, rgba(4, 8, 16, 0.96) 70%, #040810 100%),
-        radial-gradient(circle at 18% 38%, rgba(16, 185, 129, 0.28) 0%, transparent 55%),
-        url('../img/landing/tiro_potencia.jpg') left 5% center / 460px no-repeat,
+        radial-gradient(ellipse at 50% 28%, rgba(4, 8, 16, 0.45) 0%, rgba(4, 8, 16, 0.85) 70%, #040810 100%),
+        radial-gradient(circle at 14% 45%, rgba(16, 185, 129, 0.35) 0%, transparent 52%),
+        radial-gradient(circle at 86% 40%, rgba(14, 165, 233, 0.28) 0%, transparent 50%),
+        url('../img/landing/tiro_potencia.jpg') left 3% bottom / auto 85% no-repeat,
         url('../img/landing/hero_stadium.jpg') center / cover no-repeat;
-    opacity: 0.42;
-    filter: saturate(1.15) contrast(1.1);
+    opacity: 0.72;
+    filter: saturate(1.2) contrast(1.15);
     pointer-events: none;
-    z-index: -1;
+    z-index: 0;
 }
 
 @media (max-width: 991px) {
     .lp-hero-bg-media {
         background: 
-            linear-gradient(to bottom, rgba(4, 8, 16, 0.6) 0%, rgba(4, 8, 16, 0.92) 65%, #040810 100%),
+            linear-gradient(to bottom, rgba(4, 8, 16, 0.55) 0%, rgba(4, 8, 16, 0.9) 65%, #040810 100%),
             url('../img/landing/hero_stadium.jpg') center / cover no-repeat;
-        opacity: 0.35;
+        opacity: 0.5;
     }
 }
 
@@ -686,14 +764,15 @@ body.landing-body {
 
 /* Badges de Horarios 100% Legibles y sin difuminado */
 .badge-morning-solid {
-    background: rgba(217, 119, 6, 0.25) !important;
-    color: #fef08a !important; /* Amarillo brillante y nítido */
+    background: rgba(217, 119, 6, 0.28) !important;
+    color: #fbbf24 !important; /* Ámbar dorado nítido de alto contraste */
     border: 1px solid #f59e0b !important;
     font-weight: 850 !important;
     font-size: 0.82rem !important;
     padding: 0.4rem 0.85rem !important;
     border-radius: 8px !important;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
 }
 
 .badge-afternoon-solid {
@@ -705,17 +784,58 @@ body.landing-body {
     padding: 0.4rem 0.85rem !important;
     border-radius: 8px !important;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
 }
 
 .badge-weekend-solid {
-    background: rgba(2, 132, 199, 0.25) !important;
-    color: #7dd3fc !important; /* Azul cielo brillante */
-    border: 1px solid #0ea5e9 !important;
+    background: rgba(139, 92, 246, 0.25) !important;
+    color: #c084fc !important; /* Violeta/Púrpura brillante */
+    border: 1px solid #a855f7 !important;
     font-weight: 850 !important;
     font-size: 0.82rem !important;
     padding: 0.4rem 0.85rem !important;
     border-radius: 8px !important;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    box-shadow: 0 0 14px rgba(139, 92, 246, 0.25);
+}
+
+/* Botones de Horarios con identidad de turno */
+.btn-lp-schedule-morning {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.55);
+    color: #fbbf24 !important;
+    font-weight: 800;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-lp-schedule-morning:hover {
+    background: rgba(245, 158, 11, 0.25);
+    border-color: #f59e0b;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35);
+}
+
+.btn-lp-schedule-weekend {
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.55);
+    color: #c084fc !important;
+    font-weight: 800;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-lp-schedule-weekend:hover {
+    background: rgba(139, 92, 246, 0.25);
+    border-color: #a855f7;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.35);
 }
 
 .lp-schedule-title {
@@ -991,6 +1111,9 @@ body.landing-body {
     bottom: 25px !important;
     right: 25px !important;
     height: 54px !important;
+    width: auto !important;
+    min-width: 54px !important;
+    max-width: 320px !important;
     padding: 0 22px 0 16px !important;
     background: #25D366 !important;
     border-radius: 9999px !important;
@@ -1007,12 +1130,14 @@ body.landing-body {
     text-decoration: none !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    box-sizing: border-box !important;
 }
 
 .lp-floating-wa i {
     font-size: 1.7rem !important;
     line-height: 1 !important;
     display: inline-block !important;
+    flex-shrink: 0 !important;
 }
 
 .lp-floating-wa span {
@@ -1020,6 +1145,7 @@ body.landing-body {
     white-space: nowrap !important;
     line-height: 1 !important;
     letter-spacing: 0.01em !important;
+    flex-shrink: 0 !important;
 }
 
 .lp-floating-wa:hover {

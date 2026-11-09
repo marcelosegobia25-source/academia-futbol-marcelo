@@ -27,7 +27,7 @@
 
         <!-- ================= NAVBAR ================= -->
         <nav class="navbar navbar-expand-lg lp-navbar sticky-top" id="mainNavbar">
-            <div class="lp-container-fluid d-flex align-items-center justify-content-between">
+            <div class="lp-container-fluid lp-navbar-inner">
                 <a class="lp-brand" href="#inicio">
                     {% if marca.logo %}
                         <img src="{{ url_for('configuracion.logo') }}" alt="Logo {{ marca.nombre_academia }}" class="lp-brand-logo">
@@ -68,7 +68,7 @@
                         </li>
                     </ul>
 
-                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <div class="lp-nav-actions">
                         <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-lp-primary py-2 px-3">
                             <i class="bi bi-whatsapp"></i> Inscribirme
                         </a>
@@ -323,8 +323,8 @@
                                 <li><i class="bi bi-check-circle-fill text-amber-light"></i> Temperatura óptima y césped fresco</li>
                                 <li><i class="bi bi-check-circle-fill text-amber-light"></i> Psicomotricidad y técnica individual</li>
                             </ul>
-                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light w-100 py-2 rounded-3 fw-semibold">
-                                <i class="bi bi-whatsapp text-success me-1"></i> Consultar Turno Mañana
+                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-lp-schedule-morning w-100 py-2 rounded-3 fw-bold">
+                                <i class="bi bi-whatsapp text-warning me-1"></i> Consultar Turno Mañana
                             </a>
                         </div>
                     </div>
@@ -369,8 +369,8 @@
                                 <li><i class="bi bi-check-circle-fill text-purple-light"></i> Refuerzo y clínicas de perfeccionamiento</li>
                                 <li><i class="bi bi-check-circle-fill text-purple-light"></i> Ambiente familiar con graderías abiertas</li>
                             </ul>
-                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light w-100 py-2 rounded-3 fw-semibold">
-                                <i class="bi bi-whatsapp text-success me-1"></i> Consultar Sábados
+                            <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-lp-schedule-weekend w-100 py-2 rounded-3 fw-bold">
+                                <i class="bi bi-whatsapp text-purple-light me-1"></i> Consultar Sábados
                             </a>
                         </div>
                     </div>
