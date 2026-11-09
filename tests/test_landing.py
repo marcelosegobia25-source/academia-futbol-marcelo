@@ -9,6 +9,13 @@ def test_landing_page_publica(client):
     assert "Alumnos Formados" in contenido
     assert "Metodología" in contenido
     assert "whatsapp" in contenido.lower()
+    assert "lp-floating-wa" in contenido
+    assert "badge-morning-solid" in contenido
+    assert "badge-afternoon-solid" in contenido
+    assert "badge-weekend-solid" in contenido
+    assert "balon_cancha.jpg" in contenido
+    assert "tiro_potencia.jpg" in contenido
+    assert "lp-hero-bg-media" in contenido
 
 
 def test_landing_page_ruta_alternativa(client):

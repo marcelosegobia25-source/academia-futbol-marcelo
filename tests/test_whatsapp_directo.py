@@ -67,7 +67,7 @@ def test_configuracion_whatsapp_get_y_post(client, app):
 
 
 def test_modal_whatsapp_presente_en_base(client):
-    resp = client.get("/")
+    resp = client.get("/panel")
     assert resp.status_code == 200
     assert b"modalWhatsAppDirecto" in resp.data
     assert b"abrirModalWhatsAppAlumno" in resp.data
@@ -139,8 +139,8 @@ def test_difusion_masiva_whatsapp_presente_en_vistas(client, app):
         db.session.add(alumno)
         db.session.commit()
 
-    # Base contiene el modal de difusión masiva
-    resp_base = client.get("/")
+    # Base contiene el modal de difusión masiva (probado en panel que hereda de base.html)
+    resp_base = client.get("/panel")
     assert resp_base.status_code == 200
     assert b"modalDifusionWhatsApp" in resp_base.data
     assert b"abrirDifusionWhatsAppAlumnos" in resp_base.data
