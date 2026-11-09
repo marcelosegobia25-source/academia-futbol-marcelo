@@ -49,19 +49,19 @@ def ejecutar():
         categorias[nombre] = obtener(CategoriaContable, nombre=nombre, defaults={"tipo": tipo, "activo": True})
 
     proveedor_uniformes = obtener(Proveedor, nombre="[DEMO] Textiles Deportivos", defaults={
-        "tipo_persona": "Empresa", "documento": "NIT-DEMO-01", "telefono": "70000001",
+        "tipo_persona": "Empresa", "documento": "NIT-DEMO-01", "telefono": "71054702",
         "correo": "textiles@demo.local", "contacto": "Ana Demostración", "activo": True,
     })
     proveedor_cancha = obtener(Proveedor, nombre="[DEMO] Cancha Central", defaults={
-        "tipo_persona": "Empresa", "documento": "NIT-DEMO-02", "telefono": "70000002", "activo": True,
+        "tipo_persona": "Empresa", "documento": "NIT-DEMO-02", "telefono": "71054702", "activo": True,
     })
 
     entrenador = obtener(PersonalDeportivo, nombre="[DEMO] Carlos Entrenador", defaults={
-        "documento": "ENT-DEMO-01", "telefono": "71000001", "especialidad": "Fútbol formativo",
+        "documento": "ENT-DEMO-01", "telefono": "71054702", "especialidad": "Fútbol formativo",
         "tipo": "Entrenador", "fecha_ingreso": hoy - timedelta(days=180), "activo": True,
     })
     obtener(PersonalDeportivo, nombre="[DEMO] Laura Preparadora", defaults={
-        "documento": "ENT-DEMO-02", "telefono": "71000002", "especialidad": "Preparación física",
+        "documento": "ENT-DEMO-02", "telefono": "71054702", "especialidad": "Preparación física",
         "tipo": "Preparador físico", "fecha_ingreso": hoy - timedelta(days=90), "activo": True,
     })
     retirado = obtener(PersonalDeportivo, nombre="[DEMO] Profesor retirado", defaults={
@@ -69,7 +69,7 @@ def ejecutar():
         "fecha_salida": hoy - timedelta(days=30), "activo": False,
     })
 
-    tutor = obtener(Tutor, nombre="[DEMO] Familia Caso", defaults={"telefono": "72000001", "correo": "familia@demo.local"})
+    tutor = obtener(Tutor, nombre="[DEMO] Familia Caso", defaults={"telefono": "71054702", "correo": "familia@demo.local"})
     alumnos = []
     casos = [
         ("Activo", "Sin deuda", "DEMO-ALU-01", "Ninguna", 0),

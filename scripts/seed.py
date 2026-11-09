@@ -86,7 +86,7 @@ def cargar():
             ci=f"SEED-{indice + 1:04d}",
             direccion=f"Barrio Deportivo {1 + indice % 8}",
             tutor=f"Familia {APELLIDOS[indice % len(APELLIDOS)]}",
-            telefono=f"09{10000000 + indice:08d}",
+            telefono="71054702",
             estado="Activo" if indice % 9 else "Retirado",
             posicion=("POR", "DEF", "MED", "DEL")[indice % 4],
             pierna_habil=("Derecha", "Izquierda", "Ambas")[indice % 3],

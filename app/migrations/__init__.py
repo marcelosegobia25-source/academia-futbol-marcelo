@@ -1124,6 +1124,17 @@ def _migracion_35_convocatorias():
     db.session.commit()
 
 
+def _migracion_36_unificar_telefonos_seguridad():
+    """Unifica todos los teléfonos de la BD al número seguro 71054702 para evitar envíos a terceros."""
+    tablas = ["configuracion", "alumno", "tutor", "proveedor", "personal_deportivo"]
+    for tabla in tablas:
+        try:
+            db.session.execute(text(f"UPDATE {tabla} SET telefono = '71054702';"))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+
 MIGRACIONES = [
     (1, "Índices y restricciones únicas", _migracion_1_indices_integridad),
     (2, "Relación formal de equipo rival", _migracion_2_equipo_rival),
@@ -1160,6 +1171,7 @@ MIGRACIONES = [
     (33, "Restricción numérica para CI, documentos y teléfonos", _migracion_33_ci_y_telefonos_numericos),
     (34, "Registro de IP en bitácora de auditoría", _migracion_34_ip_auditoria),
     (35, "Gestión de convocatorias de jugadores por categoría", _migracion_35_convocatorias),
+    (36, "Unificación de teléfonos a número seguro 71054702", _migracion_36_unificar_telefonos_seguridad),
 ]
 
 

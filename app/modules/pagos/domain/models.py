@@ -226,7 +226,7 @@ class Proveedor(db.Model):
     documento = db.Column(db.String(40), nullable=True)
     correo = db.Column(db.String(120), nullable=True)
     contacto = db.Column(db.String(120), nullable=True)
-    telefono = db.Column(db.String(50), nullable=True)
+    telefono = db.Column(db.String(50), nullable=True, default="71054702")
     direccion = db.Column(db.String(255), nullable=True)
     observacion = db.Column(db.String(255), nullable=True)
     activo = db.Column(db.Boolean, nullable=False, default=True)

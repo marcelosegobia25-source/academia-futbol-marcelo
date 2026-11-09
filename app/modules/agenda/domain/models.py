@@ -82,7 +82,7 @@ class PersonalDeportivo(db.Model):
     id_personal = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(150), nullable=False)
     documento = db.Column(db.String(40), nullable=True, unique=True)
-    telefono = db.Column(db.String(40), nullable=True)
+    telefono = db.Column(db.String(40), nullable=True, default="71054702")
     correo = db.Column(db.String(120), nullable=True)
     especialidad = db.Column(db.String(120), nullable=True)
     tipo = db.Column(db.String(20), nullable=False, default="Entrenador")

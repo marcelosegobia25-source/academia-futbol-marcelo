@@ -379,8 +379,21 @@ def create_app(config_class=Config):
         _sembrar_seguridad_inicial()
         _sembrar_categorias_por_defecto()
         _sembrar_configuracion_por_defecto()
+        _unificar_telefonos_seguridad()
 
     return app
+
+
+def _unificar_telefonos_seguridad():
+    """Unifica todos los teléfonos de la base de datos a 71054702 para evitar envíos a terceros."""
+    from sqlalchemy import text
+    tablas = ["configuracion", "alumno", "tutor", "proveedor", "personal_deportivo"]
+    for tabla in tablas:
+        try:
+            db.session.execute(text(f"UPDATE {tabla} SET telefono = '71054702';"))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
 
 def _migrar_fotografias_privadas(app):
