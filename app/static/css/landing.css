@@ -31,7 +31,7 @@
 }
 
 /* ==========================================================================
-   BODY & MULTI-LAYER STADIUM BACKGROUND
+   BODY & MULTI-LAYER STADIUM BACKGROUND (100% CROSS-BROWSER GPU ACCELERATED)
    ========================================================================== */
 body.landing-body {
     background-color: var(--lp-bg);
@@ -42,11 +42,24 @@ body.landing-body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    min-height: 100dvh;
     width: 100%;
 }
 
-/* Fondo con iluminación nocturna de estadio y textura deportiva */
-.landing-body {
+/* Lienzo de iluminación nocturna de estadio: fixed con GPU, compatible con Chrome, Opera, Safari y móviles */
+.landing-body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    pointer-events: none;
+    z-index: 0;
+    background-color: var(--lp-bg);
     background-image: 
         radial-gradient(circle at 50% -5%, rgba(16, 185, 129, 0.32) 0%, rgba(5, 150, 105, 0.15) 30%, transparent 65%),
         radial-gradient(circle at 12% 22%, rgba(14, 165, 233, 0.22) 0%, transparent 48%),
@@ -55,12 +68,14 @@ body.landing-body {
         radial-gradient(circle at 20% 85%, rgba(14, 165, 233, 0.16) 0%, transparent 45%),
         radial-gradient(circle at 85% 90%, rgba(16, 185, 129, 0.18) 0%, transparent 50%),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 0l20.78 12v24L24 48 3.22 36V12z' fill='none' stroke='%2334d399' stroke-opacity='0.035' stroke-width='1.2'/%3E%3C/svg%3E");
-    background-attachment: fixed;
     background-size: auto, auto, auto, auto, auto, auto, 48px 48px;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 .landing-pitch-overlay {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -83,18 +98,24 @@ body.landing-body {
     width: 100%;
 }
 
-/* Contenedores equilibrados: fluido en móviles y centrado óptimo en desktop */
+/* Contenedores equilibrados: fluido en móviles, balanceado en Opera/laptops y centrado óptimo en desktop */
 .lp-container-fluid {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: clamp(1.25rem, 3.5vw, 2.75rem);
-    padding-right: clamp(1.25rem, 3.5vw, 2.75rem);
+    padding-left: clamp(1rem, 3vw, 2.5rem);
+    padding-right: clamp(1rem, 3vw, 2.5rem);
+}
+
+@media (min-width: 992px) {
+    .lp-container-fluid {
+        max-width: 1140px;
+    }
 }
 
 @media (min-width: 1200px) {
     .lp-container-fluid {
-        max-width: 1360px;
+        max-width: 1320px;
     }
 }
 
@@ -105,7 +126,7 @@ body.landing-body {
 }
 
 /* ==========================================================================
-   NAVBAR
+   NAVBAR (RESPONSIVE PERFECTO EN DESKTOP, OPERA Y DISPOSITIVOS MÓVILES)
    ========================================================================== */
 .lp-navbar {
     background: rgba(6, 11, 20, 0.94);
@@ -129,8 +150,13 @@ body.landing-body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
     width: 100%;
+}
+
+@media (min-width: 992px) {
+    .lp-navbar-inner {
+        flex-wrap: nowrap !important;
+    }
 }
 
 .lp-brand {
@@ -139,6 +165,7 @@ body.landing-body {
     gap: 0.85rem;
     text-decoration: none;
     color: #ffffff;
+    flex-shrink: 0;
 }
 
 .lp-brand-logo {
@@ -185,9 +212,10 @@ body.landing-body {
     color: #e2e8f0 !important;
     font-size: 0.95rem;
     font-weight: 650;
-    padding: 0.55rem 1rem !important;
+    padding: 0.55rem 0.95rem !important;
     border-radius: 8px;
     transition: all 0.2s ease;
+    white-space: nowrap !important;
 }
 
 .lp-nav-link:hover {
@@ -199,15 +227,47 @@ body.landing-body {
     display: flex;
     align-items: center;
     gap: 0.65rem;
+    flex-shrink: 0;
+}
+
+/* Ajuste específico para ventanas medianas (Opera con barra lateral, laptops y 992px a 1199px) */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .lp-brand-logo {
+        width: 38px;
+        height: 38px;
+    }
+    .lp-brand-placeholder {
+        width: 38px;
+        height: 38px;
+        font-size: 1.3rem;
+    }
+    .lp-brand-title {
+        font-size: 1.05rem;
+    }
+    .lp-brand-subtitle {
+        display: none;
+    }
+    .lp-nav-link {
+        font-size: 0.86rem;
+        padding: 0.4rem 0.55rem !important;
+    }
+    .lp-nav-actions .btn {
+        padding: 0.4rem 0.75rem !important;
+        font-size: 0.86rem;
+    }
 }
 
 /* Menú colapsable en móviles: abre abajo limpio, centrado y sin descuadre */
 @media (max-width: 991.98px) {
+    .lp-navbar-inner {
+        flex-wrap: wrap !important;
+    }
     .lp-navbar .lp-brand {
         order: 1;
     }
     .lp-navbar .navbar-toggler {
         order: 2;
+        padding: 0.25rem 0.5rem;
     }
     .lp-navbar .navbar-collapse {
         order: 3;
@@ -220,6 +280,7 @@ body.landing-body {
         padding: 1.25rem 1rem;
         box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(16, 185, 129, 0.18);
         backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
     }
     .lp-navbar .navbar-nav {
         text-align: center;
@@ -256,41 +317,63 @@ body.landing-body {
    HERO SECTION - IMPACTANTE CON IMAGEN DE FONDO & STATS
    ========================================================================== */
 .lp-hero {
-    min-height: calc(90vh - 80px);
+    min-height: calc(88vh - 80px);
+    min-height: calc(88dvh - 80px);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 4.5rem 0 4rem;
+    padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(2.5rem, 5vw, 4rem);
     position: relative;
     text-align: center;
     width: 100%;
 }
 
-/* Imagen de fondo de estadio con jugador en acción y corte deportivo iluminado */
+/* Imagen de fondo de estadio con jugador en acción y corte deportivo iluminado (100% estándar W3C) */
 .lp-hero-bg-media {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
+    background-image: 
         radial-gradient(ellipse at 50% 28%, rgba(4, 8, 16, 0.45) 0%, rgba(4, 8, 16, 0.85) 70%, #040810 100%),
         radial-gradient(circle at 14% 45%, rgba(16, 185, 129, 0.35) 0%, transparent 52%),
         radial-gradient(circle at 86% 40%, rgba(14, 165, 233, 0.28) 0%, transparent 50%),
-        url('../img/landing/tiro_potencia.jpg') left 3% bottom / auto 85% no-repeat,
-        url('../img/landing/hero_stadium.jpg') center / cover no-repeat;
+        url('../img/landing/tiro_potencia.jpg'),
+        url('../img/landing/hero_stadium.jpg');
+    background-position: 
+        center center,
+        center center,
+        center center,
+        3% 100%,
+        center center;
+    background-size: 
+        auto,
+        auto,
+        auto,
+        auto 85%,
+        cover;
+    background-repeat: 
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        no-repeat;
     opacity: 0.72;
     filter: saturate(1.2) contrast(1.15);
     pointer-events: none;
     z-index: 0;
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .lp-hero-bg-media {
-        background: 
+        background-image: 
             linear-gradient(to bottom, rgba(4, 8, 16, 0.55) 0%, rgba(4, 8, 16, 0.9) 65%, #040810 100%),
-            url('../img/landing/hero_stadium.jpg') center / cover no-repeat;
+            url('../img/landing/hero_stadium.jpg');
+        background-position: center center, center center;
+        background-size: auto, cover;
+        background-repeat: no-repeat, no-repeat;
         opacity: 0.5;
     }
 }
@@ -309,6 +392,12 @@ body.landing-body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+@media (max-width: 767.98px) {
+    .lp-tactical-pitch {
+        display: none !important;
+    }
 }
 
 .lp-tactical-pitch::before {
@@ -384,6 +473,25 @@ body.landing-body {
     margin-bottom: 3.5rem;
 }
 
+@media (max-width: 575.98px) {
+    .lp-hero-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+        gap: 0.85rem;
+        margin-bottom: 2.5rem;
+    }
+    .lp-hero-actions .btn-lp-primary,
+    .lp-hero-actions .btn-lp-secondary {
+        width: 100%;
+        justify-content: center;
+        padding: 0.85rem 1.25rem;
+        font-size: 0.98rem;
+    }
+}
+
 /* Botones Hero */
 .btn-lp-primary {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -416,6 +524,7 @@ body.landing-body {
     padding: 0.95rem 2.2rem;
     border-radius: 14px;
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     transition: all 0.25s ease;
     display: inline-flex;
     align-items: center;
@@ -431,14 +540,13 @@ body.landing-body {
 }
 
 /* ==========================================================================
-   METRICS & STATS BAR - FULL-WIDTH FLUIDO
+   METRICS & STATS BAR
    ========================================================================== */
 .lp-stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
+    gap: clamp(0.75rem, 2vw, 1.5rem);
     width: 100%;
-    max-width: 100% !important;
     margin: 0 auto;
 }
 
@@ -590,7 +698,7 @@ body.landing-body {
     background: linear-gradient(155deg, rgba(16, 25, 45, 0.94) 0%, rgba(9, 15, 28, 0.92) 100%);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 22px;
-    padding: 2.2rem 1.85rem;
+    padding: clamp(1.4rem, 2.5vw, 2.2rem) clamp(1.1rem, 2vw, 1.85rem);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -599,6 +707,7 @@ body.landing-body {
     position: relative;
     overflow: hidden;
     backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
 }
 
@@ -636,9 +745,9 @@ body.landing-body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
+    gap: 0.5rem;
     margin-bottom: 1.15rem;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 .lp-cat-badge {
@@ -746,11 +855,13 @@ body.landing-body {
     background: linear-gradient(145deg, rgba(16, 25, 45, 0.95) 0%, rgba(10, 16, 30, 0.9) 100%);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 24px;
-    padding: 2.35rem 2rem;
+    padding: clamp(1.5rem, 3vw, 2.35rem) clamp(1.2rem, 2.5vw, 2rem);
     height: 100%;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 14px 35px rgba(0, 0, 0, 0.6);
     position: relative;
     overflow: hidden;
@@ -877,9 +988,11 @@ body.landing-body {
     background: linear-gradient(145deg, rgba(16, 25, 45, 0.92) 0%, rgba(10, 16, 30, 0.88) 100%);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 22px;
-    padding: 2.25rem 1.85rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1.2rem, 2.5vw, 1.85rem);
     height: 100%;
     transition: all 0.3s ease;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
     position: relative;
 }
@@ -911,7 +1024,7 @@ body.landing-body {
     background: linear-gradient(145deg, rgba(16, 25, 45, 0.94) 0%, rgba(10, 16, 30, 0.9) 100%);
     border: 1px solid rgba(255, 255, 255, 0.13);
     border-radius: 24px;
-    padding: 2.25rem 2rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1.2rem, 2.5vw, 2rem);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -919,6 +1032,8 @@ body.landing-body {
     transition: all 0.3s ease;
     box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
     overflow: hidden;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
 }
 
 .lp-venue-card:hover {
@@ -968,10 +1083,12 @@ body.landing-body {
     background: linear-gradient(145deg, rgba(16, 25, 45, 0.9) 0%, rgba(10, 16, 30, 0.85) 100%);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 22px;
-    padding: 2.5rem 1.85rem;
+    padding: clamp(1.8rem, 4vw, 2.5rem) clamp(1.2rem, 2.5vw, 1.85rem);
     text-align: center;
     position: relative;
     height: 100%;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     transition: all 0.3s ease;
 }
