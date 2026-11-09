@@ -83,14 +83,14 @@ body.landing-body {
     width: 100%;
 }
 
-/* Contenedores de ancho completo que ocupan el espacio en monitores */
+/* Contenedores verdaderamente expansivos (Full-width fluido en cualquier monitor) */
 .lp-container-fluid {
-    width: 100%;
-    max-width: 1560px;
+    width: 100% !important;
+    max-width: 100% !important;
     margin-left: auto;
     margin-right: auto;
-    padding-left: clamp(1rem, 3.5vw, 3.5rem);
-    padding-right: clamp(1rem, 3.5vw, 3.5rem);
+    padding-left: clamp(1.25rem, 3.8vw, 4.5rem) !important;
+    padding-right: clamp(1.25rem, 3.8vw, 4.5rem) !important;
 }
 
 /* ==========================================================================
@@ -353,14 +353,14 @@ body.landing-body {
 }
 
 /* ==========================================================================
-   METRICS & STATS BAR - FULL-WIDTH
+   METRICS & STATS BAR - FULL-WIDTH FLUIDO
    ========================================================================== */
 .lp-stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.15rem;
+    gap: 1.25rem;
     width: 100%;
-    max-width: 1380px;
+    max-width: 100% !important;
     margin: 0 auto;
 }
 
@@ -506,11 +506,11 @@ body.landing-body {
 }
 
 /* ==========================================================================
-   TARJETAS DE CATEGORÍA CON IMAGEN REAL DE FÚTBOL
+   TARJETAS DE CATEGORÍA - ALTA ESTÉTICA Y CERO SUPERPOSICIÓN
    ========================================================================== */
 .lp-cat-card {
-    background: linear-gradient(145deg, rgba(16, 25, 45, 0.94) 0%, rgba(10, 16, 30, 0.9) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.13);
+    background: linear-gradient(155deg, rgba(16, 25, 45, 0.94) 0%, rgba(9, 15, 28, 0.92) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 22px;
     padding: 2.2rem 1.85rem;
     height: 100%;
@@ -524,23 +524,71 @@ body.landing-body {
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
 }
 
+/* Barra superior con gradiente por categoría */
+.lp-cat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+.cat-border-cyan::before { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+.cat-border-emerald::before { background: linear-gradient(90deg, #10b981, #34d399); }
+.cat-border-purple::before { background: linear-gradient(90deg, #7c3aed, #c084fc); }
+.cat-border-amber::before { background: linear-gradient(90deg, #d97706, #fef08a); }
+
+/* Resplandor radial de acento sutil en esquina superior */
+.cat-border-cyan { background-image: radial-gradient(circle at 100% 0%, rgba(14, 165, 233, 0.1) 0%, transparent 60%); }
+.cat-border-emerald { background-image: radial-gradient(circle at 100% 0%, rgba(16, 185, 129, 0.1) 0%, transparent 60%); }
+.cat-border-purple { background-image: radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.1) 0%, transparent 60%); }
+.cat-border-amber { background-image: radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.1) 0%, transparent 60%); }
+
 .lp-cat-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 22px 45px rgba(0, 0, 0, 0.7), 0 0 30px rgba(16, 185, 129, 0.2);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Badges con alto contraste */
+/* Fila superior: badge de etapa a la izquierda y rango de edad a la derecha sin colisión */
+.lp-cat-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+    flex-wrap: nowrap;
+}
+
 .lp-cat-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    padding: 0.4rem 0.95rem;
-    border-radius: 10px;
+    padding: 0.38rem 0.85rem;
+    border-radius: 9999px;
+    font-weight: 850;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap !important;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.lp-cat-age-pill {
+    font-size: 0.84rem;
     font-weight: 800;
-    font-size: 0.82rem;
-    letter-spacing: 0.03em;
-    margin-bottom: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    white-space: nowrap !important;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
 }
 
 .badge-cyan {
@@ -568,22 +616,24 @@ body.landing-body {
 }
 
 .lp-cat-name {
-    font-size: 1.55rem;
+    font-size: 1.65rem;
     font-weight: 850;
     color: #ffffff;
     margin-bottom: 0.25rem;
+    letter-spacing: -0.01em;
 }
 
-.lp-cat-age {
-    font-size: 0.96rem;
+.lp-cat-sub {
+    font-size: 0.92rem;
     font-weight: 750;
     margin-bottom: 0.85rem;
+    letter-spacing: 0.01em;
 }
 
 .lp-cat-desc {
-    font-size: 0.92rem;
+    font-size: 0.93rem;
     color: #cbd5e1;
-    line-height: 1.6;
+    line-height: 1.62;
     margin-bottom: 1.35rem;
 }
 
@@ -772,8 +822,23 @@ body.landing-body {
     background: rgba(14, 165, 233, 0.22);
     color: #38bdf8;
     border: 1px solid rgba(14, 165, 233, 0.45);
-    display: inline-block;
-    margin-bottom: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.lp-venue-status-pill {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #6ee7b7;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    padding: 0.35rem 0.8rem;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
 }
 
 /* ==========================================================================

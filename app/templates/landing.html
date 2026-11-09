@@ -183,48 +183,54 @@
                                 {% set badge_cls = 'badge-cyan' %}
                                 {% set icon_cls = 'bi-stars' %}
                                 {% set color_txt = 'text-cyan-light' %}
-                                {% set etapa = 'Iniciación & Psicomotricidad' %}
+                                {% set etapa_corta = 'Iniciación' %}
+                                {% set etapa_desc = 'Iniciación deportiva & psicomotricidad' %}
                             {% elif edad_m <= 12 %}
                                 {% set border_cls = 'cat-border-emerald' %}
                                 {% set badge_cls = 'badge-emerald' %}
                                 {% set icon_cls = 'bi-dribbble' %}
                                 {% set color_txt = 'text-emerald-light' %}
-                                {% set etapa = 'Fundamentos & Técnica' %}
+                                {% set etapa_corta = 'Fundamentos' %}
+                                {% set etapa_desc = 'Fundamentos técnicos & control de balón' %}
                             {% elif edad_m <= 16 %}
                                 {% set border_cls = 'cat-border-purple' %}
                                 {% set badge_cls = 'badge-purple' %}
                                 {% set icon_cls = 'bi-lightning-charge-fill' %}
                                 {% set color_txt = 'text-purple-light' %}
-                                {% set etapa = 'Desarrollo Táctico' %}
+                                {% set etapa_corta = 'Táctica' %}
+                                {% set etapa_desc = 'Desarrollo táctico & fútbol reducido' %}
                             {% else %}
                                 {% set border_cls = 'cat-border-amber' %}
                                 {% set badge_cls = 'badge-amber' %}
                                 {% set icon_cls = 'bi-trophy-fill' %}
                                 {% set color_txt = 'text-amber-light' %}
-                                {% set etapa = 'Alta Competencia & Liga' %}
+                                {% set etapa_corta = 'Competencia' %}
+                                {% set etapa_desc = 'Alta competencia & torneos oficiales' %}
                             {% endif %}
 
                             <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
                                 <div class="lp-cat-card {{ border_cls }}">
                                     <div>
-                                        <div class="d-flex align-items-center justify-content-between mb-2">
-                                            <div class="lp-cat-badge {{ badge_cls }} mb-0">
+                                        <div class="lp-cat-top-bar">
+                                            <span class="lp-cat-badge {{ badge_cls }}">
                                                 <i class="bi {{ icon_cls }}"></i>
-                                                <span>{{ etapa }}</span>
-                                            </div>
+                                                <span>{{ etapa_corta }}</span>
+                                            </span>
                                             {% if cat.edad_min and cat.edad_max %}
-                                                <small class="{{ color_txt }} fw-bold font-monospace">{{ cat.edad_min }}-{{ cat.edad_max }} años</small>
+                                                <span class="lp-cat-age-pill {{ color_txt }}">
+                                                    {{ cat.edad_min }} a {{ cat.edad_max }} años
+                                                </span>
+                                            {% else %}
+                                                <span class="lp-cat-age-pill {{ color_txt }}">
+                                                    Juvenil / Libre
+                                                </span>
                                             {% endif %}
                                         </div>
 
                                         <h3 class="lp-cat-name mt-2">{{ cat.nombre_mostrado }}</h3>
 
-                                        <div class="lp-cat-age {{ color_txt }}">
-                                            {% if cat.edad_min and cat.edad_max %}
-                                                Rango Oficial: {{ cat.edad_min }} a {{ cat.edad_max }} años
-                                            {% else %}
-                                                Plantel Formativo &amp; Competitivo
-                                            {% endif %}
+                                        <div class="lp-cat-sub {{ color_txt }}">
+                                            <i class="bi bi-shield-check me-1"></i>{{ etapa_desc }}
                                         </div>
 
                                         <p class="lp-cat-desc">
@@ -242,7 +248,7 @@
 
                                     <div>
                                         <a href="https://wa.me/{{ tel_destino }}?text={{ wa_msg_cat }}" target="_blank" rel="noopener noreferrer" class="lp-cat-btn">
-                                            <i class="bi bi-whatsapp text-success"></i>
+                                            <i class="bi bi-whatsapp text-success me-1"></i>
                                             <span>Consultar cupos para {{ cat.nombre_mostrado }}</span>
                                         </a>
                                     </div>
@@ -252,22 +258,34 @@
                     {% else %}
                         <div class="col-md-4">
                             <div class="lp-cat-card cat-border-cyan">
-                                <div class="lp-cat-badge badge-cyan"><i class="bi bi-star"></i> 5 a 8 años</div>
-                                <h3 class="lp-cat-name">Iniciación (Sub-7 &amp; Sub-8)</h3>
+                                <div class="lp-cat-top-bar">
+                                    <span class="lp-cat-badge badge-cyan"><i class="bi bi-stars"></i> Iniciación</span>
+                                    <span class="lp-cat-age-pill text-cyan-light">5 a 8 años</span>
+                                </div>
+                                <h3 class="lp-cat-name mt-2">Iniciación (Sub-7 &amp; Sub-8)</h3>
+                                <div class="lp-cat-sub text-cyan-light"><i class="bi bi-shield-check me-1"></i>Iniciación deportiva</div>
                                 <p class="lp-cat-desc">Psicomotricidad, diversión y primeros toques con el balón.</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="lp-cat-card cat-border-emerald">
-                                <div class="lp-cat-badge badge-emerald"><i class="bi bi-dribbble"></i> 9 a 12 años</div>
-                                <h3 class="lp-cat-name">Intermedia (Sub-10 &amp; Sub-12)</h3>
-                                <p class="lp-cat-desc">Técnica individual, pases, control y comprensión de juego.</p>
+                                <div class="lp-cat-top-bar">
+                                    <span class="lp-cat-badge badge-emerald"><i class="bi bi-dribbble"></i> Fundamentos</span>
+                                    <span class="lp-cat-age-pill text-emerald-light">9 a 12 años</span>
+                                </div>
+                                <h3 class="lp-cat-name mt-2">Intermedia (Sub-10 &amp; Sub-12)</h3>
+                                <div class="lp-cat-sub text-emerald-light"><i class="bi bi-shield-check me-1"></i>Técnica individual</div>
+                                <p class="lp-cat-desc">Pases, control orientado, conducción y comprensión de juego.</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="lp-cat-card cat-border-amber">
-                                <div class="lp-cat-badge badge-amber"><i class="bi bi-trophy"></i> 13 a 17 años</div>
-                                <h3 class="lp-cat-name">Competitiva (Sub-14 a Sub-17)</h3>
+                                <div class="lp-cat-top-bar">
+                                    <span class="lp-cat-badge badge-amber"><i class="bi bi-trophy-fill"></i> Competencia</span>
+                                    <span class="lp-cat-age-pill text-amber-light">13 a 17 años</span>
+                                </div>
+                                <h3 class="lp-cat-name mt-2">Competitiva (Sub-14 a Sub-17)</h3>
+                                <div class="lp-cat-sub text-amber-light"><i class="bi bi-shield-check me-1"></i>Táctica avanzada</div>
                                 <p class="lp-cat-desc">Táctica de equipo, preparación física y torneos de liga.</p>
                             </div>
                         </div>
@@ -440,15 +458,13 @@
                             <div class="col-md-6 col-lg-4">
                                 <div class="lp-venue-card">
                                     <div>
-                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
                                             <span class="lp-venue-badge">
                                                 <i class="bi bi-flag-fill me-1"></i> {{ l.tipo or 'Cancha Deportiva' }}
                                             </span>
-                                            {% if l.superficie %}
-                                                <span class="badge bg-success-subtle text-emerald-light border border-success border-opacity-30 small">
-                                                    <i class="bi bi-check2 me-1"></i>{{ l.superficie }}
-                                                </span>
-                                            {% endif %}
+                                            <span class="lp-venue-status-pill">
+                                                <i class="bi bi-shield-check text-emerald-light me-1"></i> Sede Oficial
+                                            </span>
                                         </div>
                                         <h3 class="lp-venue-title">{{ l.nombre }}</h3>
                                         <p class="text-secondary small mb-3">
@@ -461,11 +477,9 @@
                                             <a href="{{ l.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-info flex-grow-1">
                                                 <i class="bi bi-map-fill me-1"></i> Ver en Maps
                                             </a>
-                                        {% else %}
-                                            <span class="text-muted small"><i class="bi bi-shield-check text-success me-1"></i> Sede Oficial Habilitada</span>
                                         {% endif %}
-                                        <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success">
-                                            <i class="bi bi-whatsapp me-1"></i> Visitar
+                                        <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success flex-grow-1">
+                                            <i class="bi bi-whatsapp me-1"></i> Consultar Ubicación
                                         </a>
                                     </div>
                                 </div>
@@ -475,14 +489,17 @@
                         <div class="col-md-6 col-lg-4">
                             <div class="lp-venue-card">
                                 <div>
-                                    <span class="lp-venue-badge">Cancha Principal</span>
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <span class="lp-venue-badge">Cancha Principal</span>
+                                        <span class="lp-venue-status-pill"><i class="bi bi-shield-check text-emerald-light me-1"></i> Sede Oficial</span>
+                                    </div>
                                     <h3 class="lp-venue-title">Complejo Deportivo Central</h3>
                                     <p class="text-secondary small mb-3">
                                         <i class="bi bi-geo-alt text-danger me-1"></i> Césped sintético de alta densidad con iluminación nocturna.
                                     </p>
                                 </div>
                                 <a href="{{ wa_url_general }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success">
-                                    <i class="bi bi-whatsapp"></i> Consultar Ubicación
+                                    <i class="bi bi-whatsapp me-1"></i> Consultar Ubicación
                                 </a>
                             </div>
                         </div>
