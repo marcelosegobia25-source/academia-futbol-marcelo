@@ -112,11 +112,14 @@ def general():
 
     activos = [alumno for alumno in alumnos if alumno.estado == "Activo"]
     retirados = [alumno for alumno in alumnos if alumno.estado == "Retirado"]
-    estados_mensualidad = Counter(
-        ultimo_pago[alumno.id_alumno].estado_cobertura
-        if alumno.id_alumno in ultimo_pago else "Sin pagos"
-        for alumno in activos
-    )
+    estados_mensualidad = Counter()
+    for alumno in activos:
+        if alumno.beca_vigente == "Completa":
+            estados_mensualidad["Vigente"] += 1
+        elif alumno.id_alumno in ultimo_pago:
+            estados_mensualidad[ultimo_pago[alumno.id_alumno].estado_cobertura] += 1
+        else:
+            estados_mensualidad["Sin pagos"] += 1
 
     pagos_mes, recaudacion_mes, recaudacion_por_modo = (
         _calcular_recaudacion_mes(hoy)
@@ -147,8 +150,9 @@ def general():
             "deben": sum(
                 1 for alumno in integrantes.values()
                 if (
-                    alumno.id_alumno not in ultimo_pago
-                    or ultimo_pago[alumno.id_alumno].estado_cobertura == "Vencido"
+                    alumno.beca_vigente != "Completa"
+                    and alumno.id_alumno in ultimo_pago
+                    and ultimo_pago[alumno.id_alumno].estado_cobertura == "Vencido"
                 )
             ),
         })
@@ -199,7 +203,7 @@ def general():
         "proximos": estados_mensualidad["Próximo a vencer"],
         "vencidos": estados_mensualidad["Vencido"],
         "sin_pagos": estados_mensualidad["Sin pagos"],
-        "deben": estados_mensualidad["Vencido"] + estados_mensualidad["Sin pagos"],
+        "deben": estados_mensualidad["Vencido"],
         "categorias": len(categorias),
         "equipos": len(equipos),
         "pagos_mes": len(pagos_mes),

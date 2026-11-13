@@ -204,3 +204,59 @@ def test_boton_descarga_respaldo_completo_con_base_fotos_y_manifiesto(
         manifiesto = json.loads(paquete.read("manifiesto.json"))
         for nombre, esperado in manifiesto["sha256"].items():
             assert hashlib.sha256(paquete.read(nombre)).hexdigest() == esperado
+
+
+def test_deudores_solo_cuenta_vencidos_y_excluye_beca_completa_y_sin_pagos(client, app):
+    with app.app_context():
+        # Limpiar alumnos para prueba exacta
+        Pago.query.delete()
+        Alumno.query.delete()
+        db.session.commit()
+
+        categoria = Categoria.query.first()
+        equipo = Equipo.query.first() or Equipo(nombre="Equipo Prueba", categoria=categoria)
+
+        # 1. Alumno con Beca Completa (debe ser Vigente, no deuda, no sin pagos)
+        alumno_becado = Alumno(
+            nombre="Carlos", apellido="Becado", fecha_nacimiento=date(2013, 1, 1),
+            estado="Activo", beca="Completa", categoria=categoria, equipos=[equipo],
+        )
+        # 2. Alumno Sin Pagos (debe figurar como Sin pagos, pero NO como deudor)
+        alumno_sin_pagos = Alumno(
+            nombre="Pedro", apellido="Nuevo", fecha_nacimiento=date(2013, 2, 2),
+            estado="Activo", beca="Ninguna", categoria=categoria, equipos=[equipo],
+        )
+        # 3. Alumno con cuota vencida (único deudor real)
+        alumno_vencido = Alumno(
+            nombre="Juan", apellido="Deudor", fecha_nacimiento=date(2013, 3, 3),
+            estado="Activo", beca="Ninguna", categoria=categoria, equipos=[equipo],
+        )
+        db.session.add_all([alumno_becado, alumno_sin_pagos, alumno_vencido])
+        db.session.flush()
+
+        # Pago vencido para alumno_vencido
+        db.session.add(Pago(
+            alumno=alumno_vencido,
+            fecha_pago=date.today() - timedelta(days=60),
+            fecha_vencimiento=date.today() - timedelta(days=15),
+            mes_pagado=(date.today() - timedelta(days=60)).strftime("%Y-%m"),
+            modo_pago="Efectivo",
+            monto=150,
+        ))
+        db.session.commit()
+
+        # Validar propiedades de modelo
+        assert alumno_becado.estado_mensualidad == "Vigente"
+        assert alumno_sin_pagos.estado_mensualidad == "Sin pagos"
+        assert alumno_vencido.estado_mensualidad == "Vencido"
+
+    respuesta = client.get("/informacion/")
+    assert respuesta.status_code == 200
+
+    # Validar que con el filtro "Con deuda" solo aparezca 1 alumno (el deudor)
+    resp_deudores = client.get("/alumnos/?estado=Activo&estado_mensualidad=Con%20deuda")
+    assert resp_deudores.status_code == 200
+    assert b"Juan Deudor" in resp_deudores.data
+    assert b"Carlos Becado" not in resp_deudores.data
+    assert b"Pedro Nuevo" not in resp_deudores.data
+

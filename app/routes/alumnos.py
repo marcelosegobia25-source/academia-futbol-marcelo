@@ -317,7 +317,7 @@ def _filtrar_alumnos(args, paginar=False):
             alumnos = [
                 a for a in alumnos
                 if a.estado == "Activo"
-                and a.estado_mensualidad in {"Vencido", "Sin pagos"}
+                and a.estado_mensualidad == "Vencido"
             ]
         else:
             alumnos = [a for a in alumnos if a.estado_mensualidad == estado_mensualidad]

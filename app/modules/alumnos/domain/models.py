@@ -138,6 +138,8 @@ class Alumno(db.Model):
     def estado_mensualidad(self):
         if self.estado == "Retirado":
             return "Retirado"
+        if self.beca_vigente == "Completa":
+            return "Vigente"
         ultimo = self.ultimo_pago
         if ultimo is None:
             return "Sin pagos"
