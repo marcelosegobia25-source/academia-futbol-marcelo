@@ -85,41 +85,18 @@ def general():
 
     alumnos = (
         Alumno.query
-        .options(selectinload(Alumno.equipos), selectinload(Alumno.categoria))
+        .options(
+            selectinload(Alumno.equipos),
+            selectinload(Alumno.categoria),
+            selectinload(Alumno.pagos).joinedload(Pago.aplicacion).joinedload(AplicacionPago.obligacion),
+        )
         .order_by(Alumno.apellido, Alumno.nombre)
         .all()
     )
-    ids_alumnos = [alumno.id_alumno for alumno in alumnos]
-    pagos = []
-    if ids_alumnos:
-        pagos = (
-            Pago.query
-            .filter(Pago.eliminado_en.is_(None), Pago.id_alumno.in_(ids_alumnos))
-            .order_by(Pago.fecha_vencimiento.desc(), Pago.fecha_pago.desc(), Pago.id_pago.desc())
-            .all()
-        )
-
-    reactivacion_por_alumno = {
-        alumno.id_alumno: alumno.fecha_ultima_reactivacion.strftime("%Y-%m")
-        for alumno in alumnos if alumno.fecha_ultima_reactivacion
-    }
-    ultimo_pago = {}
-    for pago in pagos:
-        mes_inicio = reactivacion_por_alumno.get(pago.id_alumno)
-        if mes_inicio and pago.mes_pagado < mes_inicio:
-            continue
-        ultimo_pago.setdefault(pago.id_alumno, pago)
 
     activos = [alumno for alumno in alumnos if alumno.estado == "Activo"]
     retirados = [alumno for alumno in alumnos if alumno.estado == "Retirado"]
-    estados_mensualidad = Counter()
-    for alumno in activos:
-        if alumno.beca_vigente == "Completa":
-            estados_mensualidad["Vigente"] += 1
-        elif alumno.id_alumno in ultimo_pago:
-            estados_mensualidad[ultimo_pago[alumno.id_alumno].estado_cobertura] += 1
-        else:
-            estados_mensualidad["Sin pagos"] += 1
+    estados_mensualidad = Counter(alumno.estado_mensualidad for alumno in activos)
 
     pagos_mes, recaudacion_mes, recaudacion_por_modo = (
         _calcular_recaudacion_mes(hoy)
@@ -149,11 +126,7 @@ def general():
             "total": len(integrantes),
             "deben": sum(
                 1 for alumno in integrantes.values()
-                if (
-                    alumno.beca_vigente != "Completa"
-                    and alumno.id_alumno in ultimo_pago
-                    and ultimo_pago[alumno.id_alumno].estado_cobertura == "Vencido"
-                )
+                if alumno.estado_mensualidad == "Vencido"
             ),
         })
 
