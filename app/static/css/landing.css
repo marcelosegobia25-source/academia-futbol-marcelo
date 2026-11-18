@@ -327,9 +327,16 @@ body.landing-body {
     position: relative;
     text-align: center;
     width: 100%;
+    overflow: hidden;
 }
 
-/* Imagen de fondo de estadio con jugador en acción y corte deportivo iluminado (100% estándar W3C) */
+/* El contenido del Hero (títulos, botones, estadísticas) siempre al frente */
+.lp-hero .lp-container-fluid {
+    position: relative;
+    z-index: 10;
+}
+
+/* Fondo inmersivo de estadio con iluminación profesional y cero cortes de imagen */
 .lp-hero-bg-media {
     position: absolute;
     top: 0;
@@ -337,33 +344,22 @@ body.landing-body {
     right: 0;
     bottom: 0;
     background-image: 
-        radial-gradient(ellipse at 50% 28%, rgba(4, 8, 16, 0.45) 0%, rgba(4, 8, 16, 0.85) 70%, #040810 100%),
-        radial-gradient(circle at 14% 45%, rgba(16, 185, 129, 0.35) 0%, transparent 52%),
-        radial-gradient(circle at 86% 40%, rgba(14, 165, 233, 0.28) 0%, transparent 50%),
-        url('../img/landing/tiro_potencia.jpg'),
+        radial-gradient(ellipse at 50% 32%, rgba(4, 8, 16, 0.4) 0%, rgba(4, 8, 16, 0.88) 72%, #040810 100%),
+        radial-gradient(circle at 18% 45%, rgba(16, 185, 129, 0.28) 0%, transparent 55%),
+        radial-gradient(circle at 82% 40%, rgba(14, 165, 233, 0.22) 0%, transparent 55%),
         url('../img/landing/hero_stadium.jpg');
-    background-position: 
-        center center,
-        center center,
-        center center,
-        3% 100%,
-        center center;
-    background-size: 
-        auto,
-        auto,
-        auto,
-        auto 85%,
-        cover;
-    background-repeat: 
-        no-repeat,
-        no-repeat,
-        no-repeat,
-        no-repeat,
-        no-repeat;
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
     opacity: 0.72;
     filter: saturate(1.2) contrast(1.15);
     pointer-events: none;
     z-index: 0;
+}
+
+/* Recursos temáticos de fútbol: tiro_potencia.jpg, hero_stadium.jpg, gol_red.jpg */
+.lp-theme-asset-tiro {
+    background-image: url('../img/landing/tiro_potencia.jpg');
 }
 
 @media (max-width: 991.98px) {
@@ -371,10 +367,10 @@ body.landing-body {
         background-image: 
             linear-gradient(to bottom, rgba(4, 8, 16, 0.55) 0%, rgba(4, 8, 16, 0.9) 65%, #040810 100%),
             url('../img/landing/hero_stadium.jpg');
-        background-position: center center, center center;
-        background-size: auto, cover;
-        background-repeat: no-repeat, no-repeat;
-        opacity: 0.5;
+        background-position: center center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        opacity: 0.55;
     }
 }
 
@@ -438,21 +434,22 @@ body.landing-body {
 .lp-hero-title {
     font-size: clamp(2.4rem, 5.5vw, 4.5rem);
     font-weight: 900;
-    line-height: 1.12;
+    line-height: 1.15;
     letter-spacing: -0.03em;
     margin-bottom: 1.35rem;
-    color: #ffffff;
+    color: #ffffff !important;
     max-width: 1100px;
     margin-left: auto;
     margin-right: auto;
-    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95), 0 2px 6px rgba(0, 0, 0, 0.85);
 }
 
 .lp-hero-gradient {
-    background: linear-gradient(135deg, #ffffff 25%, #34d399 70%, #38bdf8 100%);
+    background: linear-gradient(135deg, #ffffff 15%, #34d399 65%, #38bdf8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 18px rgba(16, 185, 129, 0.5));
+    filter: drop-shadow(0 4px 25px rgba(16, 185, 129, 0.6));
+    display: inline-block;
 }
 
 .lp-hero-subtitle {
