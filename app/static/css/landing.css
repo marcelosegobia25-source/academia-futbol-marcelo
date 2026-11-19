@@ -445,11 +445,11 @@ body.landing-body {
 }
 
 .lp-hero-gradient {
-    background: linear-gradient(135deg, #ffffff 15%, #34d399 65%, #38bdf8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 4px 25px rgba(16, 185, 129, 0.6));
-    display: inline-block;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: none !important;
+    text-shadow: 0 0 30px rgba(52, 211, 153, 0.45), 0 4px 25px rgba(0, 0, 0, 0.95);
+    display: inline;
 }
 
 .lp-hero-subtitle {
