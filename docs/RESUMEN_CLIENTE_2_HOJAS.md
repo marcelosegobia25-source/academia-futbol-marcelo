@@ -1,5 +1,10 @@
+<p align="center">
+  <img src="brand/logo_include_transparent.png" alt="include SOFTWARE STUDIO" width="280">
+</p>
+
 # RESUMEN DEL SISTEMA PARA CLIENTES
 ## Academia Deportiva - Solución Integral de Gestión
+**Desarrollado y Provisto por:** include SOFTWARE STUDIO
 
 ### 1. Visión general
 El sistema de gestión para academia deportiva está diseñado para digitalizar y centralizar la operación diaria de una institución deportiva, combinando administración académica, gestión deportiva, control financiero y seguimiento operativo en una sola plataforma.

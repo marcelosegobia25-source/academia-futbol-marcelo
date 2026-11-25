@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/brand/logo_include_transparent.png" alt="include SOFTWARE STUDIO" width="280">
+</p>
+
 # Academia de Fútbol — Sistema de Gestión Deportiva en la Nube (SaaS)
 
 Plataforma web en la nube para gestionar alumnos, mensualidades, categorías,
@@ -221,3 +225,11 @@ Para ejecutar la suite de 161 pruebas automáticas (100% aprobadas):
 pip install -r requirements-dev.txt
 python -m pytest -q
 ```
+
+
+---
+
+<p align="center">
+  <b>Desarrollado con excelencia por include SOFTWARE STUDIO</b><br>
+  <i>Soluciones de Software y Cloud Computing</i>
+</p>

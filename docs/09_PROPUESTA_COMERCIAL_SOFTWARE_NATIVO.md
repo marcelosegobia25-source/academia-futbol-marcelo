@@ -1,7 +1,12 @@
+<p align="center">
+  <img src="brand/logo_include_transparent.png" alt="include SOFTWARE STUDIO" width="280">
+</p>
+
 # PROPUESTA COMERCIAL DE SOFTWARE NATIVO
 ## Sistema de Gestión para una Academia Deportiva
 
-**Versión:** 1.0  
+**Proveedor Tecnológico:** include SOFTWARE STUDIO  
+**Versión:** 1.3.0  
 **Fecha:** 19 de agosto de 2026  
 **Modelo:** Licencia para una sola academia, instalada localmente
 

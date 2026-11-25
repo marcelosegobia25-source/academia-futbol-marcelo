@@ -188,9 +188,18 @@ def construir_documento():
     # =========================================================================
     # PORTADA EJECUTIVA CLOUD
     # =========================================================================
+    logo_path = BASE_DIR / "docs" / "brand" / "logo_include_2x.png"
+    if logo_path.exists():
+        p_logo = doc.add_paragraph()
+        p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_logo.paragraph_format.space_before = Pt(16)
+        p_logo.paragraph_format.space_after = Pt(8)
+        run_logo = p_logo.add_run()
+        run_logo.add_picture(str(logo_path), width=Inches(2.4))
+
     p_tag = doc.add_paragraph()
     p_tag.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_tag.paragraph_format.space_before = Pt(32)
+    p_tag.paragraph_format.space_before = Pt(10)
     p_tag.paragraph_format.space_after = Pt(6)
     run_tag = p_tag.add_run("PLATAFORMA WEB EN LA NUBE (SaaS) — DOSSIER EJECUTIVO")
     run_tag.font.name = "Calibri"
@@ -257,9 +266,10 @@ def construir_documento():
     p_meta_sp.paragraph_format.space_before = Pt(30)
     p_meta_sp.paragraph_format.space_after = Pt(4)
 
-    t_meta = doc.add_table(rows=4, cols=2)
+    t_meta = doc.add_table(rows=5, cols=2)
     t_meta.alignment = WD_TABLE_ALIGNMENT.CENTER
     meta_rows = [
+        ("Desarrollo & Tecnología:", "include SOFTWARE STUDIO"),
         ("Destinatarios:", "Directores de Academia, Coordinadores Deportivos, Tesoreros e Inversionistas"),
         ("Modalidad del Servicio:", "Plataforma Web en la Nube (SaaS - Software as a Service)"),
         ("Disponibilidad y Acceso:", "Acceso Universal 24/7 vía Web desde cualquier dispositivo con navegador"),
@@ -827,7 +837,7 @@ def construir_documento():
     p_fin = doc.add_paragraph()
     p_fin.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_fin.paragraph_format.space_before = Pt(30)
-    r_fin = p_fin.add_run("— FIN DEL DOSSIER DE PRESENTACIÓN —\nSistema Integral de Gestión para Academias Deportivas (Plataforma Web en la Nube)")
+    r_fin = p_fin.add_run("— FIN DEL DOSSIER DE PRESENTACIÓN —\nSistema Integral de Gestión para Academias Deportivas (Plataforma Web en la Nube)\nDesarrollado y respaldado por include SOFTWARE STUDIO")
     r_fin.font.name = "Calibri"
     r_fin.font.size = Pt(10)
     r_fin.font.italic = True

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="brand/logo_include_transparent.png" alt="include SOFTWARE STUDIO" width="280">
+</p>
+
 # ACTA DE ENTREGA
 ## Sistema de Gestión de Academia Deportiva
 
@@ -7,6 +11,7 @@
 
 | Aspecto | Detalle |
 |---------|---------|
+| **Empresa Desarrolladora** | **include SOFTWARE STUDIO** |
 | **Nombre del Proyecto** | Sistema de Gestión de Academia Deportiva |
 | **Versión** | 1.0.0 |
 | **Estado** | Listo para Producción ✅ |
@@ -440,3 +445,8 @@ El sistema está **LISTO PARA USAR** en producción.
 ---
 
 *Acta de Entrega - Sistema de Gestión Academia Deportiva*
+
+
+| Por el Proveedor Tecnológico | Por la Academia Deportiva |
+| :---: | :---: |
+| <br><br>_______________________________<br><b>include SOFTWARE STUDIO</b><br>Ingeniería y Desarrollo de Software | <br><br>_______________________________<br><b>Dirección General</b><br>Academia Deportiva |

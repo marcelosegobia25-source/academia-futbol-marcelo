@@ -1,7 +1,12 @@
+<p align="center">
+  <img src="brand/logo_include_transparent.png" alt="include SOFTWARE STUDIO" width="280">
+</p>
+
 # PROPUESTA COMERCIAL SaaS
 ## Sistema de Gestión para Academias Deportivas
 
-**Versión:** 1.0  
+**Proveedor Tecnológico:** include SOFTWARE STUDIO  
+**Versión:** 1.3.0 Cloud  
 **Fecha:** 19 de agosto de 2026  
 **Estado:** Referencia comercial sujeta a validación de mercado
 

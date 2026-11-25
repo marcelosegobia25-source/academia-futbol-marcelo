@@ -1,7 +1,12 @@
+<p align="center">
+  <img src="brand/logo_include_transparent.png" alt="include SOFTWARE STUDIO" width="280">
+</p>
+
 # SISTEMA DE GESTIÓN DE ACADEMIA DEPORTIVA
 ## Documentación General del Proyecto
 
-**Versión:** 1.0.0  
+**Desarrollo:** include SOFTWARE STUDIO  
+**Versión:** 1.3.0 Cloud  
 **Fecha:** 16 de Agosto de 2026  
 **Estado:** Listo para Producción ✅
 
@@ -421,7 +426,8 @@ El sistema está **LISTO PARA PRODUCCIÓN**.
 
 **Soporte Técnico:** [Información de contacto]  
 **Documentación:** Incluida en carpeta `/DOCUMENTACION_ENTREGA/`  
-**Versión:** 1.0.0  
+**Desarrollo:** include SOFTWARE STUDIO  
+**Versión:** 1.3.0 Cloud  
 **Fecha de Entrega:** 16 de Agosto de 2026  
 
 ---

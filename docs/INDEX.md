@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="brand/logo_include_transparent.png" alt="include SOFTWARE STUDIO" width="280">
+</p>
+
 # 📚 ÍNDICE DE DOCUMENTACIÓN
 ## Sistema de Gestión de Academia Deportiva v1.0.0
 

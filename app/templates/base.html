@@ -183,6 +183,13 @@
                 {% endif %}
             {% endwith %}
             {% block contenido %}{% endblock %}
+
+            <footer class="app-footer text-center py-3 mt-4 border-top text-muted small">
+                <div class="d-inline-flex align-items-center justify-content-center gap-2">
+                    <span>Desarrollado por</span>
+                    <img src="{{ url_for('static', filename='img/brand/logo_include_transparent.png') }}" alt="include SOFTWARE STUDIO" style="height: 18px; width: auto; vertical-align: middle;">
+                </div>
+            </footer>
         </div>
     </main>
 

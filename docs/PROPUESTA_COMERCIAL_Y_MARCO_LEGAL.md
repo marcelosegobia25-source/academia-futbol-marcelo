@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="brand/logo_include_transparent.png" alt="include SOFTWARE STUDIO" width="280">
+</p>
+
 # PROPUESTA COMERCIAL, TÉRMINOS DEL SERVICIO Y MARCO DE PROTECCIÓN DE DATOS
 ### Sistema de Gestión Integral para Academias Deportivas
 **Planes de Suscripción, Políticas de Privacidad, Stack Tecnológico y Contrato Marco de Adhesión**  
@@ -7,7 +11,7 @@
 
 ## 1. Introducción y Propuesta de Valor
 
-El presente documento constituye la **Propuesta Comercial Oficial, Términos de Prestación de Servicio de Software como Servicio (SaaS) y Políticas de Seguridad y Privacidad de Datos** que regulan la relación entre el **PROVEEDOR TECNOLÓGICO** (en adelante, el *Proveedor*) y la **ACADEMIA O CLUB DEPORTIVO** (en adelante, el *Cliente* o la *Academia*).
+El presente documento constituye la **Propuesta Comercial Oficial, Términos de Prestación de Servicio de Software como Servicio (SaaS) y Políticas de Seguridad y Privacidad de Datos** que regulan la relación entre el **PROVEEDOR TECNOLÓGICO: include SOFTWARE STUDIO** (en adelante, el *Proveedor*) y la **ACADEMIA O CLUB DEPORTIVO** (en adelante, el *Cliente* o la *Academia*).
 
 ### Misión del Sistema
 Nuestra plataforma está concebida exclusivamente para resolver los problemas críticos de administración deportiva en Bolivia:

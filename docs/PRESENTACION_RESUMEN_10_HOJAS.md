@@ -1,8 +1,13 @@
+<p align="center">
+  <img src="brand/logo_include_transparent.png" alt="include SOFTWARE STUDIO" width="280">
+</p>
+
 # PRESENTACIÓN EJECUTIVA
 ## Sistema de Gestión para Academia Deportiva
 ### Resumen formal para reuniones, presentaciones y entrega institucional
 
-**Versión:** 1.0.0  
+**Desarrollo & Tecnología:** include SOFTWARE STUDIO  
+**Versión:** 1.3.0 Cloud  
 **Fecha:** 16 de Agosto de 2026  
 **Formato:** Documento de presentación ejecutivo-formal  
 **Extensión:** 10 páginas / 10 secciones
@@ -269,3 +274,11 @@ El sistema desarrollado responde a una necesidad real de gestión académica y d
 
 ## Nota para reuniones y presentación formal
 Este documento puede ser usado como resumen principal para reuniones internas, presentaciones a directivos, reuniones con clientes o entrega institucional. Su tono es formal, ejecutivo y orientado a decisión de negocio y despliegue.
+
+
+---
+
+<p align="center">
+  <b>include SOFTWARE STUDIO</b> — <i>Soluciones Tecnológicas de Alto Impacto</i><br>
+  Todos los derechos reservados © 2026
+</p>
