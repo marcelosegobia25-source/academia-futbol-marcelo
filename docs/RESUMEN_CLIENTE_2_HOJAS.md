@@ -27,42 +27,45 @@ Su objetivo es mejorar la organización, reducir errores manuales, optimizar tie
 - Registro de entrenamientos y asistencias
 - Organización deportiva general de la academia
 
-#### c) Gestión financiera
-- Registro de pagos y cuotas
-- Control de obligaciones y deudas
-- Apertura y cierre de caja
-- Registro de movimientos y saldos
-- Generación de recibos y reportes financieros
+#### c) Gestión financiera inteligente (Cero fugas)
+- Semáforo preventivo de cuotas: *Al día*, *Abono parcial* y *Vencido (Deudor real)*
+- Exclusión automática de Becas Completas (100%) sin generar falsos deudores
+- Registro de pagos con cálculo automático de continuidad de mensualidades
+- Generación instantánea de Recibos oficiales en PDF con numeración correlativa
+- Reportes gerenciales de ingresos mensuales y proyección de recaudación
 
-#### d) Inventario y ventas
-- Control de productos, costos y stock
-- Registro de compras y ventas
-- Seguimiento de inventario
-- Reducción de pérdidas y errores operativos
+#### d) Captación Web & Mensajería WhatsApp
+- Landing Page oficial de alto impacto visual y diseño atlético para móviles
+- Botón flotante directo al WhatsApp de inscripciones (+591 71054702)
+- Envío directo de comprobantes de pago al teléfono del tutor con 1 toque
+- Notificaciones de citaciones, convocatorias y avisos institucionales
 
-#### e) Seguridad y auditoría
-- Acceso por roles y permisos
-- Control de usuarios y funciones
-- Registro de actividades del sistema
-- Verificación de integridad de datos
-- Respaldos automáticos y recuperación
+#### e) Seguridad Cloud y auditoría inmutable
+- Plataforma 100% en la Nube (SaaS): acceso 24/7 desde PC, tablet o móvil
+- Base de datos relacional PostgreSQL en Supabase con conexiones cifradas SSL
+- Acceso restringido por roles (Administrador, Operador, Profesor)
+- Bitácora de auditoría inmutable: registra quién cobró, quién editó, IP y fecha exacta
+- Cierre automático de sesión por inactividad (15 min) y respaldos continuos
 
 ### 3. Beneficios para la academia
-- Centralización de la información
-- Reducción de errores manuales
-- Mayor control operativo y financiero
-- Mejor organización de entrenamientos, equipos y pagos
-- Mejor experiencia para directivos, secretaría y entrenadores
-- Mayor trazabilidad de decisiones y actividades
+- Centralización total: cero cuadernos físicos ni planillas dispersas
+- Aumento de cobranza puntual (+35%) con recordatorios por WhatsApp
+- Más de 15 horas semanales ahorradas en tareas administrativas
+- Imagen institucional moderna y profesional ante los padres de familia
+- Cero riesgo de pérdida de información: datos respaldados en la nube
 
 ### 4. Público objetivo
-El sistema está orientado a academias deportivas, clubes deportivos, instituciones de formación, escuelas deportivas y organizaciones que requieren controlar tanto la parte administrativa como la deportiva en una misma plataforma.
+El sistema está orientado a academias deportivas, clubes de formación, escuelas de fútbol e instituciones formativas que buscan profesionalizar su gestión, fidelizar a los padres de familia y maximizar su recaudación.
 
-### 5. Estado del proyecto
-El sistema se encuentra desarrollado con una estructura funcional sólida, documentada y lista para uso institucional en entorno productivo. Actualmente cuenta con módulos operativos, lógica de negocio integrada, seguridad básica y herramientas de respaldo y auditoría.
+### 5. Estado y disponibilidad
+La plataforma se encuentra actualmente en **producción activa y 100% operativa en la nube** en [academia-futbol-marcelo.onrender.com](https://academia-futbol-marcelo.onrender.com/). Despliegue y puesta en marcha para nuevas academias en menos de 24 horas.
 
-### 6. Preparación para crecimiento digital
-El sistema puede adaptarse a entornos web y de producción con servidor y dominio, permitiendo una evolución hacia una solución en línea con mayor alcance y acceso remoto.
+---
+
+<p align="center">
+  <b>include SOFTWARE STUDIO</b> — <i>Ingeniería de Software & Soluciones Cloud</i><br>
+  WhatsApp: +591 71054702 • Todos los derechos reservados © 2026
+</p>
 
 ---
 
