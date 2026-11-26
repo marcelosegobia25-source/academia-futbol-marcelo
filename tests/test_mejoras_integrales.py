@@ -487,6 +487,14 @@ def test_retirado_tiene_estado_propio_y_no_aparece_como_deudor(client):
         estado="Activo", id_categoria=categoria.id_categoria,
     )
     db.session.add(activo)
+    db.session.add(Pago(
+        alumno=activo,
+        fecha_pago=date.today() - timedelta(days=90),
+        fecha_vencimiento=date.today() - timedelta(days=60),
+        mes_pagado=(date.today() - timedelta(days=90)).strftime("%Y-%m"),
+        modo_pago="Efectivo",
+        monto=100,
+    ))
     db.session.commit()
 
     assert retirado.estado_mensualidad == "Retirado"
