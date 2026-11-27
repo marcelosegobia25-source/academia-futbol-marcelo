@@ -188,14 +188,16 @@ def construir_documento():
     # =========================================================================
     # PORTADA EJECUTIVA CLOUD
     # =========================================================================
-    logo_path = BASE_DIR / "docs" / "brand" / "logo_include_2x.png"
+    logo_path = BASE_DIR / "docs" / "brand" / "logo_include_vertical_2x.png"
+    if not logo_path.exists():
+        logo_path = BASE_DIR / "docs" / "brand" / "logo_include_2x.png"
     if logo_path.exists():
         p_logo = doc.add_paragraph()
         p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p_logo.paragraph_format.space_before = Pt(16)
+        p_logo.paragraph_format.space_before = Pt(14)
         p_logo.paragraph_format.space_after = Pt(8)
         run_logo = p_logo.add_run()
-        run_logo.add_picture(str(logo_path), width=Inches(2.4))
+        run_logo.add_picture(str(logo_path), width=Inches(1.75))
 
     p_tag = doc.add_paragraph()
     p_tag.alignment = WD_ALIGN_PARAGRAPH.CENTER
